@@ -1,6 +1,7 @@
 #ifndef __DR1GLYPHSET__H
 #define __DR1GLYPHSET__H
 #include <SDL.h>
+#include "lib/glyphset.h"
 
 /*-------------------------------------------------------------------
  * dr1GlyphTable
@@ -9,7 +10,6 @@
  */
 
 enum dr1GlyphSize { SIZE24x35 };
-typedef struct dr1GlyphTable dr1GlyphTable;
 struct dr1GlyphTable {
     char *fname;
     enum dr1GlyphSize size;
@@ -21,7 +21,6 @@ struct dr1GlyphTable {
  *
  *    The structure ...
  */
-typedef struct dr1GlyphSet dr1GlyphSet;
 struct dr1GlyphSet {
     int ntables;
     dr1GlyphTable *table;

@@ -1,14 +1,49 @@
 'ME' db-indoor-dungeon-1   0  2 s   #Starting location
+'..' db-indoor-dungeon-1   0  2     #Dirt Floor
+',,' db-indoor-dungeon-1   0  2 D   #Dirt Floor, dark
+'OO' db-indoor-castle-1    9 13 vd  #Secret door
+     db-indoor-dungeon-3   1  2 w   #Granite block wall
+'(-' db-objects-1          6  8 l   #Table Left End
+     db-indoor-dungeon-3   1  8
+'--' db-objects-1           6  9 l   #Table Left-right
+     db-indoor-dungeon-3   1  8
+'-)' db-objects-1          6  7 l   #Table Right End
+     db-indoor-dungeon-3   1  8
+'|\' db-objects-1          6 10 l   #Table Top End
+     db-indoor-dungeon-3   1  8
+'||' db-objects-1          6 12 l   #Table Vertical
+     db-indoor-dungeon-3   1  8
+'|/' db-objects-1          6 11 l   #Table Bottom End
+     db-indoor-dungeon-3   1  8
+'/|' db-objects-1          6 10 l   #Table Top End
+     db-indoor-dungeon-3   1  8
+'||' db-objects-1          6 12 l   #Table Vertical
+     db-indoor-dungeon-3   1  8
+'\|' db-objects-1          6 11 l   #Table Bottom End
+     db-indoor-dungeon-3   1  8
+'.k' db-npcs-2             5 14 a   #Kobold on dirt
+     db-indoor-dungeon-1   0  2
+',k' db-npcs-2             5 14 aD  #Kobold on dirt in dark square
+     db-indoor-dungeon-1   0  2
+'<k' db-npcs-2             5 14 al  #Kobold on stone floor
+     db-indoor-dungeon-3   1  8
+'==' db-objects-1          8 16 l   #Stair up
+     db-indoor-dungeon-3   1  8
+'=-' db-objects-1          8 17 l   #Stair down
+     db-indoor-dungeon-3   1  8
+'[-' db-objects-1         10  0 d   # Grating down
+     db-objects-1          8 17 l   #Stair down
+     db-indoor-dungeon-3   1  8
 '""' db-indoor-castle-1    0  1     # Swamp
 '..' db-indoor-castle-1    0  2     # Dirt
 '%%' db-indoor-castle-1    0  3     # Shallow water
 'f;' db-indoor-castle-1    0  4     # Grey Oak
-'@;' db-indoor-castle-1    0  5     # Boulder pile on grass
+'@;' db-indoor-castle-1    0  5 wo  # Boulder pile on grass
 'l;' db-indoor-castle-1    0  6     # Evergreen
 'Q;' db-indoor-castle-1    0  7     # Brown barked tree on grass
 'q;' db-indoor-castle-1    0  8     # Brown barked tree on grass
 'r;' db-indoor-castle-1    0  9     # Grey barked tree on grass
-'A;' db-indoor-castle-1    0 10     # Pinetree
+'A;' db-indoor-castle-1    0 10 o   # Pinetree
 'oC' db-indoor-castle-1    0 11     # Trees from up high
 'a;' db-indoor-castle-1    0 12     # Apple tree
 't;' db-indoor-castle-1    0 13     # Dead tree
@@ -34,10 +69,12 @@
 ';b' db-npcs-1             1  4 a    # Beggar on grass
      db-indoor-castle-1    0  0
 ';;' db-indoor-castle-1    0  0      # Grass
+'<@' db-objects-1          4 18 a    # Forge on a
+     db-indoor-castle-1    1 18      # Stone floor
 '<>' db-indoor-castle-1    1 18      # Stone floor
 '[]' db-indoor-castle-1    1 10 d    # Wood Door
      db-indoor-castle-1    1 18
-'##' db-indoor-castle-1    1 12      # Wall
+'##' db-indoor-castle-1    1 12 wo   # Wall
 '.-' db-indoor-castle-1    1  6      # Dirt path e/w
 '.\' db-indoor-castle-1    1  4      # Dirt path w/s
 '\.' db-indoor-castle-1    1  2      # Dirt Path n/e
@@ -47,21 +84,24 @@
 '.+' db-indoor-castle-1    1  7      # dirt path n/w
 '.T' db-indoor-castle-1    1 13      # dirt path south facing T
 '.L' db-indoor-castle-1    1  7      # dirt path north facting T
-'X|' db-indoor-castle-1   10 10      # Wood palisade N/S
-'X-' db-indoor-castle-1    8  2      # Wood palisade
-'X\' db-indoor-castle-1   10 10      # Wood palisade
-'X/' db-indoor-castle-1   10 10      # Wood palisade
-'/X' db-indoor-castle-1   10 14      # Wood palisade
-'\X' db-indoor-castle-1   10 12      # Wood palisade
-'~|' db-outdoor-terrain-1  3 12      # River through grass
-'~-' db-outdoor-terrain-1  3 13      # River through grass
-'~/' db-outdoor-terrain-1  3  8      # River through grass
-'~\' db-outdoor-terrain-1  3 10      # River through grass
-'/~' db-outdoor-terrain-1  3 11      # River through grass
-'\~' db-outdoor-terrain-1  3  9      # River through grass
-'(=' db-indoor-castle-1    1  6      # Wood Bridge LE
-'==' db-outdoor-terrain-1  5 12      # Wood Bridge center
-'=)' db-indoor-castle-1    1  6      # Wood Bridge RE
+'X|' db-indoor-castle-1   10 10 wo   # Wood palisade N/S
+'X-' db-indoor-castle-1    8  2 wo   # Wood palisade
+'|X' db-indoor-castle-1   10  9 wo   # Wood palisade N/S
+'X\' db-indoor-castle-1   10 13 wo   # Wood palisade
+'X/' db-indoor-castle-1   10 11 wo   # Wood palisade
+'/X' db-indoor-castle-1   10 14 wo   # Wood palisade
+'\X' db-indoor-castle-1   10 12 wo   # Wood palisade
+'~|' db-outdoor-terrain-1  3 12 w    # River through grass
+'~-' db-outdoor-terrain-1  3 13 w    # River through grass
+'~/' db-outdoor-terrain-1  3  8 w    # River through grass
+'~\' db-outdoor-terrain-1  3 10 w    # River through grass
+'/~' db-outdoor-terrain-1  3 11 w    # River through grass
+'\~' db-outdoor-terrain-1  3  9 w    # River through grass
+'(=' db-objects-2          6 18      # Wood Bridge LE
+     db-outdoor-terrain-1  0  0
+'()' db-outdoor-terrain-1  5 12      # Wood Bridge center
+'=)' db-objects-2          6 18      # Wood Bridge RE
+     db-outdoor-terrain-1  0  0
 '<a' db-npcs-1             1 10 a    # Apothecary
      db-indoor-castle-1    1 18      # Stone floor
 '<p' db-npcs-1             1 18 a    # Priest
@@ -74,25 +114,25 @@
      db-indoor-castle-1    1 18      # Stone floor
 ';m' db-npcs-1             1  2 a    # Merchant on grass
      db-indoor-castle-1    0  0
-'^^' db-outdoor-terrain-1  6 19 w    # Mountain
-'  ' db-indoor-dungeon-3   2  5 w    # Black
+'^^' db-outdoor-terrain-1  6 19 wo   # Mountain
+'  ' db-indoor-dungeon-3   2  5 wo   # Black
 
-/XX-X-X-X-X-X-X\;;;;;;;;;;;;;;;;;;~|X-X-X-X-X-X-X-X-X-X-X-X-X-X-X-X\;;;;;;;;;;;;
-X|;;;;;;;;;;;;\XX-X-X-X-X-X-X-X-X-~|;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;X|;;;;;;;;;;;;
-X|########;;;;;;;;;;;;;;;;;;;;;;;;~|;;;;##;;;b##########;;;;##;;;;X|;;;;;;;;;;;;
-X|##<><>##BU;;;;;;;;;;AP########;;~|;;##;;;;####<><><>####;;;;##;;X|;;;;;;;;;;;;
-X|##<><m[].-.-.-.\;;;;/.[]<><>##;;~|;;##;;####<><><><><>####;;##;;X|;;;;;;;;;;;;
-X|########;;;;;;\..\;;.|##<a<>##;;~|;;##;;##<><><>AL<><><>##;;##;;X|;;;;;;;;;;;;
-X|;;;;Q;q;;;;;;;;;\..T./########/~~/;;##;;####<><><><><>####;;##;;X|;;;;;;;;;;;;
-X|;;;;;;;;;;;;;;;;;;.|;;;;;;;;/~~/;;;;##;;;;####<><p<>####;;;;##;;X|;;;;;;;;;;;;
-X|########;;;;;;;;;;.|;;;;;;;;~|;;;;;;BE##;;;b##<><><>##;;;;##;;;;X|;;;;;;;;;;;;
-X|##<><>##TA;;;;;;a;.|;;;;;;/~~/;;;;;;;;;;;;TE##<><><>####;;;;;;;;X|^^;;;;;;;;;;
-X|##<><t[].-.-.-.-.T.L.-.-(====).-.-.-.T.-.-[]<><><><><>[];;;;;;;;X|^^^^;;;;;;;;
-X|########;;;;;;;;.|;;A;A;/~~/########.|;;;;##############;;;;q;Q;X|^^^^^^;;;;;;
-X|;;;;;;;;;;;;;;;;.|;;A;/~~/;;##<><>##TX;;;;;;;;;;;;;;;;;;;;/XX-X-X/^^^^;;;;;;;;
-\XX-X\;;##########SM;;/~~/;;;;##<><>[].|;m;;;;;;;;;;;;;;;;;;X|^^^^^^^^^^^^^^;;^^
-;;;;X|;;##<><><>##.|/~~/;;;;;;########.|;;;;;;;;;;;;;;;;q;Q;X|            ^^^^^^
-;;;;X|;;##<><><>[]./~|;;;;/XX-X-X-X-X-MEX-X-X-X-X-X-X-X-X-X-X/
-;;;;X|;;##<><s<>##;;~|;;A;X|;;;;;;;;;;.|;;;;;;^^
-;;;;X|;;##########/~~/A;A;X|;;;;;;;;;;.|;;;;;;^^
-;;;;\XX-X-X-X-X-X-~|X-X-X-X/;;;;;;;;;;.|;;;;^^^^
+/XX-X-X-X-X-X-X|;;;;;;;;;;;;;;~|;;;;|XX-X-X-X-X-X-X-X-X-X-X-X-X-X-X\;;;;;;;;;;;;
+X|;;;;;;;;;;;;\XX-X-X-X-X-X-X-X-X-~\X/;;;;;;;;;;;;;;;;;;;;;;;;;;;;|X;;;;;;;;;;;;
+X|########;;;;;;;;;;;;;;;;;;;;;;;;~|;;;;##;;;b##########;;;;##;;;;|X;;;;;;;;;;;;
+X|##<><>##BU;;;;;;;;;;AP########;;~|;;##;;;;####<><><>####;;;;##;;|X;;;;;;;;;;;;
+X|##<><m[].-.-.-.\;;;;/.[]<><>##;;~|;;##;;####<><><><><>####;;##;;|X;;;;;;;;;;;;
+X|########;;;;;;\..\;;.|##<a<>##;;~|;;##;;##<><><>AL<><><>##;;##;;|X;;;;;;;;;;;;
+X|;;;;Q;q;;;;;;;;;\..T./########/~~/;;##;;####<><><><><>####;;##;;|X;;;;;;;;;;;;
+X|;;;;;;;;;;;;;;;;;;.|;;;;;;;;/~~/;;;;##;;;;####<><p<>####;;;;##;;|X;;;;;;;;;;;;
+X|########;;;;;;;;;;.|;;;;;;;;~|;;;;;;BE##;;;b##<><><>##;;;;##;;;;|X;;;;;;;;;;;;
+X|##<><>##TA;;;;;;a;.|;;;;;;/~~/;;;;;;;;;;;;TE##<><><>####;;;;;;;;|X^^;;;;;;;;;;
+X|##<><t[].-.-.-.-.T.L.-.-(=()=).-.-.-.T.-.-[]<><><><><>[];;;;;;;;|X^^^^;;;;;;;;
+X|########;;;;;;;;.|;;A;A;/~~/########.|;;;;##############;;;;q;Q;|X^^^^^^;;;;;;
+X|;;;;;;;;;;;;;;;;.|;;A;/~~/;;##<><>##TX;;;;;;;;;;;;;;;;;;;;|XX-X-X/^^^^;;;;;;;;
+\XX-X|;;##########SM;;/~~/;;;;##<><>[].|;m;;;;;;;;;;;;;;;;;;|X^^^^^^^^^^^^^^;;^^
+;;;;X|;;##<><><>##.|/~~/;;;;;;########.|;;;;;;;;;;;;;;;;q;Q;|X            ^^^^^^
+;;;;X|;;##<><><>[]./~|;;;;|XX-X-X-X-X-MEX-X-X-X-X-X-X-X-X-X-X/
+;;;;X|;;##<@<s<>##;;~|;;A;|XA;A;A;A;A;.|A;A;A;^^
+;;;;X|;;##########/~~/A;A;|XA;A;A;A;A;.|A;A;A;^^
+;;;;\XX-X-X-X-X-X-~|X-X-X-X/A;A;A;A;A;.|A;A;^^^^

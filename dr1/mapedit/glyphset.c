@@ -16,6 +16,9 @@ dr1GlyphTable *dr1GlyphSet_find( char *file) {
     return NULL;
 }
 
+char *dr1GlyphTable_file( dr1GlyphTable *tbl) {
+    return tbl->fname;
+}
 void dr1GlyphSet_init( SDL_Surface *screen) 
 {
     int i;

@@ -2,9 +2,11 @@
 #include <assert.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <string.h>
 
 #include "map.h"
 #include "glyphset.h"
+#include <rpc/xdr.h>
 
 struct border_t {
     int top;
@@ -40,6 +42,92 @@ opendoor( dr1Map *map, int xpos, int ypos) {
 	    }
 	}
     }
+}
+
+
+/*-------------------------------------------------------------------
+ * dr1Map_save
+ *
+ *    Save a player object to disk
+ *
+ *  PARAMETERS:
+ *    fn   Filename to be loaded
+ *
+ *  RETURNS:
+ */
+
+void dr1Map_save( dr1Map *map, char *fname) {
+    /* save player with new item */
+    FILE *fp = NULL;
+    bool_t res;
+    char *cpos;
+    XDR xdrs;
+
+    cpos = rindex( fname, '.');
+    if (cpos && strcasecmp(cpos, ".xml")==0) {
+        printf("Saving xml\n");
+	xdr_xml_create( &xdrs, fname, XDR_ENCODE);
+    } else {
+        printf("Saving binary\n");
+	fp = fopen(fname, "w");
+	xdrstdio_create( &xdrs, fp, XDR_ENCODE);
+    }
+    xdr_push_note( &xdrs, "map");
+    res = xdr_dr1Map( &xdrs, map);
+    xdr_pop_note( &xdrs);
+    if (!res) {
+	printf("Error saving player to '%s'\n", fname);
+    }
+    xdr_destroy( &xdrs);
+    if (fp) fclose( fp);
+}
+
+/*-------------------------------------------------------------------
+ * dr1Map_load
+ *
+ *    Load a Map object from disk
+ *
+ *  PARAMETERS:
+ *    fn   Filename to be loaded
+ *
+ *  RETURNS:
+ *    Pointer to a malloc'd dr1Map structure, or NULL if there
+ *    was a problem loading the file.
+ */
+dr1Map *dr1Map_load( dr1Map *buf, char* fname) {
+    FILE *fp = NULL;
+    bool_t ok;
+    dr1Map *map;
+    XDR xdrs;
+    char *cpos;
+
+    cpos = rindex( fname, '.');
+    if (cpos && strcasecmp(cpos, ".xml")==0) {
+/*        printf("Loading xml\n"); /**/
+	xdr_xml_create( &xdrs, fname, XDR_DECODE);
+    } else {
+/*        printf("Loading binary\n"); /**/
+	fp = fopen( fname, "r");
+	if (!fp) return NULL;
+
+	xdrstdio_create( &xdrs, fp, XDR_DECODE);
+    }
+
+    if (buf) {
+        map = buf;
+	bzero( map, sizeof(dr1Map));
+    } else {
+	map = calloc(1,sizeof(dr1Map));
+    }
+    ok = xdr_dr1Map( &xdrs, map);
+    xdr_destroy( &xdrs);
+    if (fp) fclose( fp);
+      
+    if (!ok) {
+/*	dr1Map_destroy( map); /**/
+	map = NULL;
+    }
+    return map;
 }
 
 
@@ -288,6 +376,11 @@ int main( int argc, char **argv) {
     dr1Text _attrval[6];
     char *msgattr[6] = { "Str:", "Int:", "Wis:", "Dex:", "Con:", "Cha:" };
     int i;
+    char *fname = "map.txt";
+
+    if (argc > 1) {
+	fname = argv[1];
+    } 
     
     /* Initialize graphics */
     if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0 ) {
@@ -305,7 +398,8 @@ int main( int argc, char **argv) {
 
 
 
-    { SDL_Surface *screen;
+    { 
+        SDL_Surface *screen;
         dr1Map *map;
 
 #if 1
@@ -319,7 +413,9 @@ int main( int argc, char **argv) {
 	    exit(1);
 	}
 
+        printf("Loading graphics...");
 	dr1GlyphSet_init( screen);
+        printf("done.\n");
 	dr1_npcs1 = dr1GlyphSet_find( "db-npcs-1");
 
 	setInfo( &_dragons, "Dragon's", 28, 70, 30, ANCHOR_TOPCENTER);
@@ -343,11 +439,16 @@ int main( int argc, char **argv) {
 
 	loadBorder( screen);
 
-        map = dr1Map_readmap( "map.txt");
+        if (strstr(fname, ".txt")) {
+	    map = dr1Map_readmap( fname);
+	} else {
+	    map = dr1Map_load( NULL, fname);
+	}
 	xpos = map->startx;
 	ypos = map->starty;
 
 	infoMessage("Map loaded", screen);
+	infoMessage("Welcome to Dragon's Reach friend!", screen);
 
 	{
 	    SDL_Event event;
@@ -415,6 +516,11 @@ int main( int argc, char **argv) {
 				    case SDLK_s:
 					printf("screenshot");
 					SDL_SaveBMP(screen, "screenshot.bmp");
+					break;
+
+				    case SDLK_w:
+					infoMessage("saving map.xml", screen);
+					dr1Map_save( map, "map.xml");
 					break;
 
 				    case SDLK_h:
