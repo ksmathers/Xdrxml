@@ -18,13 +18,21 @@ enum {
     DR1W_BASICWEAPON = DR1WEAPONS,
     DR1W_BOW
 };
+
+enum DR1ProjectileType {
+    DR1W_NONE,
+    DR1W_ARROW, DR1W_BOLT, 
+    DR1W_STONE, DR1W_BLOWDART, 
+    DR1W_SPEAR, 
+    DR1W_BOULDER
+};
 /*-------------------------------------------------------------------
  * dr1
  *
  *    The structure ...
  */
 
-extern dr1ItemType dr1Weapon_type;
+extern dr1ItemType dr1Weapon_primary;
 extern dr1ItemType dr1Weapon_bowType;
 
 typedef struct {
@@ -34,6 +42,13 @@ typedef struct {
     int rof;		/* rate of fire for ranged weapons */
     int speed;
     enum DR1DamageType dtype;
+#if 0
+    int plusToHit;
+    int plusToDamage;
+    int stackable;
+    enum DR1ProjectileType ptype;  /* type of projectile */
+    int min_str;	/* minimum strength required to use */
+#endif
 } dr1Weapon;
 
 extern dr1Weapon dr1Weapon_halfspear;

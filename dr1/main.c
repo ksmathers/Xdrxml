@@ -158,7 +158,7 @@ int hunt( dr1Player *p, int c, char **v) {
     if (c != 2) return -1;
     mname = v[1];
 
-    nmon = dr1Dice_roll( "d4");
+    nmon = dr1Dice_roll( "d6");
     for (i=0; i<nmon; i++) {
 	if ( dr1Monster_init( &m[i], mname)) return -2;
 	m[i].location.x = dr1Dice_roll( "d12-6*10");

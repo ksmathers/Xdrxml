@@ -40,9 +40,29 @@ dr1Item_destroy( dr1Item *i) {
 }
 
 /*-------------------------------------------------------------------
- * dr1
+ * dr1Item_tcode_size
  *
- *    The method ...
+ *    The method returns the sizeof the item structure including
+ *    type specific data
+ *
+ *  PARAMETERS:
+ *    tcode  The item type code to get the size of 
+ *
+ *  RETURNS:
+ *    Size of the item in bytes
+ *
+ */
+long dr1Item_tcode_size( int tcode) {
+    dr1Item i; 
+    i.type = dr1Registry_lookup( &dr1itemReg, tcode);
+    return dr1Item_size( &i);
+}
+
+/*-------------------------------------------------------------------
+ * dr1Item_size
+ *
+ *    The method returns the sizeof the item structure including
+ *    type specific data
  *
  *  PARAMETERS:
  *    i     The item to get the size of 

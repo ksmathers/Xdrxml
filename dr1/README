@@ -2,5 +2,5 @@ To build:
 
 make depend && make
 
-The result is the program 'a.out' which is a test driver for the game
+The result is the program 'dr1' which is a test driver for the game
 libraries.
