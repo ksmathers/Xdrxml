@@ -19,10 +19,20 @@ static dr1AttrAdjust race_halfling = {
     "halfling", { -1, 0, 0, 2, 0, -1 }
 };
 
+static dr1AttrAdjust race_halfogre = {
+    "halfogre", { 2, -1, 0, 0, 0, -2 }
+};
+
+static dr1AttrAdjust race_dwarf = {
+    "dwarf", { 1, 0, 0, 0, 1, -2 }
+};
+
 static dr1RegistryEntry race_entries[] = {
     { (int)'MAN ', &race_human },
     { (int)'ELF ', &race_elf },
     { (int)'HOBB', &race_halfling },
+    { (int)'OGRE', &race_halfogre },
+    { (int)'DWAR', &race_dwarf },
     { -1, NULL }
 };
 

@@ -144,10 +144,10 @@ bool_t xdrasc_putlong( XDR *__xdrs, __const long *__lp)
     fp = XDRASC_DATA(__xdrs)->fp;
     if (!fp) fp = stdout;
     if (attr) fprintf(fp, "<%s>", attr);
-    else fprintf(fp,"<int>");
+    else fprintf(fp,"<int value=\"");
     fprintf(fp, "0x%lx", *__lp);
     if (attr) fprintf(fp, "</%s>\n", attr);
-    else fprintf(fp,"</int>");
+    else fprintf(fp,"\"/>");
     XDRASC_DATA(__xdrs)->attr = 0;
     return TRUE;
 }

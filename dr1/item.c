@@ -55,7 +55,7 @@ bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
     }
     xdr_attr( xdrs, "code");
     if (!xdr_int( xdrs, &code)) return FALSE;
-    printf("code %x\n", code);
+/*    printf("code %x\n", code); /**/
     if (xdrs->x_op == XDR_DECODE) {
         i->type = dr1Registry_lookup( &dr1itemReg, code);
 	assert(i->type);
@@ -64,8 +64,9 @@ bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
     xdr_attr( xdrs, "value");
     if (!xdr_long( xdrs, &i->value)) return FALSE;
    
-    xdr_attr( xdrs, "name");
+    xdr_push_note( xdrs, "name");
     if (!xdr_wrapstring( xdrs, &i->name)) return FALSE;
+    xdr_pop_note( xdrs);
    
     xdr_attr( xdrs, "encumbrance");
     if (!xdr_int( xdrs, &i->encumbrance)) return FALSE;

@@ -94,8 +94,6 @@ int dr1ItemSet_encumbrance( dr1ItemSet* set) {
 bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
     long siz = 0;
     
-    xdr_push_note( xdrs, "item");
-
     if (xdrs->x_op == XDR_ENCODE) {
         if (*itemp) siz = dr1Item_size( *itemp);
     }
@@ -113,7 +111,6 @@ bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
 	*itemp = NULL;
     }
 
-    xdr_pop_note( xdrs);
     return TRUE;
 }
 
@@ -131,7 +128,9 @@ bool_t xdr_dr1ItemSet( XDR *xdrs, dr1ItemSet* set) {
 	set->items = malloc(sizeof(dr1Item*) * set->len);
     }
     for ( i=0; i<set->len; i++) {
+        xdr_push_note( xdrs, "item");
 	if (!xdr_dr1ItemPtr( xdrs, &set->items[i])) return FALSE;
+        xdr_pop_note( xdrs);
     }
     if (xdrs->x_op == XDR_FREE) {
 	free( set->items);

@@ -61,15 +61,20 @@ int dr1Playerv_sex( dr1Player *p, int c, char **v) {
 
     old = dr1Registry_lookup( &dr1sex, p->sex);
 
+    printf("old = %p\n", old);
+
     if (!strcasecmp( v[1], "male")) r='MALE';
     else if (!strcasecmp( v[1], "female")) r='FEMA';
     else return -1;
 
-    new = dr1Registry_lookup( &dr1race, r);
+    new = dr1Registry_lookup( &dr1sex, r);
+
+    printf("new = %p\n", new);
+
     if (!new) return -1;
     if (old) dr1Attr_adjust( &p->base_attr, &old->offset, -1);
     dr1Attr_adjust( &p->base_attr, &new->offset, 1);
-    p->race = r;
+    p->sex = r;
     return 0;
 }
 
@@ -79,7 +84,8 @@ int dr1Playerv_race( dr1Player *p, int c, char **v) {
     char s[80];
     
     if (c == 1) {
-	printf("(human, elf, halfling)\n");
+	printf("(human, elf, halfling, dwarf, halfogre)\n");
+	printf("Race: ");
 	gets(s);
     
         v[1] = s;
@@ -92,6 +98,8 @@ int dr1Playerv_race( dr1Player *p, int c, char **v) {
     if (!strcasecmp( v[1], "human")) r='MAN ';
     else if (!strcasecmp( v[1], "elf")) r='ELF ';
     else if (!strcasecmp( v[1], "halfling")) r='HOBB';
+    else if (!strcasecmp( v[1], "dwarf")) r='DWAR';
+    else if (!strcasecmp( v[1], "halfogre")) r='OGRE';
     else return -1;
 
     new = dr1Registry_lookup( &dr1race, r);

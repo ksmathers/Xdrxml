@@ -149,6 +149,7 @@ int main( int argc, char** argv) {
 	fgets( cmd, sizeof(cmd), stdin);
 
 	cmds[0] = strtok( cmd, " \t\n");
+	if (!cmds[0]) continue;
 	while ((cmds[++i] = strtok( NULL, " \t\n")) != 0 && i<10 );
 	
 	if ( !strcmp(cmds[0], "buy")) r=buy( p, i, cmds);
