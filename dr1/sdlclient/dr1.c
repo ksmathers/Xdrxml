@@ -10,6 +10,10 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <gtk/gtk.h>
+#include <gnome.h>
+#include <glade/glade.h>
+
 
 #include "dr1.h"
 #include "glyphset.h"
@@ -254,10 +258,92 @@ struct dr1Point {
 extern int EF_ALLOW_MALLOC_0;
 #endif
 
+void SDLEvent( void) {
+    SDL_Event event;
+    pthread_t comm;
+
+    pthread_create( &comm, NULL, comm_main, server);
+
+    for (;;) {
+	printf("."); fflush(stdout);
+
+	/* Draw the screen */
+	SDL_FillRect( ctx.screen, NULL, 0);
+	if (ctx.map) showMap( ctx.screen, ctx.map, ctx.xpos, ctx.ypos);
+	showBorder( ctx.screen);
+	dr1Text_show( ctx.screen);
+	SDL_Flip( ctx.screen);
+
+	/* Get input */
+	usleep( 100000L); /**/
+	while ( SDL_PollEvent(&event) ) {
+	    switch (event.type) {
+		case SDL_KEYDOWN:
+		    oxpos = ctx.xpos;
+		    oypos = ctx.ypos;
+		    switch ( event.key.keysym.sym) {
+			case SDLK_s:
+			    printf("screenshot");
+			    SDL_SaveBMP(ctx.screen, "screenshot.bmp");
+			    break;
+
+			case SDLK_h:
+			    sendCommand( 'w');
+			    break;
+			case SDLK_j:
+			    sendCommand( 's');
+			    break;
+			case SDLK_k:
+			    sendCommand( 'n');
+			    break;
+			case SDLK_l:
+			    sendCommand( 'e');
+			    break;
+			case SDLK_o:
+			    opendoor( ctx.map, ctx.xpos, ctx.ypos);
+			    break;
+			case SDLK_q:
+			    exit(3);
+			default:
+		    }
+		    {
+			dr1MapSquare *gr = &ctx.map->grid[ ctx.ypos*ctx.map->xsize + ctx.xpos];
+			if ( !gr->graphic || 
+			     gr->graphic->glyph[0].wall ||
+			     ( gr->graphic->glyph[0].door && 
+			       !gr->open) 
+			   )
+			{
+			    if (gr->graphic) gr->seen = 1;
+			    ctx.xpos = oxpos;
+			    ctx.ypos = oypos;
+			}
+		    }
+		    break;
+		case SDL_MOUSEMOTION:
+#if 0
+		    printf("Mouse moved by %d,%d to (%d,%d)\n", 
+			   event.motion.xrel, event.motion.yrel,
+			   event.motion.x, event.motion.y); 
+#endif
+		    break;
+		case SDL_MOUSEBUTTONDOWN:
+		    printf("Mouse button %d pressed at (%d,%d)\n",
+			   event.button.button, event.button.x, event.button.y);
+		    exit(1);
+		    break;
+		case SDL_QUIT:
+		    exit(0);
+	    } /* switch event type */
+	} /* while poll event */
+    } /* main loop */
+} /* handle SDL events */
+
 int main( int argc, char **argv) {
     char buf[80];
     int oxpos, oypos;
     char *server;
+    pthread_t comm;
 
 #if 0
     EF_ALLOW_MALLOC_0 = 1;
@@ -268,7 +354,19 @@ int main( int argc, char **argv) {
 	 exit (1);
     }
     server = argv[1];
-     
+
+    /* Initialize GNOME */
+    gnome_init ("dr1", "1.0", argc, argv);
+    glade_gnome_init();
+
+    /* Read RC file */
+    gtk_rc_parse( "dr1.rc");
+
+    /* load the interface */
+    glade = glade_xml_new("dr1.glade", NULL);
+    /* connect the signals in the interface */
+    glade_xml_signal_autoconnect(glade);
+ 
     /* Initialize graphics */
     if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0 ) {
 	fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
@@ -286,110 +384,27 @@ int main( int argc, char **argv) {
     /* initialize globals */
     dr1Dice_seed();
 
-    {   
 #if 1
-	ctx.screen = SDL_SetVideoMode(XSIZE, YSIZE, 16, SDL_SWSURFACE);
+    ctx.screen = SDL_SetVideoMode(XSIZE, YSIZE, 16, SDL_SWSURFACE);
 #else
-	ctx.screen = SDL_SetVideoMode(XSIZE, YSIZE, 16, 
-	    SDL_HWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF);
+    ctx.screen = SDL_SetVideoMode(XSIZE, YSIZE, 16, 
+	SDL_HWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF);
 #endif
-	if ( ctx.screen == NULL ) {
-	    fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
-	    exit(1);
-	}
-
-        /* Load graphics */
-        dr1GlyphSet_init( ctx.screen);
-	dr1Text_init( ctx.screen);
-	dr1_npcs1 = dr1GlyphSet_find( "db-npcs-1");
-	loadBorder( ctx.screen);
-
-
-	dr1Text_infoMessage("Welcome to Dragon's Reach, adventurer!", ctx.screen);
-
-	{
-	    SDL_Event event;
-	    pthread_t comm;
-
-	    pthread_create( &comm, NULL, comm_main, server);
-
-	    for (;;) {
-	        printf("."); fflush(stdout);
-
-		/* Draw the screen */
-	        SDL_FillRect( ctx.screen, NULL, 0);
-		if (ctx.map) showMap( ctx.screen, ctx.map, ctx.xpos, ctx.ypos);
-		showBorder( ctx.screen);
-		dr1Text_show( ctx.screen);
-		SDL_Flip( ctx.screen);
-
-		/* Get input */
-		usleep( 100000L); /**/
-		while ( SDL_PollEvent(&event) ) {
-		    switch (event.type) {
-		        case SDL_KEYDOWN:
-			    oxpos = ctx.xpos;
-			    oypos = ctx.ypos;
-			    switch ( event.key.keysym.sym) {
-			        case SDLK_s:
-				    printf("screenshot");
-				    SDL_SaveBMP(ctx.screen, "screenshot.bmp");
-				    break;
-
-				case SDLK_h:
-				    sendCommand( 'w');
-				    break;
-				case SDLK_j:
-				    sendCommand( 's');
-				    break;
-				case SDLK_k:
-				    sendCommand( 'n');
-				    break;
-				case SDLK_l:
-				    sendCommand( 'e');
-				    break;
-				case SDLK_o:
-				    opendoor( ctx.map, ctx.xpos, ctx.ypos);
-				    break;
-				case SDLK_q:
-				    exit(3);
-				default:
-			    }
-			    {
-				dr1MapSquare *gr = &ctx.map->grid[ ctx.ypos*ctx.map->xsize + ctx.xpos];
-				if ( !gr->graphic || 
-				     gr->graphic->glyph[0].wall ||
-				     ( gr->graphic->glyph[0].door && 
-				       !gr->open) 
-				   )
-				{
-				    if (gr->graphic) gr->seen = 1;
-				    ctx.xpos = oxpos;
-				    ctx.ypos = oypos;
-				}
-			    }
-			    break;
-			case SDL_MOUSEMOTION:
-#if 0
-			    printf("Mouse moved by %d,%d to (%d,%d)\n", 
-				   event.motion.xrel, event.motion.yrel,
-				   event.motion.x, event.motion.y); 
-#endif
-			    break;
-			case SDL_MOUSEBUTTONDOWN:
-			    printf("Mouse button %d pressed at (%d,%d)\n",
-				   event.button.button, event.button.x, event.button.y);
-			    exit(1);
-			    break;
-			case SDL_QUIT:
-			    exit(0);
-		    }
-		}
-	    }
-
-
-	}
+    if ( ctx.screen == NULL ) {
+	fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
+	exit(1);
     }
+
+    /* Load graphics */
+    dr1GlyphSet_init( ctx.screen);
+    dr1Text_init( ctx.screen);
+    dr1_npcs1 = dr1GlyphSet_find( "db-npcs-1");
+    loadBorder( ctx.screen);
+
+    dr1Text_infoMessage("Welcome to Dragon's Reach, adventurer!", ctx.screen);
+
+    /* start the event loop */
+    gtk_main();
 
     printf("exiting");
     fflush(stdout);
