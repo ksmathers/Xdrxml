@@ -1,0 +1,5 @@
+INTEGER = STRING			<ident>value</ident>
+BOOL = ENUM 		 		<ident/>
+ARRAY = POINTER = STRUCT		<ident><content1></content1></ident>
+
+DATE?
