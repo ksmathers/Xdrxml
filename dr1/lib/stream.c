@@ -20,6 +20,7 @@ dr1Stream_finit( dr1Stream *str) {
 }
 
 int dr1Stream_read( dr1Stream *str, char *buf, int min, int max) {
+    /* unbuffered stream reader */
     int count = 0;
     int nread;
 
@@ -37,25 +38,20 @@ int dr1Stream_read( dr1Stream *str, char *buf, int min, int max) {
 }
 
 int dr1Stream_write( dr1Stream *str, char *buf, int size) {
-    /*
-     * FIXME:  Need to make this asynchronous, but will
-     * have to write unflushed data to the output buffer
-     */
-    int count = 0;
+    /* unbuffered stream writer */
     int nwrite;
 
     printf("clnt> '%s'\n", buf);
-    do {
-	nwrite = write( str->fd, buf, size-count);
-	if (nwrite < 0) {
-	    if (errno == EAGAIN) continue;
-	    str->error = errno;
+    nwrite = write( str->fd, buf, size);
+    if (nwrite < 0) {
+	str->error = errno;
+	if (errno != EAGAIN) {
 	    perror("write");
-	    break;
 	}
-	count += nwrite;
-    } while (count < size);
-    return count;
+    } else if (nwrite < size) {
+        str->error = EAGAIN;
+    }
+    return nwrite;
 }
 
 int dr1Stream_fgets( dr1Stream *str, char *buf, int size) {
@@ -66,9 +62,12 @@ int dr1Stream_fgets( dr1Stream *str, char *buf, int size) {
     /* Buffer ahead to the next newline */
     len = sbindex( &str->ibuf, '\n')+1;
     while (!len) {
+        /* loop until buffer includes a complete line */
 	nread = dr1Stream_read( str, tbuf, 1, sizeof( tbuf));
 /*	printf("stream: fgets %d bytes total\n", nread); */
 	if (nread == 0) {
+	    /* break if no more data available */
+	    str->error = EAGAIN;
 	    return 0;
 	}
 	sbcat( &str->ibuf, tbuf, nread);
@@ -110,16 +109,42 @@ int dr1Stream_getdoc( dr1Stream *str, dr1StringBuffer *buf) {
     return tlen;
 }
 
+int dr1Stream_flush( dr1Stream* str) {
+    /* return number of bytes still queued, or -1 on error */
+    int nwrite;
+    int res;
+    nwrite = dr1Stream_write( str, str->obuf.buf, str->obuf.cpos);
+    if (nwrite > 0) {
+	sbtail( &str->obuf, nwrite);
+    } 
+    res = str->obuf.cpos;
+    if (nwrite < 0) res = nwrite;
+    return res;
+}
+
+int dr1Stream_fwrite( dr1Stream *str, char *buf, int len) {
+    if (sbcat( &str->obuf, buf, len)) {
+        str->error = ENOMEM;
+        return -1;
+    }
+    return dr1Stream_drain( str);
+}
+
 int dr1Stream_printf( dr1Stream *str, char *fmt, ...) {
-    int len;
+    /* buffered stream output */
+    int nwrite;
     va_list va;
     va_start( va, fmt);
     vsbprintf( &str->obuf, fmt, va);
-    dr1Stream_write( str, str->obuf.buf, str->obuf.cpos);
-    sbclear( &str->obuf);
+    nwrite = dr1Stream_flush( str);
     va_end( va);
+    return nwrite;
 }
 
 int dr1Stream_iqlen( dr1Stream *str) {
     return str->ibuf.cpos;
+}
+
+int dr1Stream_oqlen( dr1Stream *str) {
+    return str->obuf.cpos;
 }

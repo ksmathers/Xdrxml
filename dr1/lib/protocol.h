@@ -1,5 +1,6 @@
 #define DR1MSG_IDENT "DR1/1.0"
 #define DR1MSG_100 "100 LOGIN OK\n"
+#define DR1MSG_105 "105 CHARACTER CREATION DIALOG\n"
 #define DR1MSG_110 "110 MAP GLYPHS\n"
 #define DR1MSG_120 "120 MAP DATA\n"
 #define DR1MSG_135 "135 PROJECTILE %d %d %d %d %d %d\n"
@@ -9,6 +10,7 @@
 #define DR1MSG_175 "175 LOCATION %d %d\n"
 #define DR1MSG_180 "180 TREASURE %d %d %d %d %d %d\n"
 #define DR1MSG_190 "190 CMDLIST %s\n"
+#define DR1MSG_195 "195 INVENTORY DIALOG\n"
 
 #define DR1MSG_200 "200 OK (%d)\n"
 #define DR1MSG_210 "210 SENT (%d)\n"

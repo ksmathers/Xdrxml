@@ -165,5 +165,5 @@ sbtail( dr1StringBuffer *sb, int first_char);
  */
 
 int
-sbtail( dr1StringBuffer *sb, int ch);
+sbindex( dr1StringBuffer *sb, int ch);
 #endif /* __DR1STRBUF__H */
