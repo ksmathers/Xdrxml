@@ -159,7 +159,7 @@ bool_t xdrxml_putbit( XDR *xdrs, bool_t bit);
     /* put a bit to the underlying stream */
 
 /* String Buffer functions */
-int xdr_xml_sb_create( XDR* xdrs, char *buf, enum xdr_op xop);
+int xdr_xml_sb_create( XDR* xdrs, dr1StringBuffer *buf, enum xdr_op xop);
     /* open an XML xdr stream */
 
 int xdrxmlsb_reset( XDR* xdrs);

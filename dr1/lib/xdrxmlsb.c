@@ -77,7 +77,7 @@ char* xdrxmlsb_getbuf( XDR* xdrs) {
     return xdrd->sb->buf;
 }
 
-int xdr_xml_sb_create( XDR* xdrs, char *buf, enum xdr_op xop) {
+int xdr_xml_sb_create( XDR* xdrs, dr1StringBuffer *buf, enum xdr_op xop) {
     struct xdrxml_st *xdrd;
 
     xdrd = calloc( 1, sizeof(struct xdrxml_st));
@@ -86,7 +86,8 @@ int xdr_xml_sb_create( XDR* xdrs, char *buf, enum xdr_op xop) {
 	/*
 	 * build an XML tree from a the file;
 	 */
-	xdrd->doc = xmlParseDoc( buf);
+	
+	xdrd->doc = xmlParseDoc( buf->buf);
 	assert(xdrd->doc);
 	if (xdrd->doc == NULL) return -1;
 	xdrd->cur = xmlDocGetRootElement(xdrd->doc);
@@ -97,7 +98,11 @@ int xdr_xml_sb_create( XDR* xdrs, char *buf, enum xdr_op xop) {
 	/* 
 	 * Open file for writing
 	 */
-	xdrd->sb = calloc( 1, sizeof( dr1StringBuffer));
+	if (buf == NULL) {
+	    xdrd->sb = calloc( 1, sizeof( dr1StringBuffer));
+	} else {
+	    xdrd->sb = buf;
+	}
 	if (xdrd->sb == NULL) return -1;
     }
 
