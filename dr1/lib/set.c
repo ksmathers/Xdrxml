@@ -16,12 +16,41 @@
  *  SIDE EFFECTS:
  *    
  */
-dr1Set* dr1Set_create( dr1Set* set, cmp_fn cmp, xdr_fn xdr) {
+dr1Set* dr1Set_create( dr1Set* set, cmp_fn cmp, xdr_fn xdr, int objsize) {
     if (!set) set=malloc( sizeof(*set));
     bzero( set, sizeof(*set));
     set->cmp = cmp;
     set->xdr = xdr;
+    set->objsize = objsize;
     return set;
+}
+
+/*-------------------------------------------------------------------
+ * dr1Set_destroy
+ *
+ *    This method deletes all objects in the set and then
+ *    deletes the set.
+ *
+ *  PARAMETERS:
+ *    set 	Pointer to set to be destroyed
+ *
+ *  SIDE EFFECTS:
+ *    Uses xdrxml_free to destroy all objects in the set, freeing
+ *    their pointers as it goes.  Then the items array is
+ *    free'd.
+ *
+ *    Objects added to a set that will be destroyed should
+ *    have been malloc'd to start with.
+ *
+ *    The set itself is not free'd as that is up to the 
+ *    caller.
+ */
+void dr1Set_destroy( dr1Set *set) {
+    int i;
+    xdrxml_free( (xdrxmlproc_t)xdr_dr1Set, (void *)set);
+    set->items=NULL;
+    set->xdr=NULL;
+    set->cmp=NULL;
 }
 
 /*-------------------------------------------------------------------
@@ -72,6 +101,7 @@ void* dr1Set_find( dr1Set* set, void *key) {
 
 /*-------------------------------------------------------------------
  * dr1Set_remove
+ * dr1Set_delete
  *
  *    The method removes an item from the set.
  *
@@ -80,8 +110,15 @@ void* dr1Set_find( dr1Set* set, void *key) {
  *
  *  SIDE EFFECTS:
  *    The pointer is removed from the array.  The caller is responsible
- *    for freeing the pointer.
+ *    for freeing the pointer when using dr1Set_remove.  dr1Set_delete
+ *    destroys the set object and frees the object pointer.
  */
+void dr1Set_delete( dr1Set* set, void *i) {
+    dr1Set_remove( set, i);
+    xdrxml_free( set->xdr, i);
+    free( i);
+}
+
 void dr1Set_remove( dr1Set* set, void *i) {
     int j;
     for (j=0; j<set->len; j++) {
@@ -99,16 +136,21 @@ bool_t xdr_dr1Set( XDR *xdrs, char *node, dr1Set* set) {
     int i;
 
     xdrxml_group( xdrs, node);
-    if (!xdrxml_int( xdrs, "len", &set->len)) return FALSE;
 
     if (xdrs->x_op == XDR_DECODE) {
+        set->len = xdrxml_array_size( xdrs, "item", &set->len);
 	set->size = set->len;
 	set->items = calloc(set->len, sizeof(void*));
     }
     for ( i=0; i<set->len; i++) {
-        xdrxml_group( xdrs, "item");
-	if (!set->xdr( xdrs, &set->items[i])) return FALSE;
-        xdrxml_endgroup( xdrs);
+        if (xdrs->x_op == XDR_DECODE) {
+	    set->items[i] = malloc( set->objsize);
+	}
+	if (!set->xdr( xdrs, "item", set->items[i])) return FALSE;
+	if (xdrs->x_op == XDR_FREE) {
+	    free( set->items[i]);
+	    set->items[i] = NULL;
+	}
     }
     if (xdrs->x_op == XDR_FREE) {
 	free( set->items);

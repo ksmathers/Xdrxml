@@ -23,6 +23,9 @@
 #ifndef __DR1LOCATION__H
 #   include "location.h"
 #endif
+#ifndef __DR1MOBILE__H
+#   include "mobile.h"
+#endif
 
 #define MAXNAMELEN 1024
 
@@ -59,7 +62,7 @@ typedef struct dr1Player {
     int sex;			/* Male, Female */
     int class;			/* MU, Thief, Fighter, Cleric, ... */
 
-    dr1Location location;	/* Where am I? */
+    dr1Mobile mob;		/* Where am I? */
 } dr1Player;
 
 

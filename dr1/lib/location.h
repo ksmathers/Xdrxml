@@ -5,7 +5,6 @@
 #   include <rpc/xdr.h>
 #endif
 #include <math.h>
-#include "map.h"
 
 /*-------------------------------------------------------------------
  * dr1Location
@@ -14,7 +13,7 @@
  */
 
 typedef struct {
-    char *mapname;
+    struct dr1Map *map;
     int x;
     int y;
 } dr1Location;

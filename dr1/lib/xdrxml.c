@@ -172,13 +172,28 @@ bool_t xdrxml_bool( XDR *xdrs, char *node, bool_t *bool) {
 }
 
 
-int xdrxml_count_children( xmlNodePtr n, char *node) {
+bool_t xdrxml_arraysize( XDR *xdrs, char *node, int *size) {
+    struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+    bool_t res;
+    if (xdrs->x_handy & XDR_ANNOTATE) {
+	/* annotated stream */
+	*size = xdrxml_count_children( xdrs, node);
+	res = TRUE;
+    } else {
+        res = xdr_int( xdrs, size);
+    }
+    return res;
+}
+
+int xdrxml_count_children( XDR *xdrs, char *node) {
+    struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+    xmlNodePtr cur = xdrd->cur;
     xmlNodePtr c;
     int count = 0;
-    for (c=n->children; c != NULL; c = c->next) {
+    for (c=cur->children; c != NULL; c = c->next) {
         if (!strcmp(c->name, node)) count++;
 	if (count > 500) { count=0; break; }
-	if (c == n->last) break;
+	if (c == cur->last) break;
     }
     return count;
 }
@@ -593,8 +608,14 @@ void xdrxml_destroy( XDR *__xdrs)
 {
     /* free privates of this xdr_stream */
     struct xdrxml_st* xdrd = XDRXML_DATA(__xdrs);
-    if (xdrd->fp) fclose(xdrd->fp);
-   /* if (xdrd->doc) FIXME /**/
+    if (xdrd->fp) {
+	fclose(xdrd->fp);
+	xdrd->fp = NULL;
+    }
+    if (xdrd->doc) {
+	xmlFreeDoc( xdrd->doc);
+	xdrd->doc = NULL;
+    }
 
 }
 

@@ -24,7 +24,7 @@ struct xdr_ops xdrxmlsb_ops = {
 	&xdrxml_getpostn,
 	&xdrxml_setpostn,
 	&xdrxml_inline,
-	&xdrxml_destroy,
+	&xdrxmlsb_destroy,
     	&xdrxml_getint32,
 	&xdrxmlsb_putint32
     };
@@ -114,6 +114,18 @@ int xdr_xml_sb_create( XDR* xdrs, dr1StringBuffer *buf, enum xdr_op xop) {
     xdrs->x_handy = XDR_ANNOTATE;
 
     return 0;
+}
+
+void xdrxmlsb_destroy( XDR *xdrs) {
+    /* destroy all private data */
+    struct xdrxml_st *xdrd = XDRXML_DATA(__xdrs);
+    dr1StringBuffer_finit( xdrd->sb);
+    free(xdrd->sb);
+
+    if (xdrd->doc) {
+	xmlFreeDoc( xdrd->doc);
+	xdrd->doc = NULL;
+    }
 }
 
 int xdrxmlsb_printf( XDR *xdrs, char *fmt, ...) {

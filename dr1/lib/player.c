@@ -220,7 +220,7 @@ bool_t xdr_dr1Player( XDR *xdrs, char *node, dr1Player* p) {
    if (!xdrxml_int( xdrs, "race", &p->race)) return FALSE;
    if (!xdrxml_int( xdrs, "sex", &p->sex)) return FALSE;
    if (!xdrxml_int( xdrs, "class", &p->class)) return FALSE;
-   if (!xdr_dr1Location( xdrs, "location", &p->location)) return FALSE;
+   if (!xdr_dr1Mobile( xdrs, "mob", &p->mob)) return FALSE;
 
    xdrxml_endgroup(xdrs);
 

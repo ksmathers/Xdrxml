@@ -21,6 +21,20 @@ static dr1MapGraphic* findgraphic( dr1Map *map, int code) {
 }
 
 /*-------------------------------------------------------------------
+ * cmpmob()
+ */
+static int cmpmob( void *ta, void *tb) {
+    dr1Mobile *a, *b;
+    a = (dr1Mobile*)ta;
+    b = (dr1Mobile*)tb;
+    if (a->x < b->x) return -1;
+    if (a->x > b->x) return 1;
+    if (a->y < b->y) return -1;
+    if (a->y > b->y) return 1;
+    return 0;
+}
+
+/*-------------------------------------------------------------------
  * dr1Map_readmap
  *
  *    The method loads a map from a map definition file.
@@ -51,6 +65,7 @@ dr1Map *dr1Map_readmap( char *fname) {
     int glyph = 0;
     dr1Map *map;
     dr1MapGraphic *g;
+    dr1Glyph glyphdata;
 
     if (!fp) {
         printf("Error reading map '%s'\n", fname);
@@ -58,6 +73,8 @@ dr1Map *dr1Map_readmap( char *fname) {
     }
 
     map = calloc( 1, sizeof(dr1Map));
+    dr1Set_create( &map->moblayer.mobset, cmpmob, NULL);
+    map->mapname=strdup(fname);
 
     /* Size of the arrays */
     line = 0;
@@ -117,39 +134,34 @@ dr1Map *dr1Map_readmap( char *fname) {
 	memcpy( file, cpos, i);
 	file[i] = 0;
 	cpos += i;
-	map->graphics[ngraph].nglyphs = glyph + 1;
-	map->graphics[ngraph].glyph = realloc(
-	    map->graphics[ngraph].glyph,
-	    sizeof( dr1Glyph) * (glyph + 1));
-	bzero( &map->graphics[ngraph].glyph[glyph], sizeof(dr1Glyph));
-	map->graphics[ngraph].glyph[glyph].src = dr1GlyphSet_find( file);
-	if (!map->graphics[ngraph].glyph[glyph].src) {
+	glyphdata.src = dr1GlyphLoader_find( file);
+	if (!glyphdata.src) {
 	    printf("Invalid source '%s' on line %d\n", file, line);
 	}
 
 	/* get row and col */
 	sscanf(cpos, "%d %d%n", &row, &col, &i);
-	map->graphics[ngraph].glyph[glyph].r = row;
-	map->graphics[ngraph].glyph[glyph].c = col;
+	glyphdata.r = row;
+	glyphdata.c = col;
 	cpos += i;
 
 	/* get flags */
 	while (*cpos && *cpos != '#') {
 	    switch (*cpos) {
 		case 'd':
-		    map->graphics[ngraph].glyph[glyph].door = 1;
+		    glyphdata.door = 1;
 		    break;
 		case 'v':
-		    map->graphics[ngraph].glyph[glyph].startinvisible = 1;
+		    glyphdata.startinvisible = 1;
 		    break;
 		case 'a':
-		    map->graphics[ngraph].glyph[glyph].anim = 1;
+		    glyphdata.anim = 1;
 		    break;
 		case 'w':
-		    map->graphics[ngraph].glyph[glyph].wall = 1;
+		    glyphdata.wall = 1;
 		    break;
 		case 'o':
-		    map->graphics[ngraph].glyph[glyph].opaque = 1;
+		    glyphdata.opaque = 1;
 		    break;
 		case 's':
 		    map->graphics[ngraph].start = 1;
@@ -164,11 +176,19 @@ dr1Map *dr1Map_readmap( char *fname) {
 		    break;
 	    }
 	    cpos++;
-	}
+	} /* while *cpos */
+
+	/* Add the glyph */
+	map->graphics[ngraph].nglyphs = glyph + 1;
+	map->graphics[ngraph].glyph = realloc(
+	    map->graphics[ngraph].glyph,
+	    sizeof( dr1Glyph*) * (glyph + 1));
+	map->graphics[ngraph].glyph[nglyphs-1] = dr1GlyphSet_add( &glyphdata);
+
 
 /*        printf("graphics[%d].glyph[%d] = { code %d file %s (%p) row %d cold %d }\n", 
 	    ngraph, glyph, code, file, 
-	    map->graphics[ngraph].glyph[glyph].src,
+	    map->graphics[ngraph].glyph[glyph]->src,
 	    row, col); /**/
     } while (!feof(fp) && *buf != 0);
 
@@ -306,66 +326,6 @@ dr1Map_createView( dr1Map *map, int xpos, int ypos, int light, int infravision)
 #endif
 
 /*-------------------------------------------------------------------
- * xdr_dr1Glyph
- *
- *  PARAMETERS:
- *
- *  RETURNS:
- *
- *  SIDE EFFECTS:
- */
-
-#define XDRXML_DATA(xdrs) ((struct xdrxml_st *)xdrs->x_private)
-bool_t
-xdr_dr1Glyph( XDR *xdrs, char *node, dr1Glyph *glyph) {
-    bool_t flag;
-    char *fname = NULL;
-
-    xdrxml_group( xdrs, node);
-    /* src */
-    if (xdrs->x_op == XDR_ENCODE) {
-	fname = dr1GlyphTable_file( glyph->src);
-    }
-    if (!xdrxml_wrapstring( xdrs, "src", &fname)) return FALSE;
-    if (xdrs->x_op == XDR_DECODE) {
-	glyph->src = dr1GlyphSet_find( fname);
-	free(fname);
-    }
-
-    /* row */
-    if (!xdrxml_int( xdrs, "r", &glyph->r)) return FALSE;
-
-    /* col */
-    if (!xdrxml_int( xdrs, "c", &glyph->c)) return FALSE;
-
-    /* flags */
-    /* anim */
-    flag = glyph->anim;
-    if (!xdrxml_bool( xdrs, "anim", &flag)) return FALSE;
-    glyph->anim = flag;
-
-    flag = glyph->wall;
-    if (!xdrxml_bool( xdrs, "wall", &flag)) return FALSE;
-    glyph->wall = flag;
-
-    flag = glyph->opaque;
-    if (!xdrxml_bool( xdrs, "opaque", &flag)) return FALSE;
-    glyph->opaque = flag;
-
-    flag = glyph->door;
-    if (!xdrxml_bool( xdrs, "door", &flag)) return FALSE;
-    glyph->door = flag;
-
-    flag = glyph->startinvisible;
-    if (!xdrxml_bool( xdrs, "startinvisible", &flag)) return FALSE;
-    glyph->startinvisible = flag;
-
-    xdrxml_endgroup( xdrs);
-    return TRUE;
-}
-
-
-/*-------------------------------------------------------------------
  * xdr_dr1MapGraphic
  *
  *  PARAMETERS:
@@ -385,8 +345,7 @@ xdr_dr1MapGraphic( XDR *xdrs, char *node, dr1MapGraphic *gr) {
     
     /* glyph array */
     if (xdrs->x_op == XDR_DECODE) {
-        xmlNodePtr cur = XDRXML_DATA(xdrs)->cur;
-        gr->nglyphs = xdrxml_count_children( cur, "glyph");
+        gr->nglyphs = xdrxml_count_children( xdrs, "glyph");
 	gr->glyph = calloc( gr->nglyphs, sizeof(dr1Glyph));
     }
     for (i=0; i<gr->nglyphs; i++) {
@@ -485,14 +444,13 @@ xdr_dr1Map( XDR *xdrs, char *node, dr1Map *map) {
     bool_t flag;
 
     xdrxml_group( xdrs, node);
-#if 0
-    if (!xdrxml_int( xdrs, "ngraphics", &map->ngraphics)) return FALSE;
-#endif
+
+    /* map name */
+    if (!xdrxml_wrapstring( xdrs, "mapname", &map->mapname)) return FALSE;
 
     /* graphics */
     if (xdrs->x_op == XDR_DECODE) {
-        xmlNodePtr cur = XDRXML_DATA(xdrs)->cur;
-        map->ngraphics = xdrxml_count_children( cur, "graphic");
+        map->ngraphics = xdrxml_count_children( xdrs, "graphic");
 	map->graphics = calloc(map->ngraphics, sizeof(dr1MapGraphic));
     }
 
@@ -506,31 +464,25 @@ xdr_dr1Map( XDR *xdrs, char *node, dr1Map *map) {
 	free(map->graphics);
     }
 
-#if 0
-    if (!xdrxml_int( xdrs, "xsize", &map->xsize)) return FALSE;
-    if (!xdrxml_int( xdrs, "ysize", &map->ysize)) return FALSE;
-#endif
-
     /* grid */
 
     xdrxml_group( xdrs, "grid");
     
     if (xdrs->x_op == XDR_DECODE) {
-#if 1
         xmlNodePtr n = XDRXML_DATA(xdrs)->cur;
 	map->ysize = xdrxml_count_children( n, "y");
 	printf("ysize %d\n", map->ysize);
-
-        n=n->children;
-	while (strcmp(n->name, "y")) { n=n->next; }
-	map->xsize = xdrxml_count_children( n, "x");
-	printf("xsize %d\n", map->xsize);
-#endif
-	map->grid = calloc( map->xsize * map->ysize, sizeof(dr1MapSquare));
     }
 
     for (y=0; y<map->ysize; y++) {
         xdrxml_group( xdrs, "y");
+	
+	if (!map->grid && xdrs->x_op == XDR_DECODE) {
+	    map->xsize = xdrxml_count_children( n, "x");
+	    printf("xsize %d\n", map->xsize);
+	    map->grid = calloc( map->xsize * map->ysize, sizeof(dr1MapSquare));
+	}
+
 	for (x=0; x<map->xsize; x++) {
 	    if (!xdr_dr1MapSquare( xdrs, "x", &map->grid[y * map->xsize + x], map)) 
 	    {
@@ -559,6 +511,80 @@ xdr_dr1Map( XDR *xdrs, char *node, dr1Map *map) {
     map->town = flag;
 
     xdrxml_endgroup( xdrs);
+
+    if (xdrs->x_op == XDR_DECODE) {
+	/* initialize an empty moblayer */
+	dr1Set_create( &map->moblayer.mobset, cmpmob, NULL);
+    } else if (xdrs->x_op == XDR_FREE) {
+	dr1Set_destroy( &map->moblayer.mobset);
+    }
+
     return TRUE;
 }
+
+
+dr1Mobile* dr1Map_findMobile( dr1Map *map, int x, int y) {
+    dr1Mobile mtmp, *r;
+    mtmp.x=x; 
+    mtmp.y=y;
+    r = dr1Set_find( map->moblayer.mobset, &mtmp);
+    return r;
+}
+
+void
+dr1Map_animateMobs( dr1Map *map) {
+    dr1Mobile **mob = (dr1Mobile**)map->moblayer.mobset.items;
+    int i;
+    for (i = 0; i < map->moblayer.mobset.len; i++) {
+	if (mob[ i]->ai) {
+	    switch( mob[ i]->mobtype) {
+		case DR1MOB_MONSTER:
+/*		    dr1Monster_ai( mob[ i]->mobile.monster); /* FIXME */
+		    break;
+		default:
+		    printf("No AI action for mobtype %d\n", mob[ i]->mobtype);
+	    } /* switch */
+	} /* if */
+    } /* for */
+}
+
+void
+dr1Map_addMobile( dr1Map *map, dr1Mobile *mob) {
+    dr1Mobile **mobs;
+    int i=map->moblayer.nmobs;
+    int newmax;
+    i++;
+    mobs=map->moblayer.mobs;
+    if (i >= map->moblayer.maxmobs) {
+        newmax = map->moblayer.maxmobs + 20;
+	mobs = realloc( map->moblayer.mobs, sizeof(dr1Mobile**) * newmax);
+	assert(mobs);
+	map->moblayer.mobs = mobs;
+	map->moblayer.maxmobs = newmax;
+    } /* if */
+    mobs[i]=mob;
+    map->moblayer.nmobs = i;
+} /* dr1Map_addMobile */
+
+void 
+dr1Map_moveMobile( dr1Map *map, dr1Mobile *mob, int x, int y) {
+    mob->location.x = x;
+    mob->location.y = y;
+}
+
+void
+dr1Map_sendMobile( dr1Stream *ios, dr1Mobile *mob) {
+    dr1Location *loc;
+    loc = mob->location; 
+    psendMessage( ios, DR1MSG_175, loc->map, loc->x, loc->y);
+}
+
+#if 0
+void
+dr1Map_sendMobileLayer( dr1Stream *ios, dr1Map *map) {
+    for (i=0; i<map->moblayer.nmobs; i++) {
+	dr1Map_sendMobile( ios, map->moblayer.mobs[i]);
+    }
+}
+#endif
 

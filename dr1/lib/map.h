@@ -4,24 +4,23 @@
 #ifndef _RPC_XDR_H
 #   include <rpc/xdr.h>
 #endif
-#include "glyphset.h"
+#include "glyph.h"
+#include "glyphloader.h"
+#include "../server/merchant.h"
+#include "player.h"
+#include "monster.h"
+#include "mobile.h"
+#include "set.h"
 
 /*-------------------------------------------------------------------
- * dr1Glyph
+ * dr1MobileLayer
  *
- *    Represents one layer of a mult-layered static map square
+ *    Represents the monsters, merchants and other players moving
+ *    around on the map.
  */
-
-typedef struct dr1Glyph dr1Glyph;
-struct dr1Glyph {
-    dr1GlyphTable *src;
-    int r;
-    int c;
-    int anim:1;			/* animated */
-    int wall:1;			/* blocks passage */
-    int opaque:1;		/* blocks vision */
-    int door:1;			/* openable door ('o' command) */
-    int startinvisible:1;       /* initial visibility */
+typedef struct dr1MobileLayer dr1MobileLayer;
+struct dr1MobileLayer {
+    dr1Set mobset;
 };
 
 /*-------------------------------------------------------------------
@@ -38,7 +37,7 @@ typedef struct dr1MapGraphic dr1MapGraphic;
 struct dr1MapGraphic {
     int code;
     int nglyphs;
-    dr1Glyph *glyph; 
+    dr1Glyph **glyph; 
     int start:1;
     int light:1;	/* ambient light */
     int dark:1;		/* magically dark */
@@ -76,6 +75,7 @@ struct dr1MapSquare {
 
 typedef struct dr1Map dr1Map;
 struct dr1Map {
+    char *mapname;
     int ngraphics;
     dr1MapGraphic *graphics;
     int xsize; 
@@ -85,6 +85,8 @@ struct dr1Map {
     int starty;
     int outdoors:1;		/* in the great out of doors */
     int town:1;			/* is a town */
+    /* mobiles */
+    dr1MobileLayer moblayer;	/* players, items, monsters, merchants */
 };
 
 /*-------------------------------------------------------------------
@@ -104,6 +106,26 @@ struct dr1Map {
 
 dr1Map* dr1Map_readmap( char *fname);
 
+
+/*-------------------------------------------------------------------
+ * dr1Map_findMobile
+ *
+ *    Finds a mobile at location x,y on the map, if any.
+ *
+ *  PARAMETERS:
+ *    map       The map being searched
+ *    x,y	Coordinates to search
+ *
+ *  RETURNS:
+ *    dr1Mobile pointer, or NULL if there is no Mob at that location.
+ *
+ *  SIDE EFFECTS:
+ */
+
+dr1Mobile* dr1Map_findMobile( dr1Map *map, int x, int y);
+void dr1Map_animateMobs( dr1Map *map);
+void dr1Map_addMobile( dr1Map *map, dr1Mobile *mob);
+dr1Map_sendMobileLayer( dr1Stream *ios, dr1Map *map);
 
 int dr1Map_setgraphic( dr1Map *map, char c[2], int x, int y);
 bool_t xdr_dr1Map( XDR *xdrs, char *node, dr1Map *);

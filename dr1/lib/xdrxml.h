@@ -48,16 +48,16 @@ struct xdrxml_st {
 	char *attr;
 	int error;
 
-	/* file output */
-	FILE *fp;		/* output stream */
+	/* file input/output */
+	FILE *fp;		
+
+        /* input/output to string buffer */
+	dr1StringBuffer *sb;
 
 	/* file input */
 	xmlDocPtr doc;		/* input stream */
 	xmlNodePtr cur;		/* input cursor */
 	xmlNodePtr last;	/* last node used */
-
-        /* input/output to string buffer */
-	dr1StringBuffer *sb;
 
 	/* extended ops */
 	struct xdr_ops_ext *ext;
@@ -75,6 +75,11 @@ bool_t xdrxml_int32_t( XDR *xdrs, char *node, int32_t *data);
 bool_t xdrxml_long( XDR *xdrs, char *node, long *data);
 bool_t xdrxml_bool( XDR *xdrs, char *node, int *bool) ;
 bool_t xdrxml_wrapstring( XDR *xdrs, char *node, char **s) ;
+#define xdrxml_bitfield( xdrs, node, bool, itemp, res) \
+    (itemp=bool, \
+    res=xdrxml_bool( xdrs, node, &itemp),\
+    bool=itemp,\
+res)
 
 bool_t xdr_push_note( XDR *xdrs, const char *ann);
 bool_t xdr_pop_note( XDR *xdrs);
@@ -178,4 +183,5 @@ bool_t xdrxmlsb_putbytes( XDR *__xdrs, __const char *__addr,
 
 bool_t xdrxmlsb_putint32( XDR *__xdrs, __const int32_t *__ip);
 
+bool_t xdrxml_arraysize( XDR *xdrs, char *node, int *size);
 #endif

@@ -18,11 +18,12 @@
  *    xdr routines in particular wouldn't like it.
  */
 
-typedef bool_t (*xdr_fn)( XDR *xdrs, void **p);
+typedef bool_t (*xdr_fn)( XDR *xdrs, char *node, void *p);
 typedef int (*cmp_fn)( void* a, void *b);
 typedef struct {
     xdr_fn xdr;
     cmp_fn cmp;
+    int objsize;		/* sizeof each object in the set */
     int size;			/* allocated size of the items array */
     int len;			/* length of the array in use */
     void** items;
@@ -37,11 +38,26 @@ typedef struct {
  *    set	Static object to initialize, or NULL to allocate
  *    xdr	Serializer for the objects in the set
  *    cmp	Comparison for the objects in the set
+ *    objsize   Size of objects in the set
  *
  *  SIDE EFFECTS:
  *    
  */
-dr1Set* dr1Set_create( dr1Set* set, cmp_fn cmp, xdr_fn xdr);
+dr1Set* dr1Set_create( dr1Set* set, cmp_fn cmp, xdr_fn xdr, int objsize);
+
+/*-------------------------------------------------------------------
+ * dr1Set_destroy
+ *
+ *    Delete all internally allocated buffers in the set object
+ *
+ *  PARAMETERS:
+ *    set	Static object to destroy
+ *
+ *  SIDE EFFECTS:
+ *    All pointers are set to NULL.  Using the set after destroying
+ *    it will coredump.
+ */
+void dr1Set_destroy( dr1Set* set);
 
 /*-------------------------------------------------------------------
  * dr1Set_add
@@ -71,6 +87,24 @@ void dr1Set_add( dr1Set* set, void *i);
  *
  */
 void* dr1Set_find( dr1Set* set, void *key);
+
+/*-------------------------------------------------------------------
+ * dr1Set_delete
+ *
+ *    The method removes an item from the set and destroys the 
+ *    item free'ing the data back to the heap.  The item should
+ *    have been malloc'd before being added to the set; calling
+ *    this to remove a global is *bad*.
+ *
+ *  PARAMETERS:
+ *    i 	Pointer to item
+ *
+ *  SIDE EFFECTS:
+ *    The pointer is removed from the array.  The xdr function
+ *    is then called with an XDR_FREE xdr stream, and finally
+ *    the pointer is free'd.
+ */
+void dr1Set_delete( dr1Set* set, void *i);
 
 /*-------------------------------------------------------------------
  * dr1Set_remove
