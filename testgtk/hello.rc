@@ -1,0 +1,19 @@
+
+style "window" 
+{
+    bg_pixmap[NORMAL]="crack.xpm"
+}
+
+style "pixbutton" = "button"
+{
+    bg_pixmap[NORMAL]="ice.xpm"
+}
+
+style "pixparent" = "button"
+{
+    bg_pixmap[NORMAL]="<parent>"
+}
+
+widget "main window.*GtkButton*" style "pixparent"
+widget "main window" style "window"
+
