@@ -223,7 +223,6 @@ int dr1Playerv_classv( dr1Context *ctx) {
 	    
 	    res = apply_class( p, ccode, args->hits, args->gold, args->estr);
 	    dr1Context_popcall( ctx, res);
-
 	    return 0;
     } /* switch */
     return -1;
@@ -363,7 +362,6 @@ int dr1Playerv_racev( dr1Context *ctx) {
 
 	    if (check_classattr( p)<0) p->class=DR1C_INVALID;
 	    dr1Context_popcall( ctx, 0);
-
 	    return 0;
     } /* switch */
     dr1Context_error( ctx, "Internal error");
@@ -428,6 +426,7 @@ int dr1Playerv_swapv( dr1Context *ctx) {
 	    b = dr1Attr_statptr( &p->base_attr, args->v[2]);
 	    if (a == NULL || b == NULL) {
 		dr1Context_popcall( ctx, -1);
+		return 0;
 	    }
 
 	    /* swap attributes */
@@ -646,6 +645,7 @@ int dr1Playerv_showDialog( dr1Context *ctx) {
 		    qprintf( ctx, "Your character has no stats.  Roll stats first.\n");
 		} else {
 		    dr1Context_popcall( ctx, 0);
+		    return 0;
 		}
 	    } else qprintf( ctx, "Unknown command: '%s'\n", autos->cmds[0]);
 	    autos->state = SHOWRES;

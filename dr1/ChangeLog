@@ -1,3 +1,9 @@
+
+Fixed malloc problems.  The server is reasonably stable now, if not
+entirely protected against bad input.
+
+--
+
 4/29 Major rewrite to client server.  
 
 The server opens a server socket then calls out to another function
@@ -20,10 +26,6 @@ branches, and similar all look far too much like a series of gotos.
 
 The other two alternatives are to use threads (I'm trying to avoid this),
 or to use goto's and labels to restore state.
-
-There are still a couple of malloc bugs that crash the server from
-time to time, that I need to track down.   I'll probably be reading
-up on Electric Fence later this week.
 
 --
 

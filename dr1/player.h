@@ -26,8 +26,8 @@
 
 #define MAXNAMELEN 1024
 
-#define HITPOINTS(p) ( HITPOINTSMAX(p) - p->wounds )
-#define HITPOINTSMAX(p) (p->hp + dr1Attr_hp( &p->curr_attr, p->class == DR1C_FIGHTER))
+#define HITPOINTS(p) ( HITPOINTSMAX(p) - (p)->wounds )
+#define HITPOINTSMAX(p) ((p)->hp + dr1Attr_hp( &(p)->curr_attr, (p)->class == DR1C_FIGHTER))
 
 /*-------------------------------------------------------------------
  * dr1Player

@@ -31,6 +31,7 @@
 
 /* dialogs */
 #include "playerv.h"
+#include "class.h"
 #include "combatv.h"
 #include "town.h"
 
@@ -149,9 +150,14 @@ int loginplayer( dr1Context *ctx) {
     return 0;
 }
 
+int savegame( dr1Context *ctx) {
+    dr1Player_save( &ctx->player, ctx->fname);
+    return 0;
+}
+
 int playermain( dr1Context *ctx) {
     int *state;
-    enum { LOGIN, TOWN, OUTOFTOWN, DUNGEON, OUTOFDUNGEON, EXITING };
+    enum { LOGIN, TOWN, OUTOFTOWN, DUNGEON, OUTOFDUNGEON, DEAD, EXITING };
     
     printf("%d playermain\n", fileno(ctx->fp));
     state = dr1Context_auto( ctx, sizeof(*state));
@@ -163,11 +169,16 @@ int playermain( dr1Context *ctx) {
 	    return 0;
 
 	case TOWN:
+	    if (HITPOINTS(&ctx->player) < -10) {
+		*state = DEAD;
+		return 0;
+	    }
 	    dr1Context_pushcall( ctx, dr1Town_showDialog);
 	    *state = OUTOFTOWN;
 	    return 0;
 
 	case OUTOFTOWN:
+	    savegame( ctx);
 	    if (dr1Context_return( ctx) == 'x') *state = EXITING;
 	    else *state = DUNGEON;
 	    return 0;
@@ -178,9 +189,15 @@ int playermain( dr1Context *ctx) {
 	    return 0;
 
 	case OUTOFDUNGEON:
-	    if (dr1Context_return( ctx) == 'd') *state = EXITING;
+	    savegame( ctx);
+	    if (dr1Context_return( ctx) == 'd') *state = DEAD;
 	    else *state = TOWN;
 	    return 0;
+
+	case DEAD:
+	    qprintf( ctx, "O Mater Dei, memento mei.\n");
+	    qprintf( ctx, "You have not been resurrected (yet).\n");
+	    *state = EXITING;
 
 	case EXITING:
 	    errno = ENOSYS;

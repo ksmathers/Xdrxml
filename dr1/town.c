@@ -122,10 +122,12 @@ int dobuy( dr1Context *ctx) {
 		    autos->state = BUY;
 		} else {
 		    dr1Context_popcall( ctx, -1);
+		    return 0;
 		}
 	    } else {
 		if (args->c != 3) {
 		    dr1Context_popcall( ctx, -1);
+		    return 0;
 		} else {
 		    autos->state = BUY1;
 		}
@@ -133,7 +135,7 @@ int dobuy( dr1Context *ctx) {
 	    return 0;
 
 	case GETMANY:
-	    qgets( autos->_many, sizeof(autos->_many), ctx);
+	    if (qgets( autos->_many, sizeof(autos->_many), ctx)) return 1;
 	    args->v[4] = autos->_many;
 	    autos->state = BUY;
 
@@ -261,10 +263,11 @@ int rest( dr1Context *ctx, int c, char **v) {
     return 0;
 }
 
-int save( dr1Player *p, int c, char **v) {
+int save( dr1Context *ctx, int c, char **v) {
+    dr1Player *p = &ctx->player;
     char *fname;
     if (c == 1) {
-	fname="player.dat";
+	fname = ctx->fname;
 	c = 2;
     } else {
 	if (c != 2) return -1;
@@ -325,10 +328,11 @@ int dr1Town_showDialog( dr1Context *ctx) {
 		autos->r=equip( ctx, i, autos->cmds);
 	    } else if ( !strcmp( autos->cmds[0], "hunt")) {
 		dr1Context_popcall( ctx, 0);
+		return 0;
 	    } else if ( !strcmp( autos->cmds[0], "rest")) {
 		autos->r=rest( ctx, i, autos->cmds);
 	    } else if ( !strcmp( autos->cmds[0], "save")) {
-		autos->r=save( p, i, autos->cmds);
+		autos->r=save( ctx, i, autos->cmds);
 	    } else if ( !strcmp( autos->cmds[0], "quit")) {
 	        dr1Context_popcall( ctx, 'x');
 		return 0;

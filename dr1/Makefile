@@ -16,7 +16,7 @@ dr1server: server.o money.o merchant.o apothecary.o dice.o player.o \
 	smithy.o weapon.o monster.o combatv.o armor.o \
 	ttype.o tanner.o wright.o location.o qio.o \
 	context.o town.o \
-	potions/heal.o -lxml2 -lm
+	potions/heal.o -lxml2 -lm -L. -lefence
 
 main: main.o money.o merchant.o apothecary.o dice.o player.o \
 	    barter.o itemset.o item.o attr.o registry.o \
