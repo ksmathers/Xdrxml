@@ -9,6 +9,8 @@
 
 #include "dr1.h"
 
+#define MAPDIR "../lib/maps"
+
 /*
  * sendmap 
  *
@@ -149,7 +151,7 @@ int dr1Controller_handleLogin( dr1Context *ctx, int argc, char **argv) {
     } else {
         /* invalid login */
 	dr1Stream_printf(&ctx->ios, DR1MSG_500);
-	return 0;
+	return 1;
     }
     return 0;
 }
@@ -173,11 +175,15 @@ dr1Controller_handleNewPlayer( dr1Context *ctx, int argc, char **argv) {
         status = dr1Playerv_cmd( ctx, argc, argv);
 	if (ctx->dialog == DIALOG_DONE) {
 	    dr1Stream_printf(&ctx->ios, DR1MSG_100);
-	    ctx->map = dr1Map_readmap( "lib/maps/town.map");
-	    ctx->player.location.x = ctx->map->startx;
-	    ctx->player.location.y = ctx->map->starty;
-	    sendplayer( ctx);
-	    sendmap( ctx);
+	    ctx->map = dr1Map_readmap( MAPDIR "/town.map");
+            if (! ctx->map) {
+   		status = 1;
+	    } else {
+		ctx->player.location.x = ctx->map->startx;
+		ctx->player.location.y = ctx->map->starty;
+		sendplayer( ctx);
+		sendmap( ctx);
+	    }
 	}
     }
     return status;
@@ -249,6 +255,8 @@ struct {
  *    argv  Array of commands
  *
  *  RETURNS:
+ *    0     Processing is OK
+ *    1     Fatal processing error.
  *
  *  SIDE EFFECTS:
  */
@@ -283,7 +291,7 @@ int dr1Controller_handleCommand( dr1Context *ctx, int argc, char **argv) {
 	}
     } else if (ctx->state == NEWPLAYER) {
 	status = dr1Controller_handleNewPlayer( ctx, argc, argv);
-	if (ctx->dialog == DIALOG_DONE) {
+	if (!status && ctx->dialog == DIALOG_DONE) {
 	    /* loaded ok */
 	    if (ctx->map->town) {
 		ctx->state = TOWN;

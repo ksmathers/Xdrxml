@@ -1,3 +1,5 @@
+XML2CFLAGS=-I /usr/include/libxml2
+CFLAGS=${XML2CFLAGS} -Wall -Wno-comment -I../lib -I.
 OBJS=	    server.o \
 	    barter.o \
 	    playerv.o \
@@ -8,7 +10,7 @@ OBJS=	    server.o \
 	    merchant.o apothecary.o 
 
 .c.o:
-	gcc -c -g -Wall -Wno-comment -I../lib -I. $< -o $@
+	gcc -c -g ${CFLAGS} $< -o $@
 
 #	gcc -c -g -Wall -Wno-comment -Wno-multichar -I. $< -o $@
 

@@ -3,22 +3,23 @@ Prerequisites:
    libxml2
    ======= 
 
-   Get and install libxml2 from http://www.xmlsoft.org.  This library
-   is a very good, fast, and small C implementation of DOM, XPath,
-   and XPointer.
+   If you are using Redhat 7.3 you can just install the libxml2, and
+   libxml2-devel RPM files.  Otherwise you must get and install libxml2 
+   from http://www.libxml.org.  This library is a very good, fast, and 
+   small C implementation of DOM, XPath, and XPointer.
    
    The 'libhistory' and 'libreadline' libraries are also used by libxml,
    but will probably already be on your system.  Redhat 7 includes more
    recent versions of these two libraries than the RPMs on ftp.gnome.org,
    so if you are using Redhat 7 you'll probably be best off compiling 
-   'libxml2' from source.
+   'libxml2' from source.  
 
    sdl
    ===
 
    Get and install the SDL graphics gaming library from www.libsdl.org.
    With Redhat 7, I just installed the SDL and SDL_devel RPMs for version
-   1.2.0 of the library.  The code isn't backward compatible with 1.1 so
+   1.2.3 of the library.  The code isn't backward compatible with 1.1 so
    you will have to get 1.2 from the network.
 
    SDL_ttf
@@ -30,26 +31,30 @@ Prerequisites:
    You can find this library at:
        http://www.libsdl.org/cvs/ 
 
+   Do the following checkouts and build:
+   
+        cvs -d :pserver:guest@libsdl.org:/home/sdlweb/libsdl.org/cvs login
+	# Hit <return> when prompted for a password
+	cvs -z3 -d :pserver:guest@libsdl.org:/home/sdlweb/libsdl.org/cvs checkout -r release_2_0_3 SDL_ttf2
+	cd SDL_ttf2; ./autogen.sh; ./configure; make; make install
+
    freetype
    ========
 
-   SDL_ttf 2.0.2 and later support Freetype 2, which has the benefit of
+   SDL_ttf 2.0.3 and later support Freetype 2, which has the benefit of
    being maintained, and having fewer bugs, but most importantly can be
    compiled without the hinting interpreter in case Apple gets bent over
    their truetype patents.  Autohinting sometimes even looks better than
    the code hinting.
 
-   Get the sources from www.freetype.org.
+   Get the sources from www.freetype.org, or install the freetype library
+   and devel RPMs from your RedHat disks.
 
 To Build:
 
-    dr1server
-    =========
-
     $ make depend && make
 
-    The result is the program 'dr1server' which is the server side of 
-    Dragon's Reach
+    This builds the complete Dragon's Reach project.
 
 To Run:
 
@@ -59,6 +64,7 @@ To Run:
     server
     ======
 
+    $ cd server
     $ dr1server
     3: Server ready...
 
@@ -66,7 +72,7 @@ To Run:
     ======
 
     $ telnet localhost 2300
-    Login:
+    DR1/1.0
 
     The server saves player data to files with names like 
     'login-password.xml' in the current directory.
@@ -75,8 +81,8 @@ To Run:
     =========
 
     The custom client test code is in the sdlclient subdirectory.
-    Feel free to try it out, but it isn't yet connected to the 
-    server.  The commands are currently like 'vi':
+    Feel free to try it out, but it isn't yet completely integrated
+    with the server.  The commands are currently like 'vi':
         h - left
 	j - down
 	k - up
@@ -84,11 +90,8 @@ To Run:
 	o - open doors
         s - get a screenshot
 
-    $ cd gfx/24x35
-    $ make
-    $ cd -
     $ cd sdlclient
-    $ make
+    $ dr1 localhost
 
     mapedit
     =======
@@ -102,3 +105,5 @@ To Run:
     The map editor also lets you walk through walls, off the edge of
     the map, etc.  (Don't try to replace tiles off the edge of the 
     map though; the editor will core dump.)
+ 
+    The map editor is currently broken.

@@ -94,6 +94,8 @@ int pc_runcmd( int cs, enum runstate_t state) {
 int pc_finit( cs) {
     printf("%d: finitplayer\n", cs);
     dr1Stream_finit( &ctx[cs]->ios);
+    dr1Context_save( ctx[cs]);
+    dr1Context_destroy( ctx[cs]);
     free( ctx[cs]);
     ctx[cs] = NULL;
     return 0;

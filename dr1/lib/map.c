@@ -44,10 +44,15 @@ dr1Map *dr1Map_readmap( char *fname) {
     int ngraph = 0;
     int xsize = 0;
     int glyph = 0;
-
-    dr1Map *map = calloc( 1, sizeof(dr1Map));
+    dr1Map *map;
     dr1MapGraphic *g;
 
+    if (!fp) {
+        printf("Error reading map '%s'\n", fname);
+	return NULL;
+    }
+
+    map = calloc( 1, sizeof(dr1Map));
 
     /* Size of the arrays */
     line = 0;

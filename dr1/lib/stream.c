@@ -88,7 +88,9 @@ int dr1Stream_fgets( dr1Stream *str, char *buf, int size) {
     memcpy( buf, str->ibuf.buf, len);
     buf[len] = 0;
     sbtail( &str->ibuf, len);
+#if 0
     printf("stream: fgets line is %d bytes\n", len);
+#endif
     return len;
 }
 
@@ -102,7 +104,9 @@ int dr1Stream_gets( dr1Stream *str, char *buf, int size) {
     if (buf[len-1] == '\r') {
         buf[--len] = 0;
     }
+#if 0
     printf("stream: gets line is %d bytes\n", len);
+#endif
     return len;
 }
 

@@ -169,9 +169,11 @@ void* comm_main( void* iparm) {
     fd_set tr_set, tw_set, te_set;
     int maxsock;
     int err;
+    int more=0;
     char buf[80];
     struct timeval ttv;
     struct timeval short_wait = { 0, 100000 };
+    struct timeval no_wait = { 0, 0 };
     char *server = (char *)iparm;
 
 
@@ -188,8 +190,12 @@ void* comm_main( void* iparm) {
 	tr_set = r_set; tw_set = w_set; te_set = e_set;
 	ttv = short_wait;
         
-        err = select( maxsock + 1, &tr_set, &tw_set, &te_set, &ttv);
-	printf("/"); fflush(stdout);
+        if (more && dr1Stream_iqlen( &ctx.ios)) {
+            ttv = no_wait;
+        }
+
+	err = select( maxsock + 1, &tr_set, &tw_set, &te_set, &ttv);
+/*	printf("/"); fflush(stdout); /**/
 	if (err == EINTR) continue;
 	if (err < 0) { perror("select"); abort(); }
 	if (FD_ISSET( ctx.sd, &tr_set) || dr1Stream_iqlen( &ctx.ios)) {
@@ -197,9 +203,11 @@ void* comm_main( void* iparm) {
 
 	    /* data from server ready to read */
 	    if ( dr1Stream_fgets( &ctx.ios, buf, sizeof(buf)) == 0) {
+                more=0;
 		perror("read"); continue; 
 	    }
-	    printf("buf '%s'\n",buf); /**/
+            more=1;
+/*	    printf("buf '%s'\n",buf); /**/
 /*	    dr1Text_infoMessage( buf, ctx.screen); */
             handleMessage( buf);
 	} /* if */

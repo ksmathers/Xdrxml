@@ -1,7 +1,8 @@
+XML2CFLAGS=-I /usr/include/libxml2
 GFXDIR="../gfx"
 CFLAGS=-I../lib -I.. \
 	`sdl-config --cflags` -I/usr/local/include/SDL \
-	`freetype-config --cflags`
+	`freetype-config --cflags` ${XML2CFLAGS}
 LIBS=   `sdl-config --libs` -L/usr/local/lib -lSDL_ttf \
 	`freetype-config --libs` \
 	-lxml2 ../lib/libdr1.a -L. -lefence

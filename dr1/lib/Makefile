@@ -1,4 +1,5 @@
-CFLAGS=-I../lib
+XML2CFLAGS=-I/usr/include/libxml2
+CFLAGS=-I../lib ${XML2CFLAGS}
 
 OBJS=set.o map.o xdrxml.o strbuf.o xdrxmlsb.o stream.o \
      player.o class.o armor.o weapon.o registry.o \

@@ -371,6 +371,7 @@ int dr1Playerv_init( dr1Player *p) {
     p->race = DR1R_HUMAN; 
     p->sex = DR1R_MALE;
     p->level = 1;
+    p->location.mapname = strdup( "nomap");
     return 0;
 }
 
