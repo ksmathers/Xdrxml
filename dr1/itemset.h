@@ -39,6 +39,21 @@ typedef struct {
 void dr1ItemSet_add( dr1ItemSet* set, dr1Item *i);
 
 /*-------------------------------------------------------------------
+ * dr1ItemSet_findName
+ *
+ *    Returns a pointer to an item in the itemset, searching by name
+ *
+ *  PARAMETERS:
+ *    set       The itemset to look through
+ *    name 	Name to look for
+ *
+ *  RETURNS:
+ *    Pointer to the named item, or NULL.
+ *
+ */
+dr1Item* dr1ItemSet_findName( dr1ItemSet* set, char *name);
+
+/*-------------------------------------------------------------------
  * dr1ItemSet_remove
  *
  *    The method removes an item from the set.
@@ -64,6 +79,11 @@ void dr1ItemSet_remove( dr1ItemSet* set, dr1Item *i);
  *    Returns encumbrance of the items in the item set in pounds.
  */
 int dr1ItemSet_encumbrance( dr1ItemSet* set);
+
+/*-------------------------------------------------------------------
+ * xdr_dr1ItemPtr( xdrs, dr1Item**)
+ */
+bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item**);
 
 /*-------------------------------------------------------------------
  * xdr_dr1ItemSet( xdrs, dr1ItemSet*)

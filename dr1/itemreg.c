@@ -1,5 +1,6 @@
 #include "itemreg.h"
 #include "potions/heal.h"
+#include "weapon.h"
 
 /*-------------------------------------------------------------------
  * dr1itemReg
@@ -8,6 +9,7 @@
  */
 static dr1RegistryEntry e[] = {
     { (int)'PHEA', &dr1pHeal_type },
+    { (int)'WEAP', &dr1Weapon_type },
     { -1, 0 }
 };
 

@@ -18,7 +18,7 @@ dr1Item* dr1Merchant_inventory(dr1Merchant *m, char* name)
     int i;
     for (i=0; i < m->itemStore.len; i++) {
 	dr1Item *tmp = m->itemStore.items[i];
-	if ( !strcmp(tmp->name, name)) return tmp;
+	if ( !strcasecmp(tmp->name, name)) return tmp;
     } // for
     return NULL;
 }
@@ -44,6 +44,7 @@ dr1Barter* dr1Merchant_buy( dr1Merchant *m,  char *item)
     dr1Barter *b;
     dr1Item* i = dr1Merchant_inventory( m, item);
 
+    if (!i) return NULL;
     b = dr1Barter_create( m, i);
     return b;
 }

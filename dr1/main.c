@@ -12,6 +12,7 @@
 #include "barter.h"
 #include "dice.h"
 #include "xdrasc.h"
+#include "itemset.h"
 
 int buy( dr1Player *p, int c, char **v) {
     /* purchase an item */
@@ -24,18 +25,42 @@ int buy( dr1Player *p, int c, char **v) {
     long sell, buy;
     char mbuf[ 40];
     char buf[ 100];
+    char _who[80];
+    char _what[80];
     int len;
+    int i;
 
-    if (c != 3) return -1;
+    if (c == 1) {
+	printf("(fnord, gandor)\n");
+	printf("From whom:");
+	gets( _who);
+	v[1]= _who;
+	c = 2;
+    }
 
     who = v[1];
-    what = v[2];
-
     if ( !strcasecmp( who, "Fnord")) merc = &dr1apothecary;
     else if ( !strcasecmp( who, "Gandor")) merc = &dr1smithy;
     else return -1;
-    
+
+    if (c == 2) {
+	putchar('(');
+        for (i=0; i<merc->itemStore.len; i++) {
+	    if (i) putchar(',');
+	    printf("%s", merc->itemStore.items[i]->name);
+	}
+	printf(")\n");
+	printf("Buy what:");
+	gets( _what);
+	v[2]= _what;
+	c = 3;
+    }
+
+    if (c != 3) return -1;
+    what = v[2];
+
     b = dr1Merchant_buy( merc, what);
+    if (!b) return -1;
     offr = dr1Barter_startingOffer( b);
     printf("You have %dgp\n", p->purse.gp);
     printf("Buying %s\n", what);
@@ -66,6 +91,24 @@ int buy( dr1Player *p, int c, char **v) {
     return 0;
 }
 
+int equip( dr1Player *p, int c, char **v) {
+    /* equip armor, weapons, etc. */
+    dr1Item *item;
+
+    if (c != 2) return -1;
+    item = dr1ItemSet_findName( &p->pack, v[1]);
+    if (!item || !item->weapon) return -1;
+    if (p->weapon) {
+        printf("Putting %s back in your pack.\n", p->weapon->super.name);
+	dr1ItemSet_add( &p->pack, &p->weapon->super);
+        p->weapon = NULL;
+    }
+    printf("Equipping %s.\n", item->name);
+    dr1ItemSet_remove( &p->pack, item);
+    p->weapon = (dr1Weapon*)item;
+    return 0;
+}
+
 int main( int argc, char** argv) {
     FILE *fp;
     XDR xdrs;
@@ -78,6 +121,7 @@ int main( int argc, char** argv) {
     bzero( &player, sizeof(player));
     dr1Dice_seed();
     dr1Apothecary_init( &dr1apothecary);
+    dr1Smithy_init();
 
     /* restore player from disk */
     pdatf = stat( "player.dat", &pdat);
@@ -90,9 +134,28 @@ int main( int argc, char** argv) {
     }
 
     
-    {
-	char *v[3] = { "buy", "Fnord", "Healing Potion" };
-	buy( &player, 3, v);
+    for (;;) {
+        char cmd[100];
+	char *cmds[10];
+	int i, r;
+	dr1Player *p = &player;
+	i=0;
+
+	printf("---------------------------------------------------------\n");
+	if (player.name) printf("Name: %s\n", player.name);
+
+	printf("(buy, sell, hunt, quit)\n");
+	printf("Command: ");
+	fgets( cmd, sizeof(cmd), stdin);
+
+	cmds[0] = strtok( cmd, " \t\n");
+	while ((cmds[++i] = strtok( NULL, " \t\n")) != 0 && i<10 );
+	
+	if ( !strcmp(cmds[0], "buy")) r=buy( p, i, cmds);
+	else if ( !strcmp(cmds[0], "equip")) r=equip( p, i, cmds);
+	else if ( !strcmp(cmds[0], "quit")) break;
+	else printf("Unknown command: '%s'\n", cmds[0]);
+	if (r) printf("Command returned code %d\n", r);
     }
   
     /* dump player */

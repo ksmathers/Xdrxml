@@ -105,10 +105,10 @@ bool_t xdr_pop_note( XDR *xdrs)
 
 	if (xdrs->x_op == XDR_ENCODE) {
 	    if (!fp) fp = stdout;
-	    fprintf(fp, "<%s>\n", a->note);
+	    fprintf(fp, "</%s>\n", a->note);
 	} else if (xdrs->x_op == XDR_DECODE) {
 	    if (!fp) fp = stdin;
-	    fscanf(fp, "<%s>\n", buf);
+	    fscanf(fp, "</%s>\n", buf);
 	    if (!strcmp(buf, a->note)) return FALSE;
 	}
 	
@@ -139,12 +139,16 @@ bool_t xdrasc_putlong( XDR *__xdrs, __const long *__lp)
 {
     /* put a long to " */
     FILE *fp;
+    char *attr = XDRASC_DATA(__xdrs)->attr;
 
     fp = XDRASC_DATA(__xdrs)->fp;
     if (!fp) fp = stdout;
-    fprintf(fp, "<%s>", XDRASC_DATA(__xdrs)->attr);
+    if (attr) fprintf(fp, "<%s>", attr);
+    else fprintf(fp,"<int>");
     fprintf(fp, "0x%lx", *__lp);
-    fprintf(fp, "</%s>\n", XDRASC_DATA(__xdrs)->attr);
+    if (attr) fprintf(fp, "</%s>\n", attr);
+    else fprintf(fp,"</int>");
+    XDRASC_DATA(__xdrs)->attr = 0;
     return TRUE;
 }
 
@@ -163,9 +167,11 @@ bool_t xdrasc_putbytes( XDR *__xdrs, __const char *__addr,
     FILE *fp;
     int i;
     char c;
+    char *attr = XDRASC_DATA(__xdrs)->attr;
+
     fp = XDRASC_DATA(__xdrs)->fp;
     if (!fp) fp = stdout;
-    fprintf(fp, "<%s>", XDRASC_DATA(__xdrs)->attr);
+    if (attr) fprintf(fp, "<%s>", attr);
 
     for (i=0; i<__len; i++) {
 	c = __addr[ i];
@@ -175,7 +181,8 @@ bool_t xdrasc_putbytes( XDR *__xdrs, __const char *__addr,
 	}
     }
 
-    fprintf(fp, "</%s>\n", XDRASC_DATA(__xdrs)->attr);
+    if (attr) fprintf(fp, "</%s>", attr);
+    XDRASC_DATA(__xdrs)->attr = 0;
     return TRUE;
 }
 
@@ -221,10 +228,14 @@ bool_t xdrasc_putint32( XDR *__xdrs, __const int32_t *__ip)
 {
     /* put a int to " */
     FILE *fp;
+    char *attr = XDRASC_DATA(__xdrs)->attr;
     fp = XDRASC_DATA(__xdrs)->fp;
     if (!fp) fp = stdout;
-    fprintf(fp, "<%s>", XDRASC_DATA(__xdrs)->attr);
+    if (attr) fprintf(fp, "<%s>", attr);
+    else fprintf(fp,"<int32>");
     fprintf(fp, "0x%x", *__ip);
-    fprintf(fp, "</%s>\n", XDRASC_DATA(__xdrs)->attr);
+    if (attr) fprintf(fp, "</%s>", attr);
+    else fprintf(fp,"</int32>");
+    XDRASC_DATA(__xdrs)->attr = 0;
     return TRUE;
 }

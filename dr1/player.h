@@ -14,6 +14,9 @@
 #ifndef __DR1ITEMSET__H
 #   include "itemset.h"
 #endif
+#ifndef __DR1WEAPON__H
+#   include "weapon.h"
+#endif
 
 #define MAXNAMELEN 1024
 
@@ -38,6 +41,8 @@ typedef struct dr1Player {
 
     dr1Money purse;		/* Money that Player is holding */
     dr1ItemSet pack;		/* Backpack equipment */
+    dr1Weapon* weapon;		/* Equipped weapon */
+    dr1Item* gauche;		/* Offhand item */
 
     int race;			/* Elf, Human, ... */
     int sex;			/* Male, Female */

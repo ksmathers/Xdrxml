@@ -16,7 +16,7 @@ dr1Apothecary_init()
 
     i = calloc( 1, sizeof(dr1pHeal));
     i->super.value = GP(35);
-    i->super.name = strdup("Healing Potion");
+    i->super.name = strdup("Healing-Potion");
     i->super.encumbrance = 1;
     i->super.unique = FALSE;
     i->super.uses = 1;
@@ -27,7 +27,7 @@ dr1Apothecary_init()
 
     i = calloc( 1, sizeof(dr1pHeal));
     i->super.value = GP(75);
-    i->super.name = "Extra Healing Potion";
+    i->super.name = "Extra-Healing-Potion";
     i->super.encumbrance = 1;
     i->super.unique = FALSE;
     i->super.uses = 1;

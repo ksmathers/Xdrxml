@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <string.h>
 #include "itemset.h"
 #include "xdrasc.h"
 
@@ -24,6 +25,28 @@ void dr1ItemSet_add( dr1ItemSet *set, dr1Item *i) {
     set->items[set->len-1] = i;
 }
 
+/*-------------------------------------------------------------------
+ * dr1ItemSet_findName
+ *
+ *    Returns a pointer to an item in the itemset, searching by name
+ *
+ *  PARAMETERS:
+ *    set       The itemset to look through
+ *    name 	Name to look for
+ *
+ *  RETURNS:
+ *    Pointer to the named item, or NULL.
+ *
+ */
+dr1Item* dr1ItemSet_findName( dr1ItemSet* set, char *name) {
+    int j;
+    for (j=0; j<set->len; j++) {
+	if ( !strcasecmp(set->items[j]->name, name)) {
+	    return set->items[j];
+	}
+    }
+    return NULL;
+}
 
 /*-------------------------------------------------------------------
  * dr1ItemSet_remove
@@ -67,12 +90,38 @@ int dr1ItemSet_encumbrance( dr1ItemSet* set) {
     return enc;
 }
 
+
+bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
+    long siz = 0;
+    
+    xdr_push_note( xdrs, "item");
+
+    if (xdrs->x_op == XDR_ENCODE) {
+        if (*itemp) siz = dr1Item_size( *itemp);
+    }
+    xdr_attr( xdrs, "size");
+    if (!xdr_long( xdrs, &siz)) return FALSE;
+    if (siz) {
+	if (xdrs->x_op == XDR_DECODE) {
+	    *itemp = calloc( 1, siz);
+	}
+	if (!xdr_dr1Item( xdrs, *itemp)) return FALSE;
+	if (xdrs->x_op == XDR_FREE) {
+	    free(*itemp);
+	}
+    } else {
+	*itemp = NULL;
+    }
+
+    xdr_pop_note( xdrs);
+    return TRUE;
+}
+
 /*-------------------------------------------------------------------
  * xdr_dr1ItemSet( xdrs, dr1ItemSet*)
  */
 bool_t xdr_dr1ItemSet( XDR *xdrs, dr1ItemSet* set) {
     int i;
-    long siz;
 
     xdr_attr( xdrs, "len");
     if (!xdr_int( xdrs, &set->len)) return FALSE;
@@ -82,20 +131,7 @@ bool_t xdr_dr1ItemSet( XDR *xdrs, dr1ItemSet* set) {
 	set->items = malloc(sizeof(dr1Item*) * set->len);
     }
     for ( i=0; i<set->len; i++) {
-        xdr_push_note( xdrs, "item-%d", i);
-	if (xdrs->x_op == XDR_ENCODE) {
-	    siz = dr1Item_size( set->items[i]);
-	}
-	xdr_attr( xdrs, "size");
-	if (!xdr_long( xdrs, &siz)) return FALSE;
-	if (xdrs->x_op == XDR_DECODE) {
-	    set->items[i] = calloc( 1, siz);
-	}
-	if (!xdr_dr1Item( xdrs, set->items[i])) return FALSE;
-	if (xdrs->x_op == XDR_FREE) {
-	    free(set->items[i]);
-	}
-	xdr_pop_note( xdrs);
+	if (!xdr_dr1ItemPtr( xdrs, &set->items[i])) return FALSE;
     }
     if (xdrs->x_op == XDR_FREE) {
 	free( set->items);

@@ -125,6 +125,14 @@ bool_t xdr_dr1Player( XDR *xdrs, dr1Player* p) {
    if (!xdr_dr1ItemSet( xdrs, &p->pack)) return FALSE;
    xdr_pop_note( xdrs);
 
+   xdr_push_note( xdrs, "weapon");
+   if (!xdr_dr1ItemPtr( xdrs, (dr1Item **)&p->weapon)) return FALSE;
+   xdr_pop_note( xdrs);
+
+   xdr_push_note( xdrs, "gauche");
+   if (!xdr_dr1ItemPtr( xdrs, &p->gauche)) return FALSE;
+   xdr_pop_note( xdrs);
+
    xdr_attr( xdrs, "race");
    if (!xdr_int( xdrs, &p->race)) return FALSE;
 

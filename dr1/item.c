@@ -2,6 +2,7 @@
 * Inventory item
 *
 */
+#include <assert.h>
 #include "money.h"
 #include "item.h"
 #include "itemreg.h"
@@ -54,8 +55,10 @@ bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
     }
     xdr_attr( xdrs, "code");
     if (!xdr_int( xdrs, &code)) return FALSE;
+    printf("code %x\n", code);
     if (xdrs->x_op == XDR_DECODE) {
         i->type = dr1Registry_lookup( &dr1itemReg, code);
+	assert(i->type);
     }
 
     xdr_attr( xdrs, "value");
