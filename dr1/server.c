@@ -58,16 +58,21 @@ static dr1Context* ctx[FD_SETSIZE];
  */
 void sendmap( dr1Context* ctx) {
     char *buf;
+    int res;
     xdrxmlsb_reset( &xdrxmlsb);
+    xdr_push_note( &xdrxmlsb, "map");
     if (xdr_dr1Map( &xdrxmlsb, ctx->map) != TRUE) {
 	printf("Error serializing map.\n");
     }
+    xdr_pop_note( &xdrxmlsb);
 
     buf = xdrxmlsb_getbuf( &xdrxmlsb); 
 
-    qprintf( ctx, "%s %d %d %d %d\n", DR1MSG_120, 0, 0, ctx->map->xsize, ctx->map->ysize);
-    qprintf( ctx, buf);
-    qprintf( ctx, "%s\n", SEPARATOR);
+    qprintf( ctx, DR1MSG_120, 0, 0, ctx->map->xsize, ctx->map->ysize);
+    res = qprintf( ctx, buf);
+    if (res != strlen(buf)) perror("qprintf-1");
+    res = qprintf( ctx, "%s\n", SEPARATOR);
+    if (res != strlen(SEPARATOR)) perror("qprintf-2");
 }
 
 /*
@@ -76,16 +81,21 @@ void sendmap( dr1Context* ctx) {
  */
 void sendplayer( dr1Context* ctx) {
     char *buf;
+    int res;
     xdrxmlsb_reset( &xdrxmlsb);
+    xdr_push_note( &xdrxmlsb, "player");
     if (xdr_dr1Player( &xdrxmlsb, &ctx->player) != TRUE) {
 	printf("Error serializing player.\n");
     }
+    xdr_pop_note( &xdrxmlsb);
 
     buf = xdrxmlsb_getbuf( &xdrxmlsb); 
 
     qprintf( ctx, "%s\n", DR1MSG_170);
-    qprintf( ctx, buf);
-    qprintf( ctx, "%s\n", SEPARATOR);
+    res = qprintf( ctx, buf);
+    if (res != strlen(buf)) perror("qprintf-3");
+    res = qprintf( ctx, "%s\n", SEPARATOR);
+    if (res != strlen(SEPARATOR)) perror("qprintf-4");
 }
 
 /*--------------------------------------------------------------------------
@@ -134,7 +144,7 @@ int loginplayer( dr1Context *ctx) {
 
     switch (autos->state) {
 	case INIT:
-	    qprintf( ctx, "DR1/1.0\n");
+	    qprintf( ctx, "%s\n", DR1MSG_IDENT);
 	    autos->state = LOGIN;
 	    return 0;
 
@@ -177,7 +187,7 @@ int loginplayer( dr1Context *ctx) {
 		}
 		qprintf(ctx, DR1MSG_100);
 		sendplayer( ctx);
-		sendmap( ctx);
+/*		sendmap( ctx); */
 		dr1Context_popcall( ctx, 0);
 	    } else {
 	        autos->state = NEWPLAYER;

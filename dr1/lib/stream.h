@@ -57,6 +57,25 @@ dr1Stream_create( dr1Stream *str, int sd);
 int dr1Stream_read( dr1Stream *str, char *buf, int min, int max);
 
 /*-------------------------------------------------------------------
+ * dr1
+ *
+ *    The method writes 'len' characters to the stream.
+ *
+ *  PARAMETERS:
+ *    str    Stream
+ *    buf    Buffer to write to
+ *    len    Length of the buffer
+ *
+ *  RETURNS:
+ *    Number of characters written.  Can return less than 'len' if
+ *    there is an error on the stream.
+ *
+ *  SIDE EFFECTS:
+ */
+
+int dr1Stream_write( dr1Stream *str, char *buf, int len);
+
+/*-------------------------------------------------------------------
  * dr1Stream_gets
  * dr1Stream_fgets
  *
@@ -85,5 +104,38 @@ int dr1Stream_read( dr1Stream *str, char *buf, int min, int max);
 
 int dr1Stream_fgets( dr1Stream *str, char *buf, int size);
 int dr1Stream_gets( dr1Stream *str, char *buf, int size);
+
+/*-------------------------------------------------------------------
+ * dr1
+ *
+ *    The method writes a formatted print buffer to the stream.
+ *
+ *  PARAMETERS:
+ *    str    Stream
+ *    fmt    Format descriptor in printf format
+ *
+ *  RETURNS:
+ *    Number of characters written.
+ *
+ *  SIDE EFFECTS:
+ */
+
+int dr1Stream_printf( dr1Stream *str, char *fmt, ...);
+
+/*-------------------------------------------------------------------
+ * dr1Stream_iqlen( dr1Stream *str);
+ *
+ *    The method returns the number of characters available in the
+ *    input queue
+ *
+ *  PARAMETERS:
+ *    str    Stream
+ *
+ *  RETURNS:
+ *    Number of characters available
+ *
+ *  SIDE EFFECTS:
+ */
+int dr1Stream_iqlen( dr1Stream *str);
 
 #endif /* __DR1STREAM__H */

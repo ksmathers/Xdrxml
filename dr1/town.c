@@ -13,6 +13,7 @@
 #include "dice.h"
 #include "itemset.h"
 #include "qio.h"
+#include "lib/protocol.h"
 
 struct cmdargs_t {
     int c;
@@ -275,19 +276,15 @@ int dr1Town_showDialog( dr1Context *ctx) {
 
     switch ( autos->state) {
 	case PROMPT:
-	    qprintf( ctx, "---------------------------------------------------------\n");
-	    if (p->name) qprintf( ctx, "Name: %s\n", p->name);
-
 	    if ( strlen( ctx->error)) {
-		qprintf( ctx, "--\n: %s\n--\n", ctx->error);
+		qprintf( ctx, DR1MSG_310, 0, ctx->error);
 		*ctx->error = 0;
 	    }
 	    if ( autos->r) {
-		qprintf( ctx, "Command returned code %d\n", autos->r);
+		qprintf( ctx, DR1MSG_310, autos->r, "Last command returned error");
 	    }
 
-	    qprintf( ctx, "(buy, equip, sell, rest, hunt, save, quit)\n");
-	    qprintf( ctx, "Command: ");
+	    qprintf( ctx, DR1MSG_190, "(buy, equip, sell, rest, hunt, save, quit)\n");
 	    autos->state = GETCMD;
 	    return 0;
 

@@ -18,7 +18,8 @@ int dr1Stream_read( dr1Stream *str, char *buf, int min, int max) {
     int nread;
 
     do {
-	nread = read( str->fd, buf, max-count);
+	nread = read( str->fd, buf+count, max-count);
+/*	printf("stream: Read %d bytes\n", nread); */
 	if (nread < 0) {
 	    str->error = errno;
 	    perror("read");
@@ -33,6 +34,7 @@ int dr1Stream_write( dr1Stream *str, char *buf, int size) {
     int count = 0;
     int nwrite;
 
+    printf("clnt> '%s'\n", buf);
     do {
 	nwrite = write( str->fd, buf, size-count);
 	if (nwrite < 0) {
@@ -50,14 +52,13 @@ int dr1Stream_fgets( dr1Stream *str, char *buf, int size) {
     int nread;
     int len;
 
-    printf("in fgets()\n");
     /* Buffer ahead to the next newline */
     len = sbindex( &str->ibuf, '\n')+1;
     while (!len) {
 	nread = dr1Stream_read( str, tbuf, 1, sizeof( tbuf));
+/*	printf("stream: fgets %d bytes total\n", nread); */
 	if (nread == 0) {
-	    len = str->ibuf.cpos;
-	    break;
+	    return 0;
 	}
 	sbcat( &str->ibuf, tbuf, nread);
 	len = sbindex( &str->ibuf, '\n')+1;
@@ -68,12 +69,12 @@ int dr1Stream_fgets( dr1Stream *str, char *buf, int size) {
     memcpy( buf, str->ibuf.buf, len);
     buf[len] = 0;
     sbtail( &str->ibuf, len);
+    printf("stream: fgets line is %d bytes\n", len);
     return len;
 }
 
 int dr1Stream_gets( dr1Stream *str, char *buf, int size) {
     int len;
-    printf("in gets()\n");
     len = dr1Stream_fgets( str, buf, size);
     if (len == 0) return -1;
     if (buf[len-1] == '\n') {
@@ -82,6 +83,7 @@ int dr1Stream_gets( dr1Stream *str, char *buf, int size) {
     if (buf[len-1] == '\r') {
         buf[--len] = 0;
     }
+    printf("stream: gets line is %d bytes\n", len);
     return len;
 }
 
@@ -105,4 +107,8 @@ int dr1Stream_printf( dr1Stream *str, char *fmt, ...) {
     dr1Stream_write( str, str->obuf.buf, str->obuf.cpos);
     sbclear( &str->obuf);
     va_end( va);
+}
+
+int dr1Stream_iqlen( dr1Stream *str) {
+    return str->ibuf.cpos;
 }

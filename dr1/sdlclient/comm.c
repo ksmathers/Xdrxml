@@ -53,34 +53,73 @@ int doConnect( char *server, int port) {
     return 0;
 }
 
+enum {
+    M_IDENT,
+    M_LOGIN,
+    M_READY,
+    M_MAPDATA,
+    M_PLAYERDATA
+};
+
 int handleMessage(char *buf) {
-    static int mode = 0;
+    static int mode = M_IDENT;
     static dr1StringBuffer *sb = NULL;
     if (!sb) {
 	sb = dr1StringBuffer_create( NULL);
     }
     switch (mode) {
-	case 0:
-	    if (!strncmp( buf, MAPDATA, 3)) {
-		sb->cpos = 0;
-		mode = 1;
-	    }
-	    if (!strncmp( buf, PLAYERDATA, 3)) {
-		sb->cpos = 0;
-		mode = 2;
+	case M_IDENT:		/* waiting for IDENT */
+	    if (!strcmp( buf, DR1MSG_IDENT)) {
+/*		showDialog( DLG_LOGIN); */
+		dr1Stream_printf( &ctx.ios, DR1CMD_LOGIN, "foo", "bar");
+		mode = M_LOGIN;
+	    } else {
+		printf("Expecting '%s', got '%s'\n", DR1MSG_IDENT, buf);
 	    }
 	    break;
-	case 1: /* reading map data */
-	case 2: /* reading player data */
+
+	case M_LOGIN:
+	    if (!strncmp( buf, DR1MSG_100, 3)) {
+/*		closeDialog( DLG_LOGIN); */
+		mode = M_READY;
+	    } else if (!strncmp( buf, DR1MSG_500, 3)) {
+		printf("Name/password error\n");
+#if 0
+	        resetDialog( DLG_LOGIN);
+		showStatus( "Name/password error"); 
+#endif
+	    } else if (!strncmp( buf, DR1MSG_550, 3)) {
+		printf("Connection denied. Blacklisted.\n");
+#if 0
+		showStatus( "Connection denied.  You are blacklisted.");
+#endif
+		mode = M_IDENT;
+	    } else {
+/*		showStatus( "Server Error."); */
+		mode = M_IDENT;
+	    }
+	    break;
+
+	case M_READY:	/* ready for next message */
+	    if (!strncmp( buf, DR1MSG_120, 3)) {
+		mode = M_MAPDATA;
+	    }
+	    if (!strncmp( buf, DR1MSG_170, 3)) {
+		mode = M_PLAYERDATA;
+	    }
+	    break;
+
+	case M_MAPDATA: 	/* reading map data */
+	case M_PLAYERDATA: 	/* reading player data */
 	    if ( !strcmp( buf, SEPARATOR)) {
 		XDR xdrs;
 		int ok;
 		xdr_xml_sb_create( &xdrs, sb->buf, XDR_DECODE);
 		switch (mode) {
-		    case 1: /* reading map data */
+		    case M_MAPDATA:    /* reading map data */
 			printf("Got map.\n");
 			break;
-		    case 2: /* reading player data */
+		    case M_PLAYERDATA: /* reading player data */
 			printf("Got player data \n");
 			{
 			    dr1Player p;
@@ -91,6 +130,8 @@ int handleMessage(char *buf) {
 			}
 			break;
 		}
+		sbclear( sb);
+		mode = M_READY;
 		break;
 	    }
 	    sbstrcat( sb, buf);
@@ -127,14 +168,14 @@ void* comm_main( void* iparm) {
 	printf("/"); fflush(stdout);
 	if (err == EINTR) continue;
 	if (err < 0) { perror("select"); abort(); }
-	if (FD_ISSET( ctx.sd, &tr_set)) {
-	    printf("R\n");
+	if (FD_ISSET( ctx.sd, &tr_set) || dr1Stream_iqlen( &ctx.ios)) {
+/*	    printf("R\n"); */
 
 	    /* data from server ready to read */
 	    if ( dr1Stream_gets( &ctx.ios, buf, sizeof(buf)) == 0) {
 		perror("read"); continue; 
 	    }
-	    printf("buf %s\n",buf); /**/
+	    printf("buf '%s'\n",buf); /**/
 /*	    dr1Text_infoMessage( buf, ctx.screen); */
             handleMessage( buf);
 	} /* if */
