@@ -36,7 +36,8 @@
 #define SEPARATOR "7608bdb04fee4d6cf23289314582203c\n"
 
 #define DR1CMD_LOGIN "IAM %s %s\n"
-#define DR1CMD_MOVE "%d MOVE %d %d\n"
+#define DR1CMD_NEWPLAYER "NEWPLAYER %s %s\n"
+#define DR1CMD_MOVE "MOVE %c\n"
 #define DR1CMD_SAY "%d SAY %s\n"
 #define DR1CMD_YELL "%d YELL %s\n"
 #define DR1CMD_MESG "%d MESG %s %s\n"

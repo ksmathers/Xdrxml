@@ -222,6 +222,7 @@ int domove( dr1Context *ctx, int argc, char **argv) {
 	ctx->player.location.x = xpos;
 	ctx->player.location.y = ypos;
     }
+    sendplayer( ctx);
     return 0;
 }
 

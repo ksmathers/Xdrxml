@@ -64,6 +64,17 @@ enum {
     M_INVENTORYDIALOG
 };
 
+int sendCommand(char key) {
+    switch (key) {
+        case 'n':
+        case 'e':
+        case 's':
+        case 'w':
+	    dr1Stream_printf( &ctx.ios, DR1CMD_MOVE, key);
+    } /* switch key */
+    return 0;
+}
+
 int handleMessage(char *buf) {
     static int mode = M_IDENT;
     static dr1StringBuffer *sb = NULL;

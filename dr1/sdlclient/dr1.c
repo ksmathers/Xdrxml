@@ -330,16 +330,16 @@ int main( int argc, char **argv) {
 				    break;
 
 				case SDLK_h:
-				    ctx.xpos--;
+				    sendCommand( 'w');
 				    break;
 				case SDLK_j:
-				    ctx.ypos++;
+				    sendCommand( 's');
 				    break;
 				case SDLK_k:
-				    ctx.ypos--;
+				    sendCommand( 'n');
 				    break;
 				case SDLK_l:
-				    ctx.xpos++;
+				    sendCommand( 'e');
 				    break;
 				case SDLK_o:
 				    opendoor( ctx.map, ctx.xpos, ctx.ypos);
