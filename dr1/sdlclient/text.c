@@ -2,8 +2,32 @@
 #include <SDL_ttf.h>
 #include <assert.h>
 #include <pthread.h>
-#include "text.h"
 #include <string.h>
+#include "text.h"
+#include "common.h"
+
+char* race_name[] = { 
+	"HUMAN",
+	"ELF",
+	"HOBBIT",
+	"HALFORC",
+	"DWARF"
+    };
+
+char* class_name[] = {
+	"INVALID",
+	"MU",
+	"CLERIC",
+	"FIGHTER",
+	"THIEF",
+	/* not implemented below here */
+	"ILLUSIONIST",
+	"DRUID",
+	"ASASSIN",
+	"PALADIN",
+	"RANGER",
+	"MONK"
+    };
 
 static struct {
     dr1Text dragons;
@@ -147,6 +171,7 @@ int dr1Text_setPlayer( dr1Player *p) {
 
 int dr1Text_init( SDL_Surface *screen) {
     int i;
+    char buf[80];
     /* title */
     dr1Text_setInfo( &_text.dragons, 
 	    "Dragon's", TITLE_PTSIZE, 70, 20, ANCHOR_TOPCENTER);
@@ -154,13 +179,13 @@ int dr1Text_init( SDL_Surface *screen) {
 	    "Reach", TITLE_PTSIZE, 70, 45, ANCHOR_TOPCENTER);
 
     /* character */
-    dr1Text_setInfo( &_text.name, ctx->player.name,
+    dr1Text_setInfo( &_text.name, common.player.name,
 	    NAME_PTSIZE, XPOS, lpos(2), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.race, race_name[ ctx->player.race],
+    dr1Text_setInfo( &_text.race, race_name[ common.player.race],
 	    DEFAULT_PTSIZE, XPOS, lpos(5), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.class_level, "%s/%d",
-	    class_name[ ctx->player.class],
-	    ctx->player.level,
+    sprintf(buf, "%s/%d", class_name[ common.player.class],
+            common.player.level);
+    dr1Text_setInfo( &_text.class_level, buf,
 	    DEFAULT_PTSIZE, XPOS, lpos(7), ANCHOR_TOPLEFT);
     dr1Text_setInfo( &_text.sex, "Male", 
 	    DEFAULT_PTSIZE, XPOS, lpos(9), ANCHOR_TOPLEFT);

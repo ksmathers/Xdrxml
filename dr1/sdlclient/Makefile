@@ -10,8 +10,8 @@ OBJSPLAYER=\
 	../item.o ../attr.o ../itemset.o ../location.o ../dice.o \
 	../money.o ../itemreg.o ../potions/heal.o
 
-dr1: dr1.o util.o glyphset.o text.o comm.o ${OBJSPLAYER}
-	gcc -g dr1.o util.o glyphset.o text.o comm.o ${OBJSPLAYER} -o dr1 ${LIBS}
+dr1: dr1.o util.o glyphset.o text.o comm.o common.o ${OBJSPLAYER}
+	gcc -g dr1.o util.o glyphset.o text.o comm.o common.o ${OBJSPLAYER} -o dr1 ${LIBS}
 
 test: test.o util.o glyphset.o text.o
 	gcc -g test.o util.o glyphset.o text.o -o test ${LIBS}
