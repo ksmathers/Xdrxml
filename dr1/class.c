@@ -18,6 +18,13 @@ static dr1ClassType class_mu = {
     "d4",
     "3d4*10",
     INTELLIGENCE,
+    /* min_str */ 3,
+    /* min_int */ 9,
+    /* min_wis */ 6,
+    /* min_dex */ 6,
+    /* min_con */ 6,
+    /* min_cha */ 6,
+
     21,
     5
 };
@@ -27,6 +34,12 @@ static dr1ClassType class_thief = {
     "d6",
     "3d6*10",
     DEXTERITY,
+    /* min_str */ 6,
+    /* min_int */ 6,
+    /* min_wis */ 3,
+    /* min_dex */ 9,
+    /* min_con */ 6,
+    /* min_cha */ 6,
     21,
     4
 };
@@ -36,6 +49,12 @@ static dr1ClassType class_cleric = {
     "d8",
     "3d8*10",
     WISDOM,
+    /* min_str */ 6,
+    /* min_int */ 6,
+    /* min_wis */ 9,
+    /* min_dex */ 3,
+    /* min_con */ 6,
+    /* min_cha */ 6,
     20,
     3
 };
@@ -45,6 +64,12 @@ static dr1ClassType class_fighter = {
     "d10",
     "3d10*10",
     STRENGTH,
+    /* min_str */ 9,
+    /* min_int */ 3,
+    /* min_wis */ 6,
+    /* min_dex */ 6,
+    /* min_con */ 6,
+    /* min_cha */ 6,
     20,
     2
 };

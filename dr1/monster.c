@@ -14,8 +14,9 @@ static dr1MonsterType kobold = {
     /* ac        */ 7,
     /* nattacks  */ 1,
     /* damage    */ { &dr1Weapon_halfspear, NULL, NULL, NULL },
-    /* xp        */ 10,
-    /* ttype     */ 'J',
+    /* xp, xp/hp */ 5, 1,
+    /* ttype     */ "J",
+    /* lair      */ "OQQQQQ",
     /* attack    */ NULL,
     /* defend    */ NULL
 };

@@ -40,8 +40,9 @@ typedef struct {
     int ac;
     int nattacks;
     dr1Weapon* damage[4];
-    int xp;
-    int ttype;
+    int xp, xphp;
+    char *ttype;
+    char *lair;
     dr1Monster_attack_fnp attack;
     dr1Monster_defend_fnp defend;
 } dr1MonsterType;

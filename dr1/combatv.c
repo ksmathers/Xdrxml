@@ -5,7 +5,24 @@
 #include "monster.h"
 #include "dice.h"
 #include "class.h"
+#include "ttype.h"
 
+/*
+ * Utility functions
+ */
+static int *statptr( dr1Attr *a, int stat) {
+    if ( stat == STRENGTH) return &a->_str;
+    if ( stat == INTELLIGENCE) return &a->_int;
+    if ( stat == WISDOM) return &a->_wis;
+    if ( stat == DEXTERITY) return &a->_dex;
+    if ( stat == CONSTITUTION) return &a->_con;
+    if ( stat == CHARISMA) return &a->_cha;
+    return NULL;
+}
+
+/*
+ * Combat commands
+ */
 int attack( dr1Player *p, dr1Monster *m, int c, char **v) {
     int fleeing = 0;
     int p_thac0 = dr1Player_thac0( p);
@@ -47,8 +64,13 @@ int attack( dr1Player *p, dr1Monster *m, int c, char **v) {
 	if (roll >= tohit) {
 	    int dam;
 
-	    dam = dr1Dice_roll( p->weapon->damage) + 
-	    	dr1Attr_damage( &p->base_attr, p->weapon->ranged);
+            if (p->weapon) {
+		dam = dr1Dice_roll( p->weapon->damage) + 
+		    dr1Attr_damage( &p->base_attr, p->weapon->ranged);
+	    } else {
+		dam = dr1Dice_roll( "d3") + 
+		    dr1Attr_damage( &p->base_attr, FALSE);
+	    }
 	    printf("Hit! %d Damage.\n", dam);
 	    m->wounds += dam;
 	} else {
@@ -141,11 +163,30 @@ void dr1Combatv_showPage( dr1Player *p, dr1Monster *m) {
 	}
 
 	if (m->wounds > m->hp) {
-	    printf("The beast is slain.  Thus falls the hammer of god upon the infidel.\n");
+	    int xp;
+	    dr1ClassType *c;
+	    dr1Money t;
+	    char buf[80];
+	    int gems;
+	    int jewelry;
+	    int *st;
 
-	    printf("In nomen de Padre, facio Domine.\n");
+	    printf("The beast is slain.  Facio Domine.\n");
 
-	    p->xp += m->type->xp;
+            /* calculate experience w/ bonus */
+	    xp = m->type->xp + m->hp * m->type->xphp;
+	    c = dr1Registry_lookup( &dr1class, p->class);
+	    st = statptr( &p->base_attr, c->primaryStat);
+	    if ( st && *st >= 16) xp += (xp+5)/10;
+            p->xp += xp;
+	    printf("Gained %d xp.\n", xp);
+
+	    /* collect treasures */
+	    dr1TType_collect( m->type->ttype, &t, &gems, &jewelry);
+	    dr1Money_format( &t, buf);
+	    dr1Money_add( &p->purse, &t);
+	    printf("Collected %sfrom the carcass.\n", buf);
+
 	    break;
 	}
     } while (strcasecmp( cmds[0], "run")); 

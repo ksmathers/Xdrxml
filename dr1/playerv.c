@@ -157,7 +157,7 @@ int dr1Playerv_race( dr1Player *p, int c, char **v) {
     char s[80];
     
     if (c == 1) {
-	printf("(human, elf, halfling, dwarf, halfogre)\n");
+	printf("(human, elf, halfling, dwarf, halforc)\n");
 	printf("Race: ");
 	gets(s);
     
@@ -172,7 +172,7 @@ int dr1Playerv_race( dr1Player *p, int c, char **v) {
     else if (!strcasecmp( v[1], "elf")) r=DR1R_ELF;
     else if (!strcasecmp( v[1], "halfling")) r=DR1R_HOBBIT;
     else if (!strcasecmp( v[1], "dwarf")) r=DR1R_DWARF;
-    else if (!strcasecmp( v[1], "halfogre")) r=DR1R_HALFOGRE;
+    else if (!strcasecmp( v[1], "halforc")) r=DR1R_HALFORC;
     else return -1;
 
     new = dr1Registry_lookup( &dr1race, r);

@@ -28,6 +28,12 @@ typedef struct {
     dr1Dice hitdice;
     dr1Dice startingMoney;
     int primaryStat;
+    int min_str;
+    int min_int;
+    int min_wis;
+    int min_dex;
+    int min_con;
+    int min_cha;
     int thac0;			/* THAC0 as a level 1 character */
     int levelmod;		/* Levels per THAC0 adjustment */	
 } dr1ClassType;

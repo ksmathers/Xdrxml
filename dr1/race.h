@@ -17,7 +17,7 @@ enum {
     DR1R_HUMAN,
     DR1R_ELF,
     DR1R_HOBBIT,
-    DR1R_HALFOGRE,
+    DR1R_HALFORC,
     DR1R_DWARF
 };
 
