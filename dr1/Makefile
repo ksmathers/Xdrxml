@@ -16,6 +16,9 @@ dr1: main.o money.o merchant.o apothecary.o dice.o player.o \
 	ttype.o tanner.o wright.o location.o \
 	potions/heal.o -lxml2 -lm
 
+server: server.o
+	gcc -g -Wl,-warn-common -oserver server.o
+
 #xtest: xtest.o xdrxml.o
 #	gcc -g -oxtest xtest.o xdrxml.o -lxml2
 
