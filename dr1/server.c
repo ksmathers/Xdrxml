@@ -81,7 +81,7 @@ static dr1Context* ctx[FD_SETSIZE];
 int loginplayer( dr1Context *ctx) {
     struct stat pdat;
     int pdatf;
-    dr1Player *loadOk;
+    int loadOk;
     char *cpos;
     char password[12];
     struct {
@@ -106,6 +106,8 @@ int loginplayer( dr1Context *ctx) {
 		if (!isalnum(*cpos)) *cpos = '_';
 	    }
 
+	    if (!strcmp(autos->login, "down")) exit(1);
+
 	    qprintf( ctx, "Password: ");
 	    autos->state = PASSWORD;
 	    return 0;
@@ -125,7 +127,7 @@ int loginplayer( dr1Context *ctx) {
 
 	    pdatf = stat( ctx->fname, &pdat);
 	    if (!pdatf && S_ISREG(pdat.st_mode)) {
-		loadOk = dr1Player_load( &ctx->player, ctx->fname);
+		loadOk = dr1Context_load( ctx, ctx->fname);
 		if (!loadOk) {
 		    qprintf(ctx, "Error loading %s\n", ctx->fname);
 		    return 1;
@@ -139,7 +141,7 @@ int loginplayer( dr1Context *ctx) {
 	
 	case NEWPLAYER:
 	    qprintf( ctx, "Welcome to Dragon's Reach, traveller!\n");
-	    ctx->map = dr1Map_readmap( "town.map");
+	    ctx->map = dr1Map_readmap( "lib/maps/town.map");
 	    ctx->player.location.x = ctx->map->startx;
 	    ctx->player.location.y = ctx->map->starty;
 	    dr1Context_popcall( ctx, ctx->cstack[ctx->stackptr-1].result);
@@ -154,8 +156,7 @@ int loginplayer( dr1Context *ctx) {
 }
 
 int savegame( dr1Context *ctx) {
-    dr1Player_save( &ctx->player, ctx->fname);
-    return 0;
+    return dr1Context_save( ctx);
 }
 
 int playermain( dr1Context *ctx) {
@@ -203,6 +204,7 @@ int playermain( dr1Context *ctx) {
 	    *state = EXITING;
 
 	case EXITING:
+	    savegame( ctx);
 	    errno = ENOSYS;
 	    return 1;
     }
@@ -262,6 +264,7 @@ int main( int argc, char **argv) {
     dr1Tanner_init();
     dr1Wright_init();
     dr1Smithy_init();
+    dr1GlyphSet_init();
 
     /* open server socket */
     ss = socket( PF_INET, SOCK_STREAM, IPPROTO_TCP);

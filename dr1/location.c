@@ -1,5 +1,5 @@
 #include "location.h"
-#include "xdrxml.h"
+#include "lib/xdrxml.h"
 
 /*-------------------------------------------------------------------
  * dr1Location_distance

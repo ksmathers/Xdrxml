@@ -16,7 +16,7 @@
 #include "money.h"
 #include "barter.h"
 #include "dice.h"
-#include "xdrxml.h"
+#include "lib/xdrxml.h"
 #include "itemset.h"
 #include "monster.h"
 #include "combatv.h"

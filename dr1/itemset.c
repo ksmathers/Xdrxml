@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <string.h>
 #include "itemset.h"
-#include "xdrxml.h"
+#include "lib/xdrxml.h"
 #include "globals.h"
 
 /*-------------------------------------------------------------------

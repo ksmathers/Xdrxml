@@ -6,7 +6,7 @@
 #endif
 #include <stdio.h>
 #include "player.h"
-#include "map.h"
+#include "lib/map.h"
 #define CMDSTACK_SIZE 20
 
 /*-------------------------------------------------------------------
@@ -57,13 +57,14 @@ int dr1Context_save( dr1Context *ctx);
  *    Load player context from disk
  *
  *  PARAMETERS:
+ *    ctx     Context to fill
  *    fname   File name to load from
  *
  *  RETURNS:
- *    NULL Error loading file
- *    Pointer to newly malloc'd context
+ *    0 success
+ *    1 failure
  */
-dr1Context* dr1Context_load( char *fname);
+int dr1Context_load( dr1Context *ctx, char *fname);
 
 /*-------------------------------------------------------------------
  * dr1Context_destroy

@@ -2,7 +2,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include "context.h"
-#include "xdrxml.h"
+#include "lib/xdrxml.h"
+
+#define DEFAULT_MAP "town.map"
 
 /*-------------------------------------------------------------------
  * dr1Context_save
@@ -62,14 +64,13 @@ int dr1Context_save( dr1Context *ctx) {
  *    fname   File name to load from
  *
  *  RETURNS:
- *    NULL Error loading file
- *    Pointer to newly malloc'd context
+ *    0   success
+ *    1   failure
  */
 
-dr1Context *dr1Context_load( char *fname) {
+int dr1Context_load( dr1Context *ctx, char *fname) {
     FILE *fp = NULL;
     bool_t ok;
-    dr1Context *ctx;
     XDR xdrs;
     char *cpos;
 
@@ -80,21 +81,27 @@ dr1Context *dr1Context_load( char *fname) {
     } else {
 /*        printf("Loading binary\n"); /**/
 	fp = fopen( fname, "r");
-	if (!fp) return NULL;
+	if (!fp) return 1;
 
 	xdrstdio_create( &xdrs, fp, XDR_DECODE);
     }
 
-    ctx = calloc( 1, sizeof(dr1Context));
+    assert(ctx);
+
     xdr_push_note( &xdrs, "context");
 
     xdr_push_note( &xdrs, "player");
     ok = xdr_dr1Player( &xdrs, &ctx->player);
     xdr_pop_note( &xdrs);
 
-    xdr_push_note( &xdrs, "player");
+    xdr_push_note( &xdrs, "map");
     ctx->map = calloc( 1, sizeof(dr1Map));
     ok = xdr_dr1Map( &xdrs, ctx->map);
+    if (!ok) {
+	/* save file missing a map, load the default map instead. */
+	ctx->map = dr1Map_readmap( "lib/maps/town.map");
+	ok = 1; 
+    }
     xdr_pop_note( &xdrs);
 
     xdr_pop_note( &xdrs);
@@ -105,7 +112,7 @@ dr1Context *dr1Context_load( char *fname) {
 	dr1Context_destroy( ctx);
 	ctx = NULL;
     }
-    return ctx;
+    return (ctx!=NULL);
 }
 
 /*-------------------------------------------------------------------

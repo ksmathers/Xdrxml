@@ -6,7 +6,7 @@
 #include "money.h"
 #include "item.h"
 #include "itemreg.h"
-#include "xdrxml.h"
+#include "lib/xdrxml.h"
 #include "armor.h"
 
 /*-------------------------------------------------------------------
