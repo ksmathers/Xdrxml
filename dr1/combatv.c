@@ -23,7 +23,7 @@ static int *statptr( dr1Attr *a, int stat) {
 /*
  * Combat commands
  */
-int attack( dr1Player *p, int nmon, dr1Monster *m, int c, char **v) {
+int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **v) {
     int p_thac0 = dr1Player_thac0( p);
     int tohit, roll, crit;
     int mul=1;
@@ -31,7 +31,7 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int c, char **v) {
     dr1Monster *target;
 
     if (c == 1) {
-	target = m;
+	target = m; i=0;
 	while (i < nmon && target->wounds >= target->hp) target++, i++;
     } else if (c == 2) {
         target = m; i=0;
@@ -48,8 +48,15 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int c, char **v) {
 
     /* Player swings */
     crit = 0;
-    tohit = p_thac0 - m->type->ac;
+    tohit = p_thac0 - target->type->ac;
     roll = dr1Dice_roll("d20");
+    if ( roll == 1) {
+	/* critical miss */
+	printf("Critical Miss!\n");
+	*surprise = 1;
+    } else {
+	*surprise = 0;
+    }
     if ( roll == 20) {
 	/* natural 20 gets a bonus */
 	if ( tohit>20) roll += 5;
@@ -80,14 +87,14 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int c, char **v) {
 		dr1Attr_damage( &p->base_attr, FALSE);
 	}
 	printf("Hit! %d Damage.\n", dam);
-	m->wounds += dam;
+	target->wounds += dam;
     } else {
 	printf("Swish!\n");
     }
     return 0;
 }
 
-int defend( dr1Player *p, dr1Monster *m) {
+int defend( dr1Player *p, dr1Monster *m, int *surprise) {
     int m_thac0 = dr1Monster_thac0( m);
     int tohit, roll, crit;
     int mul=1;
@@ -97,7 +104,7 @@ int defend( dr1Player *p, dr1Monster *m) {
 	assert(m->type->damage[i]);
 	/* FIXME */
 	tohit = m_thac0 - dr1Player_ac( p, 
-		/* surprise/behind */ 0, 
+		/* surprise/behind */ *surprise, 
 		m->type->damage[i]->ranged, 
 		m->type->damage[i]->dtype
 	    );
@@ -173,6 +180,7 @@ int use( dr1Player *p, int c, char **v) {
  */
 void dr1Combatv_showPage( dr1Player *p, int nmon, dr1Monster *m) {
     int alldead;
+    int surprise = 0;
     char cmd[80];
     char *cmds[10];
     do {
@@ -192,7 +200,7 @@ void dr1Combatv_showPage( dr1Player *p, int nmon, dr1Monster *m) {
 	if (!cmds[0]) continue;
 	while ((cmds[++i] = strtok( NULL, " \t\n")) != 0 && i<10 );
 
-        if (!strcasecmp( cmds[0], "attack")) attack( p, nmon, m, i, cmds);
+        if (!strcasecmp( cmds[0], "attack")) attack( p, nmon, m, &surprise, i, cmds);
         else if (!strcasecmp( cmds[0], "run")) printf("Fleeing.\n");
         else if (!strcasecmp( cmds[0], "use")) use( p, i, cmds);
         else if (!strcasecmp( cmds[0], "equip")) equip( p, i, cmds);
@@ -204,7 +212,7 @@ void dr1Combatv_showPage( dr1Player *p, int nmon, dr1Monster *m) {
         for (i=0; i<nmon; i++) {
 	    if (m[i].wounds < m[i].hp) { 
 		alldead = 0; 
-		defend( p, m); 
+		defend( p, m, &surprise); 
 	    }
 	}
 

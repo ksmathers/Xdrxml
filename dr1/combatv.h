@@ -20,16 +20,28 @@
 /*-------------------------------------------------------------------
  * dr1
  *
- *    The method ...
+ *    The method attack runs a single attack round for the character,
+ *    attacking a monster.
  *
  *  PARAMETERS:
+ *    p		Player
+ *    nmon	Number of attackers
+ *    m		Array of attackers
+ *    surprise	Sets surprise to TRUE on a critical miss
+ *    c		number of command line arguments
+ *    v         command line argument list
+ *              v[0] is the attack command ('attack')
+ *              v[1] is the name of the monster to target
  *
  *  RETURNS:
+ *    0		Success
+ *    -1..-N 	Error
  *
  *  SIDE EFFECTS:
+ *    Monster hit points are reduced, and surprise is set.
  */
 
-int attack( dr1Player *p, int nmon, dr1Monster *m, int c, char **v);
+int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **v);
 
 /*-------------------------------------------------------------------
  * dr1
