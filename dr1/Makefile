@@ -1,5 +1,5 @@
 .c.o:
-	gcc -c -g -Wall -I. $< -o $@
+	gcc -c -g -Wall -Wno-comment -Wno-multichar -I. $< -o $@
 
 main: main.o money.o merchant.o apothecary.o dice.o player.o \
 	    barter.o itemset.o item.o attr.o registry.o \

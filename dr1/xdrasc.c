@@ -145,6 +145,7 @@ bool_t xdrasc_putlong( XDR *__xdrs, __const long *__lp)
     fprintf(fp, "<%s>", XDRASC_DATA(__xdrs)->attr);
     fprintf(fp, "0x%lx", *__lp);
     fprintf(fp, "</%s>\n", XDRASC_DATA(__xdrs)->attr);
+    return TRUE;
 }
 
 bool_t xdrasc_getbytes( XDR *__xdrs, caddr_t __addr,
@@ -152,6 +153,7 @@ bool_t xdrasc_getbytes( XDR *__xdrs, caddr_t __addr,
 {
     /* get some bytes from " */
     assert(1==0);
+    return TRUE;
 }
 
 bool_t xdrasc_putbytes( XDR *__xdrs, __const char *__addr,
@@ -174,6 +176,7 @@ bool_t xdrasc_putbytes( XDR *__xdrs, __const char *__addr,
     }
 
     fprintf(fp, "</%s>\n", XDRASC_DATA(__xdrs)->attr);
+    return TRUE;
 }
 
 u_int xdrasc_getpostn( __const XDR *__xdrs)
@@ -211,6 +214,7 @@ bool_t xdrasc_getint32( XDR *__xdrs, int32_t *__ip)
 {
     /* get a int from underlying stream */
     assert(1==0);
+    return TRUE;
 }
 
 bool_t xdrasc_putint32( XDR *__xdrs, __const int32_t *__ip)
@@ -222,4 +226,5 @@ bool_t xdrasc_putint32( XDR *__xdrs, __const int32_t *__ip)
     fprintf(fp, "<%s>", XDRASC_DATA(__xdrs)->attr);
     fprintf(fp, "0x%x", *__ip);
     fprintf(fp, "</%s>\n", XDRASC_DATA(__xdrs)->attr);
+    return TRUE;
 }
