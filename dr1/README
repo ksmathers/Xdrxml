@@ -1,0 +1,6 @@
+To build:
+
+make depend && make
+
+The result is the program 'a.out' which is a test driver for the game
+libraries.
