@@ -31,6 +31,39 @@ dr1Registry dr1monsters = {
 };
 
 /*-------------------------------------------------------------------
+ * dr1Monster_init
+ *
+ *    Initialize a monster in a buffer
+ *
+ *  PARAMETERS:
+ *    name	Monster type name
+ *    m         Monster buffer
+ *
+ *  RETURNS:
+ *    -1 on error, 0 on success
+ *
+ */
+
+int dr1Monster_init( dr1Monster *m, char *name) {
+    dr1MonsterType *mtype, *tmp = NULL;
+    int i;
+
+    for (i=0; dr1monsters.entries[i].code != -1; i++) {
+        tmp = dr1monsters.entries[i].value;
+	if (!strcasecmp( tmp->name, name)) {
+	    mtype = tmp;
+	    break;
+	}
+    }
+    if ( !mtype) return -1;
+
+    m->type = mtype;
+    m->hp = dr1Dice_roll( mtype->hd);
+    m->wounds = 0;
+    return 0;
+}
+
+/*-------------------------------------------------------------------
  * dr1Monster_new
  *
  *    Create a new monster object on the heap and return it.
@@ -44,22 +77,13 @@ dr1Registry dr1monsters = {
  */
 
 dr1Monster* dr1Monster_new( char *name) {
-    dr1MonsterType *mtype = NULL;
     dr1Monster *m;
-    int i;
+    dr1Monster buf;
 
-    for (i=0; dr1monsters.entries[i].code != -1; i++) {
-        mtype = dr1monsters.entries[i].value;
-	if (!strcasecmp( mtype->name, name)) {
-	    break;
-	}
-    }
-    if (!mtype) return NULL;
+    if (dr1Monster_init( &buf, name)) return NULL;
 
     m = malloc( sizeof(dr1Monster));
-    m->type = mtype;
-    m->hp = dr1Dice_roll( mtype->hd);
-    m->wounds = 0;
+    *m = buf;
     return m;
 }
 

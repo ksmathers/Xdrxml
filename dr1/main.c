@@ -139,7 +139,9 @@ int equip( dr1Player *p, int c, char **v) {
 int hunt( dr1Player *p, int c, char **v) {
     char buf[80];
     char *mname;
-    dr1Monster *m;
+    dr1Monster m[10];
+    int nmon;
+    int i;
 
     if (c < 2) {
 	printf("Hunt what: ");
@@ -151,11 +153,12 @@ int hunt( dr1Player *p, int c, char **v) {
     if (c != 2) return -1;
     mname = v[1];
 
-    m = dr1Monster_new( mname);
+    nmon = dr1Dice_roll( "d4");
+    for (i=0; i<nmon; i++) {
+	if ( dr1Monster_init( &m[i], mname)) return -2;
+    }
     
-    if (!m) return -2;
-
-    dr1Combatv_showPage( p, m);
+    dr1Combatv_showPage( p, nmon, m);
     return 0;
 }
 

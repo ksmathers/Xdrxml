@@ -59,6 +59,22 @@ typedef struct {
 } dr1Monster;
 
 /*-------------------------------------------------------------------
+ * dr1Monster_init
+ *
+ *    Initialize a monster in a buffer
+ *
+ *  PARAMETERS:
+ *    name	Monster type name
+ *    m         Monster buffer
+ *
+ *  RETURNS:
+ *    -1 on error, 0 on success
+ *
+ */
+
+int dr1Monster_init( dr1Monster *m, char *name) ;
+
+/*-------------------------------------------------------------------
  * dr1Monster_new
  *
  *    Create a new monster object on the heap and return it.

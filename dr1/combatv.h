@@ -29,7 +29,7 @@
  *  SIDE EFFECTS:
  */
 
-int attack( dr1Player *p, dr1Monster *m, int c, char **v);
+int attack( dr1Player *p, int nmon, dr1Monster *m, int c, char **v);
 
 /*-------------------------------------------------------------------
  * dr1
@@ -43,6 +43,6 @@ int attack( dr1Player *p, dr1Monster *m, int c, char **v);
  *  SIDE EFFECTS:
  */
 
-void dr1Combatv_showPage( dr1Player *p, dr1Monster *m);
+void dr1Combatv_showPage( dr1Player *p, int nmon, dr1Monster *m);
 
 #endif /* __DR1COMBATV__H */
