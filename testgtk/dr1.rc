@@ -1,7 +1,7 @@
 
 style "window" 
 {
-#    bg_pixmap[NORMAL]="crack.xpm"
+    bg_pixmap[NORMAL]="granite.xpm"
 }
 
 style "ice"
