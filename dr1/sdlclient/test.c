@@ -357,25 +357,8 @@ int main( int argc, char **argv) {
 	}
 
         dr1GlyphSet_init( screen);
+	dr1Text_init( screen);
 	dr1_npcs1 = dr1GlyphSet_find( "db-npcs-1");
-	setInfo( &_dragons, "Dragon's", 28, 70, 30, ANCHOR_TOPCENTER);
-	setInfo( &_reach, "Reach", 28, 70, 55, ANCHOR_TOPCENTER);
-
-#define lpos(ln) (95 + (ln) * 11)
-#define mpos(ln) (screen->h - 103 + (ln) * 10)
-        setInfo( &dr1__name, "Thorin", 24, 20, lpos(0), ANCHOR_TOPLEFT);
-	setInfo( &dr1__class, "Fighter/15", 20, 20, lpos(3), ANCHOR_TOPLEFT);
-	setInfo( &_hits, "Hits: 24/32", 20, 20, lpos(5), ANCHOR_TOPLEFT);
-	for (i = 0; i < 4; i++) {
-	    setInfo( &_scrollmsg[i], 
-		"The quick brown fox jumped over the lazy dog.", 
-		18, 140, mpos(i<<1), ANCHOR_TOPLEFT);
-	}
-
-	for (i = 0; i < 6; i++) {
-	    setInfo( &_attr[i], msgattr[i], 20, 60, lpos((i<<1)+7), ANCHOR_TOPRIGHT);
-	    setInfo( &_attrval[i], (i==0?"18/00":"18"), 20, 65, lpos((i<<1)+7), ANCHOR_TOPLEFT);
-	}
 	loadBorder( screen);
 
         map = dr1Map_readmap( mapfile);
@@ -392,18 +375,7 @@ int main( int argc, char **argv) {
 	        SDL_FillRect( screen, NULL, 0);
 		showMap( screen, map, xpos, ypos);
 		showBorder( screen);
-		showInfo( screen, &_dragons);
-		showInfo( screen, &_reach);
-		showInfo( screen, &_hits);
-		showInfo( screen, &dr1__name);
-		showInfo( screen, &dr1__class);
-		for (i = 0; i < 4; i++) {
-		    showInfo( screen, &_scrollmsg[i]);
-		}
-		for (i=0; i<6; i++) {
-		    showInfo( screen, &_attr[i]);
-		    showInfo( screen, &_attrval[i]);
-		}
+		dr1Text_show( screen);
 		SDL_Flip( screen);
 		usleep( 100000L);
 		while ( SDL_PollEvent(&event) ) {

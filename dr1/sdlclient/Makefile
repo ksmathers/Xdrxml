@@ -6,8 +6,8 @@ LIBS=   `sdl-config --libs` -L/usr/local/lib -lSDL_ttf \
 	`freetype-config --libs` \
 	-lxml2 ../lib/libdr1.a
 
-test: test.o util.o glyphset.o
-	gcc -g test.o util.o glyphset.o -o test ${LIBS}
+test: test.o util.o glyphset.o text.o
+	gcc -g test.o util.o glyphset.o text.o -o test ${LIBS}
 
 test2: showfont.o
 	gcc showfont.o -o test2 `sdl-config --libs` -lSDL_ttf -lttf
