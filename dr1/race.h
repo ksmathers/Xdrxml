@@ -13,6 +13,26 @@
  *    The structure ...
  */
 
+enum {
+    DR1R_HUMAN,
+    DR1R_ELF,
+    DR1R_HOBBIT,
+    DR1R_HALFOGRE,
+    DR1R_DWARF
+};
+
+enum {
+    DR1R_MALE,
+    DR1R_FEMALE
+};
+
+
+/*-------------------------------------------------------------------
+ * dr1
+ *
+ *    The structure ...
+ */
+
 extern dr1Registry dr1race;
 extern dr1Registry dr1sex;
 

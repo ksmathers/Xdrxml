@@ -155,8 +155,8 @@ bool_t xdr_dr1Player( XDR *xdrs, dr1Player* p) {
    xdr_attr( xdrs, "hp");
    if (!xdr_int( xdrs, &p->hp)) return FALSE;
 
-   xdr_attr( xdrs, "full_hp");
-   if (!xdr_int( xdrs, &p->full_hp)) return FALSE;
+   xdr_attr( xdrs, "wounds");
+   if (!xdr_int( xdrs, &p->wounds)) return FALSE;
 
    xdr_push_note( xdrs, "base_attr");
    if (!xdr_dr1Attr( xdrs, &p->base_attr)) return FALSE;

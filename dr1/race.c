@@ -28,11 +28,11 @@ static dr1AttrAdjust race_dwarf = {
 };
 
 static dr1RegistryEntry race_entries[] = {
-    { (int)'MAN ', &race_human },
-    { (int)'ELF ', &race_elf },
-    { (int)'HOBB', &race_halfling },
-    { (int)'OGRE', &race_halfogre },
-    { (int)'DWAR', &race_dwarf },
+    { DR1R_HUMAN, &race_human },
+    { DR1R_ELF, &race_elf },
+    { DR1R_HOBBIT, &race_halfling },
+    { DR1R_HALFOGRE, &race_halfogre },
+    { DR1R_DWARF, &race_dwarf },
     { -1, NULL }
 };
 
@@ -49,8 +49,8 @@ static dr1AttrAdjust sex_female = {
 };
 
 static dr1RegistryEntry sex_entries[] = {
-    { (int)'MALE', &sex_male },
-    { (int)'FEMA', &sex_female },
+    { DR1R_MALE, &sex_male },
+    { DR1R_FEMALE, &sex_female },
     { -1, NULL }
 };
 

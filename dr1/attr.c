@@ -30,6 +30,17 @@ static int con_hp[] =
     { -4,-3,-2,-1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5};
 
 /*-------------------------------------------------------------------
+ * Dexterity modifiers
+ *
+ *   dr1Attr_dex_ac       AC adjustment
+ *   dr1Attr_dex_tohit    ToHit adjustment
+ */
+
+static int dex_ac[] = 
+    /* 3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25*/
+    { -4,-3,-2,-1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5};
+
+/*-------------------------------------------------------------------
  * dr1Attr_damage
  *
  *    Returns the attributes adjustment for damage
@@ -78,6 +89,29 @@ int dr1Attr_hp( dr1Attr *a, int fighter) {
 	if (hpadj == 1) hpadj++;
     }
     return hpadj;
+}
+
+/*-------------------------------------------------------------------
+ * dr1Attr_ac
+ *
+ *    Returns the attributes adjustment AC
+ *
+ * Parameters:
+ *    a       Attributes of the player being checked
+ *
+ * Returns:
+ *    Attribute value
+ */
+
+int dr1Attr_ac( dr1Attr *a) {
+    int dex, acadj;
+    dex = a->_dex;
+
+    if (dex > 25) dex=25;
+    if (dex < 3) dex=3;
+
+    acadj = dex_ac[ dex-3]; 
+    return acadj;
 }
 
 /*-------------------------------------------------------------------

@@ -7,7 +7,7 @@
  */
 
 static dr1MonsterType kobold = {
-    /* mtype     */ 'KOBO', 
+    /* mtype     */ DR1M_KOBOLD,
     /* name      */ "Kobold",
     /* attr      */ { 0, 0, 0, 0, 0, 0},
     /* hd        */ "d4+1",
@@ -21,7 +21,7 @@ static dr1MonsterType kobold = {
 };
 
 static dr1RegistryEntry entries[] = {
-    { 'KOBO', &kobold },
+    { DR1M_KOBOLD, &kobold },
     { -1, NULL }
 };
 
@@ -58,7 +58,7 @@ dr1Monster* dr1Monster_new( char *name) {
     m = malloc( sizeof(dr1Monster));
     m->type = mtype;
     m->hp = dr1Dice_roll( mtype->hd);
-    m->full_hp = m->hp;
+    m->wounds = 0;
     return m;
 }
 

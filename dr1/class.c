@@ -1,4 +1,5 @@
 #include "class.h"
+#include "attr.h"
 
 
 /*-------------------------------------------------------------------
@@ -16,7 +17,7 @@ static dr1ClassType class_mu = {
     "Magic User",
     "d4",
     "3d4*10",
-    'INT ',
+    INTELLIGENCE,
     21,
     5
 };
@@ -25,7 +26,7 @@ static dr1ClassType class_thief = {
     "Thief",
     "d6",
     "3d6*10",
-    'DEX ',
+    DEXTERITY,
     21,
     4
 };
@@ -34,7 +35,7 @@ static dr1ClassType class_cleric = {
     "Cleric",
     "d8",
     "3d8*10",
-    'WIS ',
+    WISDOM,
     20,
     3
 };
@@ -43,7 +44,7 @@ static dr1ClassType class_fighter = {
     "Fighter",
     "d10",
     "3d10*10",
-    'STR ',
+    STRENGTH,
     20,
     2
 };

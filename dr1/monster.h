@@ -18,11 +18,16 @@
 #   include "weapon.h"
 #endif
 
+
 /*-------------------------------------------------------------------
  * dr1MonsterType
  *
  *    The structure defines a type of monster
  */
+
+enum MonsterTypes {
+    DR1M_KOBOLD
+};
 
 struct dr1Monster;
 typedef void (*dr1Monster_attack_fnp)( struct dr1Monster *mon, dr1Player *p);
@@ -48,8 +53,8 @@ typedef struct {
  */
 typedef struct {
     dr1MonsterType *type;
-    int full_hp;
     int hp;
+    int wounds;
 } dr1Monster;
 
 /*-------------------------------------------------------------------

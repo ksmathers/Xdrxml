@@ -4,6 +4,7 @@
 #include "player.h"
 #include "monster.h"
 #include "dice.h"
+#include "class.h"
 
 int attack( dr1Player *p, dr1Monster *m, int c, char **v) {
     int fleeing = 0;
@@ -49,7 +50,7 @@ int attack( dr1Player *p, dr1Monster *m, int c, char **v) {
 	    dam = dr1Dice_roll( p->weapon->damage) + 
 	    	dr1Attr_damage( &p->base_attr, p->weapon->ranged);
 	    printf("Hit! %d Damage.\n", dam);
-	    m->hp -= dam;
+	    m->wounds += dam;
 	} else {
 	    printf("Swish!\n");
 	}
@@ -84,7 +85,7 @@ int attack( dr1Player *p, dr1Monster *m, int c, char **v) {
 	    int dam;
 	    dam = dr1Dice_roll( m->type->damage[i]->damage);
 	    printf("Struck Thee! %d damage.\n", dam);
-	    p->hp -= dam;
+	    p->wounds += dam;
 	} else {
 	    printf("Swish!\n");
 	}
@@ -111,8 +112,8 @@ void dr1Combatv_showPage( dr1Player *p, dr1Monster *m) {
     do {
         int i;
         printf("-------------------------------------------------------\n");
-	printf("Player: %-20s    Hits: %d/%d\n", p->name, p->hp, p->full_hp);
-	printf("Monster: %-20s   Damage: %d\n", m->type->name, m->full_hp - m->hp);
+	printf("Player: %-20s    Hits: %d/%d\n", p->name, HITPOINTS(p), HITPOINTSMAX(p));
+	printf("Monster: %-20s   Damage: %d\n", m->type->name, m->wounds);
         printf("(attack, equip, run)\n");
 	printf("Command: ");
 
@@ -130,12 +131,12 @@ void dr1Combatv_showPage( dr1Player *p, dr1Monster *m) {
 	    printf("Unknown command %s.\n", cmds[0]);
 	}
 
-	if (p->hp < 0) {
+	if (p->wounds > p->hp) {
 	    printf("Thou'rt slain.  Donai nais requiem.  Resquiat in pace.\n");
 	    break;
 	}
 
-	if (m->hp < 0) {
+	if (m->wounds > m->hp) {
 	    printf("The beast is slain.  Thus falls the hammer of god upon the infidel.\n");
 
 	    printf("In nomen de Padre, facio Domine.\n");

@@ -30,9 +30,9 @@ void dr1pHeal_quaff( dr1Player* p, dr1Item* i, int fn) {
     dr1pHeal *pot = (dr1pHeal*)i;
     
     h = dr1Dice_roll(pot->effect);
-    if (p->hp > p->full_hp) return;
-    p->hp += h;
-    if (p->hp > p->full_hp) p->hp=p->full_hp;
+    if (p->wounds <= 0) return;
+    p->wounds -= h;
+    if (p->wounds < 0) p->wounds = 0;
 }
 
 

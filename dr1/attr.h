@@ -4,6 +4,19 @@
 #ifndef _RPC_XDR_H
 #   include <rpc/xdr.h>
 #endif
+
+/*-------------------------------------------------------------------
+ * dr1Attr
+ *
+ *    Player and monster attributes pack.  These are the six basic
+ *    attributes: Strength, Intelligence, Wisdom, Dexterity, Constitution
+ *    and Charisma.
+ */
+
+enum {
+    STRENGTH, INTELLIGENCE, WISDOM, DEXTERITY, CONSTITUTION, CHARISMA
+};
+
 /*-------------------------------------------------------------------
  * dr1Attr
  *

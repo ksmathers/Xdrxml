@@ -153,8 +153,8 @@ int hunt( dr1Player *p, int c, char **v) {
 int rest( dr1Player *p, int c, char **v) {
     dr1Money roomcost = { 0, 2, 0, 0, 0 };
     printf("You've rested for 1 day at 2sp per day for room and board.\n");
-    p->hp ++;
-    if (p->hp > p->full_hp) p->hp = p->full_hp;
+    p->wounds --;
+    if (p->wounds < 0) p->wounds = 0;
     dr1Money_deduct( &p->purse, &roomcost);
 }
 

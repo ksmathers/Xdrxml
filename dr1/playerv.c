@@ -22,6 +22,7 @@ static int *statptr( dr1Attr *a, char *s) {
 int dr1Playerv_roll( dr1Player *p, int c, char **v) {
     if (c != 1) return -1;
     p->base_attr = dr1Attr_create_mode4();
+    p->curr_attr = p->base_attr;
     return 0;
 }
 
@@ -63,8 +64,8 @@ int dr1Playerv_sex( dr1Player *p, int c, char **v) {
 
     printf("old = %p\n", old);
 
-    if (!strcasecmp( v[1], "male")) r='MALE';
-    else if (!strcasecmp( v[1], "female")) r='FEMA';
+    if (!strcasecmp( v[1], "male")) r=DR1R_MALE;
+    else if (!strcasecmp( v[1], "female")) r=DR1R_FEMALE;
     else return -1;
 
     new = dr1Registry_lookup( &dr1sex, r);
@@ -95,11 +96,11 @@ int dr1Playerv_race( dr1Player *p, int c, char **v) {
 
     old = dr1Registry_lookup( &dr1race, p->race);
 
-    if (!strcasecmp( v[1], "human")) r='MAN ';
-    else if (!strcasecmp( v[1], "elf")) r='ELF ';
-    else if (!strcasecmp( v[1], "halfling")) r='HOBB';
-    else if (!strcasecmp( v[1], "dwarf")) r='DWAR';
-    else if (!strcasecmp( v[1], "halfogre")) r='OGRE';
+    if (!strcasecmp( v[1], "human")) r=DR1R_HUMAN;
+    else if (!strcasecmp( v[1], "elf")) r=DR1R_ELF;
+    else if (!strcasecmp( v[1], "halfling")) r=DR1R_HOBBIT;
+    else if (!strcasecmp( v[1], "dwarf")) r=DR1R_DWARF;
+    else if (!strcasecmp( v[1], "halfogre")) r=DR1R_HALFOGRE;
     else return -1;
 
     new = dr1Registry_lookup( &dr1race, r);
@@ -145,7 +146,6 @@ int dr1Playerv_class( dr1Player *p, int c, char **v) {
         p->hp = hits[ idx];
 	p->purse = m[ idx];
     }
-    p->full_hp = p->hp;
     return 0;
 }
 
@@ -175,8 +175,8 @@ int dr1Playerv_trade( dr1Player *p, int c, char **v) {
 
 int dr1Playerv_init( dr1Player *p) {
     p->name = strdup( "Unnamed");
-    p->race = 'MAN ';
-    p->sex = 'MALE';
+    p->race = DR1R_HUMAN; 
+    p->sex = DR1R_MALE;
     p->level = 1;
     return 0;
 }
@@ -202,9 +202,9 @@ int dr1Playerv_showDialog( dr1Player *p) {
 	if (p->name) printf("Name: %s\n", p->name);
 	if (race) printf("Race: %s\n", race->type);
 	if (class) printf("Class: %s\n", class->class);
-	printf("Sex: %s\n", p->sex=='FEMA'?"Female":"Male");
+	printf("Sex: %s\n", p->sex==DR1R_FEMALE?"Female":"Male");
 	printf("Purse: %s\n", buf);
-	printf("Hits: %d\n", p->full_hp + dr1Attr_hp( &p->base_attr, p->class == DR1C_FIGHTER));
+	printf("Hits: %d\n", HITPOINTS(p));
 	printf("Str: %2d\n", p->base_attr._str);
 	printf("Int: %2d\n", p->base_attr._int);
 	printf("Wis: %2d\n", p->base_attr._wis);
@@ -229,7 +229,6 @@ int dr1Playerv_showDialog( dr1Player *p) {
 	else if ( !strcasecmp(cmds[0], "done")) break;
 	else printf("Unknown command: '%s'\n", cmds[0]);
     }
-    p->full_hp += dr1Attr_hp( &p->base_attr, p->class == DR1C_FIGHTER);
     return 0;
 }
 

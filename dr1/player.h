@@ -23,6 +23,9 @@
 
 #define MAXNAMELEN 1024
 
+#define HITPOINTS(p) ( HITPOINTSMAX(p) - p->wounds )
+#define HITPOINTSMAX(p) (p->hp + dr1Attr_hp( &p->curr_attr, p->class == DR1C_FIGHTER))
+
 /*-------------------------------------------------------------------
  * dr1Player
  *
@@ -38,7 +41,7 @@ typedef struct dr1Player {
     int level;			/* Training level */
 
     int hp;			/* Hit points */
-    int full_hp;		/* Full undamaged hits */
+    int wounds;			/* Current wounds */
 
     dr1Attr base_attr;		/* Unmodified Attributes */
     dr1Attr curr_attr;		/* Attributes (incl. temporary effects) */
