@@ -1,6 +1,7 @@
 #include <stdio.h>
-#include <SDL.h>
 #include <assert.h>
+#include <SDL.h>
+#include <SDL_ttf.h>
 
 #include "map.h"
 #include "util.h"
@@ -181,12 +182,207 @@ int showBorder( SDL_Surface *screen) {
     }
 }
 
+int showMap( SDL_Surface* screen, dr1Map *map, int xpos, int ypos) {
+    int r,c,g;
+    int ambientlight = 0;
+    static int alt = 0;
+    alt ^= 1;
+
+    ambientlight = map->grid[ ypos*map->xsize + xpos].graphic->light;
+    for (r=ypos-MAPROWS/2; r<map->ysize; r++) {
+	if (r<0) continue;
+	if ((r-ypos) > MAPROWS) break;
+	for (c=xpos-MAPCOLS/2; c<map->xsize; c++) {	    
+	    dr1MapGrid *gr = &map->grid[ r*map->xsize +c];
+	    /* reject if off of the map */
+	    if (c<0) continue;
+	    if ((c-xpos) > MAPCOLS) break;
+
+	    /* reject if there is no graphic in this part of map */
+	    if (!gr->graphic) break;
+
+	    if (!gr->seen) {
+		/* reject if beyond light distance */
+		if (!gr->graphic->light) {
+		    int dx, dy, d;
+		    int ld;
+		    
+		    dx = xpos - c;
+		    if (dx < 0) dx = -dx;
+		    dy = (ypos - r) * 3 / 2;
+		    if (dy < 0) dy = -dy;
+		    if (dx>dy) { 
+			d = dx + (dy>>1);
+		    } else { 
+			d = dy + (dx>>1);
+		    }
+
+		    if (gr->graphic->dark) {
+			/* magically dark square */
+			ld = NOLIGHTDIST;
+		    } else {
+			if (ambientlight) {
+			    /* lit square */
+			    ld = AMBIENTLIGHTDIST;
+			} else {
+			    /* unlit square */
+			    if (lightsource == TORCH) {
+				/* using torch light */
+				ld = TORCHLIGHTDIST;
+			    } else if (lightsource == LANTERN) {
+				/* using lantern */
+				ld = LANTERNLIGHTDIST;
+			    } else {
+				/* using sense of touch */
+				ld = NOLIGHTDIST;
+			    }
+			}
+		    }
+		    if (d>ld) continue;
+		}
+
+		/* reject if not in view */
+		if (!dr1_los(ypos,xpos, r, c, map)) continue;
+	    }
+	    
+	    /* else draw all of the glyphs in the graphic */
+	    gr->seen = 1;
+	    assert(gr->graphic->nglyphs>0);
+	    for (g=gr->graphic->nglyphs-1; g >= (gr->invisible?1:0); g--) {
+		blit24x35( gr->graphic->glyph[g].src, 
+			gr->graphic->glyph[g].r, 
+			gr->graphic->glyph[g].c + 
+			  (gr->graphic->glyph[g].anim?alt:0), 
+			screen, 
+			(c - xpos + MAPCOLS/2) * 24, 
+			(r - ypos + MAPROWS/2) * 35);
+	    }
+
+	    if (c==xpos && r==ypos) {
+		blit24x35( dr1_npcs1, 0, 1, screen, 
+		    (c - xpos + MAPCOLS/2) * 24, 
+		    (r - ypos + MAPROWS/2) * 35 );
+	    }
+	} /* for c */
+    } /* for r */
+}
+
+typedef struct dr1Point dr1Point;
+struct dr1Point {
+    int x;
+    int y;
+};
+enum Position {
+    ANCHOR_TOPLEFT,
+    ANCHOR_CTRLEFT,
+    ANCHOR_BOTLEFT,
+    ANCHOR_TOPCENTER,
+    ANCHOR_CENTER,
+    ANCHOR_BOTCENTER,
+    ANCHOR_TOPRIGHT,
+    ANCHOR_CTRRIGHT,
+    ANCHOR_BOTRIGHT
+};
+
+typedef struct dr1Text dr1Text;
+struct dr1Text {
+    SDL_Surface *textbuf;
+    SDL_Rect dstrect;
+} _dragons, _reach;
+
+#define DEFAULT_PTSIZE	18
+int setInfo( dr1Text *buf, char *string, int ptsize, int x, int y, enum Position pos) 
+{
+    static int init = 0;
+    static TTF_Font *font;
+    static SDL_Surface *temp;
+    static SDL_Color white = { 0xFF, 0xFF, 0xFF, 0 };
+    static SDL_Color black = { 0, 0, 0, 0 };
+    if (ptsize <= 0) ptsize = DEFAULT_PTSIZE;
+
+    /* Open the font file with the requested point size */
+    font = TTF_OpenFont("Wizard__.ttf", ptsize);
+    if (!font) {
+	    fprintf(stderr, "Couldn't load %d pt font from %s: %s\n",
+				    ptsize, "Wizard__.ttf", SDL_GetError());
+	    exit(2);
+    }
+    assert(font);
+    TTF_SetFontStyle(font, TTF_STYLE_NORMAL);
+
+    /* Render the text */
+    buf->textbuf = TTF_RenderText_Shaded(font, string, black, white);
+    assert(buf->textbuf);
+    switch (pos) {
+	case ANCHOR_CTRLEFT:
+	case ANCHOR_TOPLEFT:
+	case ANCHOR_BOTLEFT:
+	    buf->dstrect.x = x;
+	    break;
+	case ANCHOR_CENTER:
+	case ANCHOR_TOPCENTER:
+	case ANCHOR_BOTCENTER:
+	    buf->dstrect.x = x - buf->textbuf->w/2;
+	    break;
+	case ANCHOR_CTRRIGHT:
+	case ANCHOR_TOPRIGHT:
+	case ANCHOR_BOTRIGHT:
+	    buf->dstrect.x = x - buf->textbuf->w;
+	    break;
+    }
+    switch (pos) {
+	case ANCHOR_CTRLEFT:
+	case ANCHOR_CENTER:
+	case ANCHOR_CTRRIGHT:
+	    buf->dstrect.y = y - buf->textbuf->h / 2;
+	    break;
+	
+	case ANCHOR_TOPLEFT:
+	case ANCHOR_TOPCENTER:
+	case ANCHOR_TOPRIGHT:
+	    buf->dstrect.y = y;
+	    break;
+
+	case ANCHOR_BOTLEFT:
+	case ANCHOR_BOTCENTER:
+	case ANCHOR_BOTRIGHT:
+	    buf->dstrect.y = y - buf->textbuf->h;
+	    break;
+    }
+    buf->dstrect.w = buf->textbuf->w;
+    buf->dstrect.h = buf->textbuf->h;
+    
+    printf("Font is generally %d big, and string is %hd big\n",
+	    TTF_FontHeight(font), buf->textbuf->h);
+
+    /* Set the text colorkey and convert to display format */
+    if ( SDL_SetColorKey(buf->textbuf, SDL_SRCCOLORKEY|SDL_RLEACCEL, 0) < 0 ) {
+	fprintf(stderr, "Warning: Couldn't set text colorkey: %s\n",
+		SDL_GetError());
+    }
+    temp = SDL_DisplayFormat(buf->textbuf);
+    if ( temp != NULL ) {
+	    SDL_FreeSurface(buf->textbuf);
+	    buf->textbuf = temp;
+    }
+    TTF_CloseFont(font);
+}
+
+int showInfo( SDL_Surface *screen, dr1Text *txt) {
+    SDL_BlitSurface(txt->textbuf, NULL, screen, &txt->dstrect);
+}
+
 int main( int argc, char **argv) {
     char buf[80];
     int xpos = 0;
     int ypos = 0;
     int oxpos, oypos;
-    int alt = 0;
+    dr1Text dr1__name;
+    dr1Text dr1__class;
+    dr1Text _attr[6];
+    dr1Text _attrval[6];
+    char *msgattr[6] = { "Str:", "Int:", "Wis:", "Dex:", "Con:", "Cha:" };
+    int i;
     
     /* Initialize graphics */
     if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0 ) {
@@ -194,6 +390,14 @@ int main( int argc, char **argv) {
 	exit(1);
     }
     atexit(SDL_Quit);
+
+    /* Initialize the TTF library */
+    if ( TTF_Init() < 0 ) {
+	    fprintf(stderr, "Couldn't initialize TTF: %s\n",SDL_GetError());
+	    exit(2);
+    }
+    atexit(TTF_Quit);
+
 
     { SDL_Surface *screen;
         dr1Map map;
@@ -218,6 +422,17 @@ int main( int argc, char **argv) {
 	dr1_castle1 = LoadBMP( GFXDIR "/24x35/db-indoor-castle-1.bmp", screen);
 	dr1_objects1 = LoadBMP( GFXDIR "/24x35/db-objects-1.bmp", screen);
 	dr1_objects2 = LoadBMP( GFXDIR "/24x35/db-objects-2.bmp", screen);
+	setInfo( &_dragons, "Dragon's", 28, 67, 30, ANCHOR_TOPCENTER);
+	setInfo( &_reach, "Reach", 28, 67, 55, ANCHOR_TOPCENTER);
+
+#define lpos(ln) (95 + (ln) * 11)
+        setInfo( &dr1__name, "Thorin", 24, 20, lpos(0), ANCHOR_TOPLEFT);
+	setInfo( &dr1__class, "Fighter", 20, 20, lpos(3), ANCHOR_TOPLEFT);
+
+	for (i = 0; i < 6; i++) {
+	    setInfo( &_attr[i], msgattr[i], 20, 60, lpos((i<<1)+5), ANCHOR_TOPRIGHT);
+	    setInfo( &_attrval[i], "18/00", 20, 65, lpos((i<<1)+5), ANCHOR_TOPLEFT);
+	}
 	loadBorder( screen);
 
         map = readmap( "map.txt");
@@ -228,92 +443,20 @@ int main( int argc, char **argv) {
 
 	{
 	    SDL_Event event;
-	    int r,c,g;
-	    int ambientlight = 0;
-	    SDL_Surface *img = dr1_npcs1;
 
 	    for (;;) {
-	        alt ^= 1;
 	        printf("."); fflush(stdout);
 	        SDL_FillRect( screen, NULL, 0);
-		ambientlight = map.grid[ ypos*map.xsize + xpos].graphic->light;
-		for (r=ypos-MAPROWS/2; r<map.ysize; r++) {
-		    if (r<0) continue;
-		    if ((r-ypos) > MAPROWS) break;
-		    for (c=xpos-MAPCOLS/2; c<map.xsize; c++) {	    
-		        dr1MapGrid *gr = &map.grid[ r*map.xsize +c];
-			/* reject if off of the map */
-		        if (c<0) continue;
-			if ((c-xpos) > MAPCOLS) break;
-
-			/* reject if there is no graphic in this part of map */
-			if (!gr->graphic) break;
-
-                        if (!gr->seen) {
-			    /* reject if beyond light distance */
-			    if (!gr->graphic->light) {
-				int dx, dy, d;
-				int ld;
-				
-				dx = xpos - c;
-				if (dx < 0) dx = -dx;
-				dy = (ypos - r) * 3 / 2;
-				if (dy < 0) dy = -dy;
-				if (dx>dy) { 
-				    d = dx + (dy>>1);
-				} else { 
-				    d = dy + (dx>>1);
-				}
-
-				if (gr->graphic->dark) {
-				    /* magically dark square */
-				    ld = NOLIGHTDIST;
-				} else {
-				    if (ambientlight) {
-				        /* lit square */
-					ld = AMBIENTLIGHTDIST;
-				    } else {
-				        /* unlit square */
-					if (lightsource == TORCH) {
-					    /* using torch light */
-					    ld = TORCHLIGHTDIST;
-					} else if (lightsource == LANTERN) {
-					    /* using lantern */
-					    ld = LANTERNLIGHTDIST;
-					} else {
-					    /* using sense of touch */
-					    ld = NOLIGHTDIST;
-					}
-				    }
-				}
-				if (d>ld) continue;
-			    }
-
-			    /* reject if not in view */
-			    if (!dr1_los(ypos,xpos, r, c, &map)) continue;
-			}
-			
-			/* else draw all of the glyphs in the graphic */
-			gr->seen = 1;
-			assert(gr->graphic->nglyphs>0);
-		        for (g=gr->graphic->nglyphs-1; g >= (gr->invisible?1:0); g--) {
-			    blit24x35( gr->graphic->glyph[g].src, 
-			            gr->graphic->glyph[g].r, 
-				    gr->graphic->glyph[g].c + 
-				      (gr->graphic->glyph[g].anim?alt:0), 
-				    screen, 
-				    (c - xpos + MAPCOLS/2) * 24, 
-				    (r - ypos + MAPROWS/2) * 35);
-			}
-
-			if (c==xpos && r==ypos) {
-			    blit24x35( dr1_npcs1, 0, 1, screen, 
-				(c - xpos + MAPCOLS/2) * 24, 
-				(r - ypos + MAPROWS/2) * 35 );
-			}
-		    }
-		}
+		showMap( screen, &map, xpos, ypos);
 		showBorder( screen);
+		showInfo( screen, &_dragons);
+		showInfo( screen, &_reach);
+		for (i=0; i<6; i++) {
+		    showInfo( screen, &_attr[i]);
+		    showInfo( screen, &_attrval[i]);
+		}
+		showInfo( screen, &dr1__name);
+		showInfo( screen, &dr1__class);
 		SDL_Flip( screen);
 		usleep( 100000L);
 		while ( SDL_PollEvent(&event) ) {
@@ -322,18 +465,6 @@ int main( int argc, char **argv) {
 			    oxpos = xpos;
 			    oypos = ypos;
 			    switch ( event.key.keysym.sym) {
-				case SDLK_1:
-				    img = dr1_npcs1;
-				    break;
-				case SDLK_2:
-				    img = dr1_npcs2;
-				    break;
-				case SDLK_3:
-				    img = dr1_npcs3;
-				    break;
-				case SDLK_d:
-				    img = dr1_dung1;
-				    break;
 				case SDLK_h:
 				    xpos--;
 				    break;
