@@ -24,6 +24,8 @@
  *    of a Player character.
  */
 
+
+
 typedef struct dr1Player {
     char *name;			/* Character name */
     long xp;			/* Experience points */
@@ -36,6 +38,9 @@ typedef struct dr1Player {
 
     dr1Money purse;		/* Money that Player is holding */
     dr1ItemSet pack;		/* Backpack equipment */
+
+    int race;			/* Elf, Human, ... */
+    int sex;			/* Male, Female */
 } dr1Player;
 
 

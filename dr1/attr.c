@@ -133,3 +133,25 @@ bool_t xdr_dr1Attr( XDR *xdrs, dr1Attr *a) {
     return TRUE;
 }
 
+/*-------------------------------------------------------------------
+ * dr1Attr_adjust 
+ *
+ *    Adds two attribute structs
+ *
+ * Parameters:
+ *    a    Attribute set to adjust
+ *    b    Amount to adjust by
+ *    mul  Multiplier
+ *
+ * Side effects:
+ *    b is added into a
+ */
+void dr1Attr_adjust( dr1Attr *a, dr1Attr *b, int mul) {
+    a->_str += b->_str * mul;
+    a->_int += b->_int * mul;
+    a->_wis += b->_wis * mul;
+    a->_dex += b->_dex * mul;
+    a->_con += b->_con * mul;
+    a->_cha += b->_cha * mul;
+}
+

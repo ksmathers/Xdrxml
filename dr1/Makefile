@@ -3,10 +3,12 @@
 
 main: main.o money.o merchant.o apothecary.o dice.o player.o \
 	    barter.o itemset.o item.o attr.o registry.o \
-	    itemreg.o xdrasc.o potions/heal.o 
+	    itemreg.o xdrasc.o playerv.o race.o \
+	    potions/heal.o 
 	gcc -g main.o money.o merchant.o apothecary.o dice.o \
 	player.o barter.o itemset.o item.o attr.o registry.o \
-	itemreg.o xdrasc.o potions/heal.o -lm
+	itemreg.o xdrasc.o playerv.o race.o \
+	potions/heal.o -lm
 
 test: money.o test.o dice.o
 	gcc -g test.o money.o dice.o -o test -lm

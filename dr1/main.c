@@ -38,8 +38,7 @@ int main( int argc, char** argv) {
 	loadOk = dr1Player_load( &player, "player.dat");
 	assert(loadOk);
     } else {
-	player.name = "Byron";
-	player.purse.gp = dr1Dice_roll("3d4") * 10;
+        dr1Playerv_showDialog( &player);
     }
 
     /* purchase a potion */
