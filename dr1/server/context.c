@@ -186,7 +186,7 @@ static int cmd_in_set( dr1CmdSet *set, char *cmd) {
     char *tc;
     tc = strtok( tmp, ":");
     while (tc) {
-	if (!strcmp( tc, cmd)) { found=1; break; }
+	if (!strcasecmp( tc, cmd)) { found=1; break; }
 	tc = strtok( NULL, ":");
     }
     free(tmp);

@@ -21,6 +21,7 @@
 #include "lib/map.h"
 #include "player.h"
 #include "common.h"
+#include "cgenerate.h"
 
 GtkDestroyNotify onSocketDestroy;
 
@@ -79,6 +80,11 @@ int handleMessage(char *buf) {
 	        gtk_widget_hide( wgenerate);
 		common.dialog = NONE;
 	        mode = M_READY;
+	    } else if (pisMessage( buf, DR1MSG_310)) {
+	        char *err;
+		precvMessage( buf, DR1MSG_310, &errno, &err);
+	        cgenerate_setErrorStatus( err);
+		free(err);
 	    }
 	    break;
 
@@ -134,7 +140,7 @@ int handleMessage(char *buf) {
 	case M_CCMAPDATA: 	/* reading map data */
 	case M_PLAYERDATA: 	/* reading player data */
 	case M_CCPLAYERDATA: 	/* reading player data */
-	    if ( !strcmp( buf, SEPARATOR)) {
+	    if ( !strncmp( buf, SEPARATOR, strlen(buf)-1)) {
 		XDR xdrs;
 		int ok;
 		xdr_xml_sb_create( &xdrs, sb->buf, XDR_DECODE);

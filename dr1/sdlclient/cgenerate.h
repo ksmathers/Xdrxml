@@ -8,5 +8,8 @@
 void
 cgenerate_setPlayer( dr1Player *p); 
 
+void 
+cgenerate_setErrorStatus( char *msg);
+
 #endif /* __CGENERATE__H */
 

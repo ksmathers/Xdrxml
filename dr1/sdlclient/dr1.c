@@ -384,18 +384,11 @@ int on_loginok_clicked( GtkButton *gbutton, gpointer userdata) {
 }
 
 int main( int argc, char **argv) {
-    char *server;
 
 #if 0
     EF_ALLOW_MALLOC_0 = 1;
 #endif
      
-    if (argc != 2) { 
-         printf("Usage: ./dr1 <server>\n");
-	 exit (1);
-    }
-    server = argv[1];
-
     /* Initialize GNOME */
     gnome_init ("dr1", "1.0", argc, argv);
     glade_gnome_init();

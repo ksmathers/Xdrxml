@@ -1,6 +1,3 @@
-Rewrite sdlclient comm code so that it uses gtk_input_add_full(), and
-gtk_idle_add().
-
 Add public/private flags to xdr translation (or perhaps a modality)
    so that private data isn't shipped to the client (like the real weapon
    type, etc.)

@@ -9,6 +9,12 @@
 
 
 void
+cgenerate_setErrorStatus( char *msg) {
+    GtkLabel *lerror = GTK_LABEL( glade_xml_get_widget( common.glade, "errorstatus"));
+    gtk_label_set_text( lerror, msg);
+}
+
+void
 cgenerate_setPlayer( dr1Player *p) {
     char buf[30];
     GtkWidget *wgenerate = glade_xml_get_widget( common.glade, "wgenerate");
@@ -55,23 +61,28 @@ cgenerate_setPlayer( dr1Player *p) {
 
 /* CLOSE DIALOG */
 void on_cgcancel_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_CANCEL);
 }
 
 void on_cgdone_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_DONE);
 }
 
 /* STATS */
 void on_reroll_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_ROLL);
 }
 
 void on_swap_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_ROLL);
 }
 
 void on_train_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_ROLL);
 }
 
@@ -84,6 +95,7 @@ gboolean on_changename_focus_out_event (
     char *name;
     GtkEntry *newname = GTK_ENTRY( widget);
 
+    cgenerate_setErrorStatus("");
     name = gtk_entry_get_text( newname);
     assert( strlen(name) < 20);
     psendMessage( &common.ios, DR1CMD_NAME, name);
@@ -92,55 +104,68 @@ gboolean on_changename_focus_out_event (
 
 /* SEXES */
 void on_sexmale_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_SEX, "male");
 }
 
 void on_sexfemale_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_SEX, "female");
 }
 
 /* CLASSES */
 void on_classfighter_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_CLASS, "fighter");
 }
 
 void on_classmage_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_CLASS, "mu");
 }
 
 void on_classcleric_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_CLASS, "cleric");
 }
 
 void on_classthief_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_CLASS, "thief");
 }
 
 /* RACES */
 void on_raceelf_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_RACE, "elf");
 }
 
 void on_racehalfelf_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_RACE, "half-elf");
 }
 
 void on_racehalforc_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_RACE, "half-orc");
 }
 
 void on_racehuman_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_RACE, "human");
 }
 
 void on_racehobbit_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_RACE, "hobbit");
 }
 
 void on_racedwarf_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_RACE, "dwarf");
 }
 
 void on_racegnome_clicked( GtkButton *gbutton, gpointer userdata) {
+    cgenerate_setErrorStatus("");
     psendMessage( &common.ios, DR1CMD_RACE, "gnome");
 }

@@ -469,6 +469,7 @@ int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
     sendplayer( ctx);
     if (*ctx->error) {
 	psendMessage( &ctx->ios, DR1MSG_310, 0, ctx->error);
+	*ctx->error = 0;
     }
 
     return 0;

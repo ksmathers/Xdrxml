@@ -222,9 +222,9 @@ donewplayer( dr1Context *ctx, int argc, char **argv) {
 int 
 handleLogin( dr1Context *ctx, int argc, char **argv) {
     int status = 0;
-    if (!strcmp( argv[0], "iam")) {
+    if (!strcasecmp( argv[0], "iam")) {
 	status = dologin( ctx, argc, argv);
-    } else if (!strcmp( argv[0], "newplayer")) {
+    } else if (!strcasecmp( argv[0], "newplayer")) {
 	status = donewplayer( ctx, argc, argv);
     }
     return status;
@@ -270,9 +270,9 @@ int domove( dr1Context *ctx, int argc, char **argv) {
 int 
 handleGameCmds( dr1Context *ctx, int argc, char **argv) {
     int status=0;
-    if (!strcmp( argv[0], "move")) {
+    if (!strcasecmp( argv[0], "move")) {
 	status = domove( ctx, argc, argv);
-    } else if (!strcmp( argv[0], "save")) {
+    } else if (!strcasecmp( argv[0], "save")) {
 	status = savegame( ctx);
     }
     return status;
