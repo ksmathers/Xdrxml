@@ -60,6 +60,7 @@ enum {
     M_READY,
     M_MAPDATA,
     M_PLAYERDATA,
+    M_LOCATIONDATA,
     M_CHARACTERCREATEDIALOG,
     M_INVENTORYDIALOG
 };
@@ -122,6 +123,15 @@ int handleMessage(char *buf) {
 		mode = M_MAPDATA;
 	    } else if (!strncmp( buf, DR1MSG_170, 3)) {
 		mode = M_PLAYERDATA;
+	    } else if (!strncmp( buf, DR1MSG_175, 3)) {
+                dr1Location l;
+                int n;
+                n = precvMessage( buf, DR1MSG_175, &l.mapname, &l.x, &l.y);
+                if (n != 3) {
+                    printf("Unable to parse '%s'\n", buf);
+		} else {
+		    setlocation( &l);
+		}
 	    } 
 #if 0
 	    else if (!strncmp( bud, DR1MSG_195, 3)) {

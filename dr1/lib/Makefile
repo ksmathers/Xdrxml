@@ -4,7 +4,8 @@ CFLAGS=-I../lib ${XML2CFLAGS}
 OBJS=set.o map.o xdrxml.o strbuf.o xdrxmlsb.o stream.o \
      player.o class.o armor.o weapon.o registry.o \
      item.o attr.o itemset.o location.o dice.o \
-     money.o itemreg.o potions/heal.o monster.o race.o
+     money.o itemreg.o potions/heal.o monster.o race.o \
+     protocol.o
 
 
 libdr1.a: ${OBJS}

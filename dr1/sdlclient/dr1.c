@@ -71,6 +71,13 @@ setplayer( dr1Player *player) {
     /* FIXME: player should be destroyed here */
 }
 
+void 
+setlocation( dr1Location *location) {
+    ctx.xpos = location->x;
+    ctx.ypos = location->y;
+    /* FIXME: location should be destroyed here */
+}
+
 void
 opendoor( dr1Map *map, int xpos, int ypos) {
     int x,y;

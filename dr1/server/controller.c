@@ -58,6 +58,15 @@ void sendplayer( dr1Context* ctx) {
     if (res < 0) perror("controller.c:sendplayer-2");
 }
 
+/*
+ * sendlocation
+ *
+ */
+void sendlocation( dr1Context* ctx) {
+    dr1Location *l = &ctx->player.location;
+    psendMessage( &ctx->ios, DR1MSG_175, l->mapname, l->x, l->y);
+}
+
 
 /*-------------------------------------------------------------------
  * setLoginPassword
@@ -222,7 +231,7 @@ int domove( dr1Context *ctx, int argc, char **argv) {
 	ctx->player.location.x = xpos;
 	ctx->player.location.y = ypos;
     }
-    sendplayer( ctx);
+    sendlocation( ctx);
     return 0;
 }
 

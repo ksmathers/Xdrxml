@@ -1,3 +1,12 @@
+#ifndef __DR1STRBUF__H
+#include "strbuf.h"
+#endif
+
+#ifndef __DR1STREAM__H
+#include "stream.h"
+#endif
+
+/* Message Types */
 #define DR1MSG_IDENT "DR1/1.0\n"
 #define DR1MSG_100 "100 LOGIN OK\n"
 #define DR1MSG_105 "105 CHARACTER CREATION DIALOG\n"
@@ -7,7 +16,7 @@
 #define DR1MSG_140 "140 ATK %d %d %s\n"
 #define DR1MSG_150 "150 DEF %d %d %s %s\n"
 #define DR1MSG_170 "170 PLAYER DATA\n"
-#define DR1MSG_175 "175 LOCATION %d %d\n"
+#define DR1MSG_175 "175 LOCATION %s %d %d\n"
 #define DR1MSG_180 "180 TREASURE %d %d %d %d %d %d\n"
 #define DR1MSG_190 "190 CMDLIST %s\n"
 #define DR1MSG_195 "195 INVENTORY DIALOG\n"
@@ -59,3 +68,9 @@
 #define DR1ENONAME 1
 #define DR1ENOCLASS 2
 #define DR1ENOSTATS 3
+
+void
+psendMessage( dr1Stream* os, char *msg, ...);
+
+int
+precvMessage( char* buf, char *msg, ...);

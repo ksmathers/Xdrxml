@@ -53,8 +53,8 @@
         <class value="0x2"/>
         <location>
             <mapname>nomap</mapname>
-            <x value="0x7"/>
-            <y value="0x7"/>
+            <x value="0x13"/>
+            <y value="0x9"/>
         </location>
     </player>
     <map>
@@ -2558,7 +2558,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x0"/>
+                    <seen value="0x1"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -3700,7 +3700,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x0"/>
+                    <seen value="0x1"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -4189,7 +4189,7 @@
                 </x>
                 <x>
                     <code value="0x582d"/>
-                    <seen value="0x0"/>
+                    <seen value="0x1"/>
                     <open value="0x0"/>
                 </x>
                 <x>
