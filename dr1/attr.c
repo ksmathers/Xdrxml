@@ -11,12 +11,34 @@
  */
 
 static int str_damage[] = 
-    /* 3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25*/
-    { -4,-3,-2,-1, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12};
+    /* 3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 */
+    { -1,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 7, 8, 9,10,11,12 };
+
+static int estr_damage[] = 
+    /* 01-50  51-75  76-90  91-99  00 */
+    {    3,     3,     4,     5,    6 };
+
+#define EXCEPTIONAL_IDX(x) ((x)<51?0:((x)<76?1:((x)<91?2:((x)<100?3:4))))
 
 static int str_weight[] = 
-    /*   3    4    5    6    7   8   9  10  11  12  13  14  15  16  17  18 */
-    { -600,-400,-300,-200,-100,  0,  0,  0,  0,  0,100,200,300,400,500,600 };
+ /* 3   4   5   6   7 8 9 10 11 12 13 14 15 16 17 18 19  20  21  22  23  24 */
+ {-35,-25,-25,-15,-15,0,0, 0, 0,10,10,20,20,35,50,75,450,500,600,750,900,1200};
+
+static int estr_weight[] = 
+    /* 01-50 51-75 76-90 91-99   00 */
+    {    100,  125,  150,  200, 300 };
+
+static int str_force[] = 
+    /* 3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 */
+    { -1,-1, 0, 0, 0, 1, 1, 2, 2, 4, 4, 7, 7,10,13,16,50,60,70,80,90,100 };
+
+static int str_tohit[] = 
+    /* 3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 */
+    { -3,-2,-2,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 3, 4, 4, 5, 6 };
+
+static int estr_tohit[] = 
+    /* 01-50 51-75 76-90 91-99   00 */
+    {      1,    2,    2,    2,   3 };
 
 /*-------------------------------------------------------------------
  * Constitution modifiers
@@ -33,12 +55,16 @@ static int con_hp[] =
  * Dexterity modifiers
  *
  *   dr1Attr_dex_ac       AC adjustment
- *   dr1Attr_dex_tohit    ToHit adjustment
+ *   dr1Attr_dex_tohit    ToHit adjustment (ranged only)
  */
 
 static int dex_ac[] = 
     /* 3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25*/
     { -4,-3,-2,-1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5};
+
+static int dex_tohit[] = 
+    /* 3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25*/
+    { -3,-2,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5};
 
 /*-------------------------------------------------------------------
  * dr1Attr_damage
@@ -55,12 +81,18 @@ static int dex_ac[] =
 
 int dr1Attr_damage( dr1Attr *a, int ranged) {
     int str;
+    int damadj;
     if (ranged) return 0;
     str = a->_str;
 
     if (str > 25) str=25;
     if (str < 3) str=3;
-    return str_damage[ str - 3];
+    if (str == 18 && a->estr) {
+	damadj = estr_damage[ EXCEPTIONAL_IDX( a->estr)];
+    } else {
+	damadj = str_damage[ str - 3];
+    }
+    return damadj;
 }
 
 /*-------------------------------------------------------------------
@@ -112,6 +144,41 @@ int dr1Attr_ac( dr1Attr *a) {
 
     acadj = dex_ac[ dex-3]; 
     return acadj;
+}
+
+/*-------------------------------------------------------------------
+ * dr1Attr_tohit
+ *
+ *    Returns the attributes adjustment for tohit
+ *
+ * Parameters:
+ *    a       Attributes of the player being checked
+ *
+ * Returns:
+ *    Attribute value
+ */
+
+int dr1Attr_tohit( dr1Attr *a, int ranged) {
+    int str, dex, tohit;
+    dex = a->_dex;
+    str = a->_str;
+    if (ranged) {
+	/* ranged weapons get dex bonus */
+	if (dex > 25) dex=25;
+	if (dex < 3) dex=3;
+	tohit = dex_tohit[ dex - 3];
+    } else {
+	/* melee weapons get str bonus */
+	if (str > 25) str=25;
+	if (str < 3) str=3;
+	if (str == 18 && a->estr) {
+	    tohit = estr_tohit[ EXCEPTIONAL_IDX( a->estr)];
+	} else {
+	    tohit = str_tohit[ str - 3];
+	}
+    }
+
+    return tohit;
 }
 
 /*-------------------------------------------------------------------
@@ -192,6 +259,7 @@ dr1Attr dr1Attr_create_mode1( void) {
     dr1Attr p;
     int i;
 
+    p.estr = 0;
     for (i=0; i<6; i++) {
 	*(dr1Attr_enum( &p, i)) = dr1Attr_gen_mode1();
     }
@@ -226,6 +294,9 @@ dr1Attr dr1Attr_create_mode4( void) {
 bool_t xdr_dr1Attr( XDR *xdrs, dr1Attr *a) {
     xdr_attr( xdrs, "_str");
     if (!xdr_int( xdrs, &a->_str)) return FALSE;
+
+    xdr_attr( xdrs, "estr");
+    if (!xdr_int( xdrs, &a->estr)) return FALSE;
 
     xdr_attr( xdrs, "_int");
     if (!xdr_int( xdrs, &a->_int)) return FALSE;

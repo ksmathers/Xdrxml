@@ -7,6 +7,8 @@
 #include "class.h"
 #include "armor.h"
 
+#include "globals.h"
+
 #if 0
 struct dr1Player_state {
     int state; 
@@ -109,11 +111,13 @@ int dr1Player_thac0( dr1Player *p) {
  *
  */
 
-int dr1Player_ac( dr1Player *p, int surprise, int ranged, int dtype) {
+int dr1Player_ac( dr1Player *p, int surprise, int ranged, enum DR1DamageType dtype) 
+{
     int ac = 10;
     if (p->armor) {
 	ac = p->armor->type->base_ac;
     }
+    ac -= dr1Attr_ac(&p->curr_attr, surprise);
     return ac;
 }
 

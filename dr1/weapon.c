@@ -34,7 +34,8 @@ dr1Weapon dr1Weapon_halfspear = {
     },
     /* damage   */ "d6",
     /* ranged   */ FALSE,
-    /* speed    */ 4
+    /* speed    */ 4,
+    /* dtype    */ DR1PIERCING
 };
 
 dr1Weapon dr1Weapon_longsword = {
@@ -51,7 +52,8 @@ dr1Weapon dr1Weapon_longsword = {
     },
     /* damage   */ "d8",
     /* ranged   */ FALSE,
-    /* speed    */ 6
+    /* speed    */ 6,
+    /* dtype    */ DR1SLASHING
 };
 
 /*-------------------------------------------------------------------
@@ -67,6 +69,7 @@ dr1Weapon dr1Weapon_longsword = {
  */
 static bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i) {
     bool_t res;
+    int dt;
     dr1Weapon *w = (dr1Weapon*)i;
     xdr_push_note( xdrs, "damage");
     res = xdr_dr1Dice( xdrs, &w->damage);
@@ -79,6 +82,12 @@ static bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i) {
 
     xdr_attr( xdrs, "speed");
     res = xdr_int( xdrs, &w->speed);
+    if (!res) return FALSE;
+
+    xdr_attr( xdrs, "dtype");
+    dt = w->dtype;
+    res = xdr_int( xdrs, &dt);
+    w->dtype = dt;
     if (!res) return FALSE;
     return TRUE;
 }

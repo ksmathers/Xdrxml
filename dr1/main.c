@@ -156,6 +156,7 @@ int rest( dr1Player *p, int c, char **v) {
     p->wounds --;
     if (p->wounds < 0) p->wounds = 0;
     dr1Money_deduct( &p->purse, &roomcost);
+    return 0;
 }
 
 int main( int argc, char** argv) {

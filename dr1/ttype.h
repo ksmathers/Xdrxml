@@ -14,22 +14,43 @@
 typedef struct {
     char ttype;
 
-    dr1Dice pp_chance;
-    dr1Dice pp;
-    dr1Dice gp_chance;
-    dr1Dice gp;
-    dr1Dice ep_chance;
-    dr1Dice ep;
-    dr1Dice sp_chance;
-    dr1Dice sp;
-    dr1Dice cp_chance;
+    int cp_chance;
     dr1Dice cp;
+    int sp_chance;
+    dr1Dice sp;
+    int ep_chance;
+    dr1Dice ep;
+    int gp_chance;
+    dr1Dice gp;
+    int pp_chance;
+    dr1Dice pp;
 
-    dr1Dice scroll_chance;
-    dr1Dice scroll;
-    dr1Dice miscmag_chance;
-    dr1Dice miscmag;
+    int gems_chance;
+    dr1Dice gems;
+
+    int jewelry_chance;
+    dr1Dice jewelry;
 } dr1TType;
+
+dr1TType dr1treasure[] = {
+    { 'A', /* cp */ 25, "d6*1000", 
+	   /* sp */ 30, "d6*1000", 
+	   /* ep */ 35, "d6*1000", 
+	   /* gp */ 40, "d10*1000", 
+	   /* pp */ 25, "d4*100", 
+	   /* gems    */ 60, "4d10", 
+	   /* jewelry */ 50, "3d10"
+    },
+
+    { 'B', /* cp */ 50, "d8*1000", 
+	   /* sp */ 25, "d6*1000", 
+	   /* ep */ 25, "d4*1000", 
+	   /* gp */ 25, "d3*1000", 
+	   /* pp */  0, ""
+	   /* gems    */ 30, "d8"
+	   /* jewelry */ 20, "d4"
+    },
+}
 
 
 /*-------------------------------------------------------------------

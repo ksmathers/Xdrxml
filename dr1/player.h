@@ -130,7 +130,7 @@ int dr1Player_thac0( dr1Player *p);
  *
  */
 
-int dr1Player_ac( dr1Player *p, int surprise, int ranged, int dtype);
+int dr1Player_ac( dr1Player *p, int surprise, int ranged, enum DR1DamageType dtype);
 
 /*-------------------------------------------------------------------
  * bool_t xdr_dr1Player( xdrs, dr1Player*)

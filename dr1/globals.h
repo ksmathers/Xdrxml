@@ -20,4 +20,15 @@ enum {
     DR1END
 };
 
+/*-------------------------------------------------------------------
+ *
+ *    Damage types
+ */
+enum DR1DamageType {
+    DR1PIERCING,
+    DR1CRUSHING,
+    DR1SLASHING,
+    DR1OVERBEARING
+};
+
 #endif /* __DR1GLOBALS__H */

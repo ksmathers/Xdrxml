@@ -60,7 +60,11 @@ int attack( dr1Player *p, dr1Monster *m, int c, char **v) {
     for (i=0; i < m->type->nattacks; i++) {
 	assert(m->type->damage[i]);
 	/* FIXME */
-	tohit = m_thac0 - dr1Player_ac( p, 0, m->type->damage[i]->ranged, 0);
+	tohit = m_thac0 - dr1Player_ac( p, 
+		/* surprise/behind */ 0, 
+		m->type->damage[i]->ranged, 
+		m->type->damage[i]->dtype
+	    );
 	roll = dr1Dice_roll("d20");
 	if ( roll == 20) {
 	    /* natural 20 gets a bonus */

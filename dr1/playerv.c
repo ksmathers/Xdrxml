@@ -8,6 +8,11 @@
 #include "dice.h"
 #include "class.h"
 
+static int estr = 0;
+
+/*
+ * Utility functions
+ */
 static int *statptr( dr1Attr *a, char *s) {
     if ( !strcasecmp( s, "str")) return &a->_str;
     if ( !strcasecmp( s, "int")) return &a->_int;
@@ -19,10 +24,76 @@ static int *statptr( dr1Attr *a, char *s) {
     return NULL;
 }
 
+static void fixestr( dr1Player *p) {
+    /*
+     * Fix possible problems after changing stats
+     */
+    if (p->class == DR1C_FIGHTER && p->base_attr._str == 18) {
+	p->base_attr.estr = estr;
+    } else {
+	p->base_attr.estr = 0;
+    }
+    p->curr_attr = p->base_attr;
+}
+
+
+/*
+ * Player Generation Commands
+ */
+int dr1Playerv_class( dr1Player *p, int c, char **v) {
+    dr1ClassType *cl;
+    int ccode;
+    static dr1Money m[4];
+    static int hits[4] = { 0, 0, 0, 0 };
+    int idx;
+
+    if (c == -1) {
+	for (idx=0; idx<4; idx++) hits[idx] = 0;
+	p->class = DR1C_INVALID;
+	p->hp = 0;
+	p->purse.gp = 0;
+	return 0;
+    }
+
+    if (c != 2) return -1;
+    if (!strcasecmp( v[1], "mu")) {
+	ccode = DR1C_MU;
+	idx = 0;
+    } else if (!strcasecmp( v[1], "fighter")) {
+	ccode = DR1C_FIGHTER;
+	idx = 1;
+    } else if (!strcasecmp( v[1], "cleric")) {
+	ccode = DR1C_CLERIC;
+	idx = 2;
+    } else if (!strcasecmp( v[1], "thief")) {
+	ccode = DR1C_THIEF;
+	idx = 3;
+    } else return -1;
+    
+    cl = dr1Registry_lookup( &dr1class, ccode);
+    if (!cl) return -1;
+
+    p->class = ccode;
+    if ( !hits[ idx]) {
+	p->hp = dr1Dice_roll( cl->hitdice);
+	p->purse.gp = dr1Dice_roll( cl->startingMoney);
+	m[ idx] = p->purse;
+	hits[ idx] = p->hp;
+    } else {
+        p->hp = hits[ idx];
+	p->purse = m[ idx];
+    }
+    fixestr(p);
+    return 0;
+}
+
 int dr1Playerv_roll( dr1Player *p, int c, char **v) {
     if (c != 1) return -1;
     p->base_attr = dr1Attr_create_mode4();
     p->curr_attr = p->base_attr;
+    estr = dr1Dice_roll( "d100");
+    dr1Playerv_class( p, -1, NULL);  /* reset hitpoints & wealth */
+    fixestr(p);
     return 0;
 }
 
@@ -43,6 +114,7 @@ int dr1Playerv_swap( dr1Player *p, int c, char **v) {
     t = *a;
     *a = *b;
     *b = t;
+    fixestr(p);
     return 0;
 }
 
@@ -111,43 +183,6 @@ int dr1Playerv_race( dr1Player *p, int c, char **v) {
     return 0;
 }
 
-int dr1Playerv_class( dr1Player *p, int c, char **v) {
-    dr1ClassType *cl;
-    int ccode;
-    static dr1Money m[4];
-    static int hits[4] = { 0, 0, 0, 0 };
-    int idx;
-
-    if (c != 2) return -1;
-    if (!strcasecmp( v[1], "mu")) {
-	ccode = DR1C_MU;
-	idx = 0;
-    } else if (!strcasecmp( v[1], "fighter")) {
-	ccode = DR1C_FIGHTER;
-	idx = 1;
-    } else if (!strcasecmp( v[1], "cleric")) {
-	ccode = DR1C_CLERIC;
-	idx = 2;
-    } else if (!strcasecmp( v[1], "thief")) {
-	ccode = DR1C_THIEF;
-	idx = 3;
-    } else return -1;
-    
-    cl = dr1Registry_lookup( &dr1class, ccode);
-    if (!cl) return -1;
-
-    p->class = ccode;
-    if ( !hits[ idx]) {
-	p->hp = dr1Dice_roll( cl->hitdice);
-	p->purse.gp = dr1Dice_roll( cl->startingMoney);
-	m[ idx] = p->purse;
-	hits[ idx] = p->hp;
-    } else {
-        p->hp = hits[ idx];
-	p->purse = m[ idx];
-    }
-    return 0;
-}
 
 int dr1Playerv_trade( dr1Player *p, int c, char **v) {
     int *a, *b;
@@ -170,6 +205,7 @@ int dr1Playerv_trade( dr1Player *p, int c, char **v) {
     if (*a < 5 || *b > 17) return -1;
     *a -= 2;
     *b += 1;
+    fixestr(p);
     return 0;
 }
 
@@ -195,6 +231,16 @@ int dr1Playerv_showDialog( dr1Player *p) {
 
 	i = 0;
 
+	/*
+	 * Fix possible problems after changing stats
+	 */
+	if (p->class == DR1C_FIGHTER && p->base_attr._str == 18) {
+	    p->base_attr.estr = estr;
+	} else {
+	    p->base_attr.estr = 0;
+	}
+	p->curr_attr = p->base_attr;
+
 	dr1Money_format( &p->purse, buf);
 	race = dr1Registry_lookup( &dr1race, p->race);
 	class = dr1Registry_lookup( &dr1class, p->class);
@@ -205,7 +251,12 @@ int dr1Playerv_showDialog( dr1Player *p) {
 	printf("Sex: %s\n", p->sex==DR1R_FEMALE?"Female":"Male");
 	printf("Purse: %s\n", buf);
 	printf("Hits: %d\n", HITPOINTS(p));
-	printf("Str: %2d\n", p->base_attr._str);
+	printf("Str: %2d", p->base_attr._str);
+	if (p->base_attr.estr) {
+	    printf("/%02d\n", p->base_attr.estr > 99 ? 0 : p->base_attr.estr);
+	} else {
+	    printf("\n");
+	}
 	printf("Int: %2d\n", p->base_attr._int);
 	printf("Wis: %2d\n", p->base_attr._wis);
 	printf("Dex: %2d\n", p->base_attr._dex);
@@ -226,8 +277,17 @@ int dr1Playerv_showDialog( dr1Player *p) {
 	else if ( !strcasecmp(cmds[0], "name")) dr1Playerv_name( p, i, cmds);
 	else if ( !strcasecmp(cmds[0], "class")) dr1Playerv_class( p, i, cmds);
 	else if ( !strcasecmp(cmds[0], "sex")) dr1Playerv_sex( p, i, cmds);
-	else if ( !strcasecmp(cmds[0], "done")) break;
-	else printf("Unknown command: '%s'\n", cmds[0]);
+	else if ( !strcasecmp(cmds[0], "done")) {
+	    if ( !strcmp(p->name, "Unnamed")) {
+		printf("Your character needs a name.\n");
+	    } else if ( p->class == DR1C_INVALID) {
+		printf("Your character has no class.\n");
+	    } else if ( p->base_attr._str < 3) {
+		printf("Your character has no stats.  Roll stats first.\n");
+	    } else {
+		break;
+	    }
+	} else printf("Unknown command: '%s'\n", cmds[0]);
     }
     return 0;
 }

@@ -1,4 +1,7 @@
-add default and copy constructors
+check attribute bonuses against DMG
+limit AC bonus by armor type
+add armor type bonuses per weapon damage type
+
 figure out what to do with gauche.  
 - maybe use it for damage when attacker has a critical miss.
 

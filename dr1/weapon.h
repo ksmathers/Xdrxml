@@ -30,6 +30,7 @@ typedef struct {
     dr1Dice damage;
     int ranged;
     int speed;
+    enum DR1DamageType dtype;
 } dr1Weapon;
 
 extern dr1Weapon dr1Weapon_halfspear;

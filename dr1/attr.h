@@ -27,6 +27,7 @@ enum {
 
 typedef struct {
     int _str;
+    int estr;
     int _int;
     int _wis;
     int _dex;
