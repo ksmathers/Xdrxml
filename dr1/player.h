@@ -41,6 +41,7 @@ typedef struct dr1Player {
 
     int race;			/* Elf, Human, ... */
     int sex;			/* Male, Female */
+    int class;			/* MU, Thief, Fighter, Cleric, ... */
 } dr1Player;
 
 

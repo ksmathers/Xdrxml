@@ -4,6 +4,8 @@
 #include "attr.h"
 #include "race.h"
 #include "registry.h"
+#include "dice.h"
+#include "class.h"
 
 static int *statptr( dr1Attr *a, char *s) {
     if ( !strcasecmp( s, "str")) return &a->_str;
@@ -24,6 +26,7 @@ int dr1Playerv_roll( dr1Player *p, int c, char **v) {
 
 int dr1Playerv_name( dr1Player *p, int c, char **v) {
     if (c != 2) return -1;
+    if (p->name) free( p->name);
     p->name = strdup( v[1]);
     return 0;
 }
@@ -70,6 +73,30 @@ int dr1Playerv_race( dr1Player *p, int c, char **v) {
     return 0;
 }
 
+int dr1Playerv_class( dr1Player *p, int c, char **v) {
+    dr1ClassType *cl;
+    int ccode;
+
+    if (c != 2) return -1;
+    if (!strcasecmp( v[1], "mu")) {
+	ccode = 'MU  ';
+    } else if (!strcasecmp( v[1], "fighter")) {
+	ccode = 'FIGH';
+    } else if (!strcasecmp( v[1], "cleric")) {
+	ccode = 'CLER';
+    } else if (!strcasecmp( v[1], "thief")) {
+	ccode = 'THIE';
+    } else return -1;
+    
+    cl = dr1Registry_lookup( &dr1class, ccode);
+    if (!cl) return -1;
+
+    p->class = ccode;
+    p->hp = dr1Dice_roll( cl->hitdice);
+    p->purse.gp = dr1Dice_roll( cl->startingMoney);
+    return 0;
+}
+
 int dr1Playerv_trade( dr1Player *p, int c, char **v) {
     int *a, *b;
     char v1[80], v2[80];
@@ -94,14 +121,31 @@ int dr1Playerv_trade( dr1Player *p, int c, char **v) {
     return 0;
 }
 
+int dr1Playerv_init( dr1Player *p) {
+    p->name = strdup( "Unnamed");
+    p->race = 'MAN ';
+    return 0;
+}
+
 int dr1Playerv_showDialog( dr1Player *p) {
     char cmd[80];
     char *cmds[10];
+    char buf[80];
+    dr1AttrAdjust *race;
     int i;
 
+    dr1Playerv_init( p);
+
     for (;;) {
+
 	i = 0;
+
+	dr1Money_format( &p->purse, buf);
+	race = dr1Registry_lookup( &dr1race, p->race);
 	printf("---------------------------------------------------------\n");
+	if (p->name) printf("Name: %s\n", p->name);
+	if (race) printf("Race: %s\n", race->type);
+	printf("Purse: %s\n", buf);
 	printf("Str: %2d\n", p->base_attr._str);
 	printf("Int: %2d\n", p->base_attr._int);
 	printf("Wis: %2d\n", p->base_attr._wis);
@@ -121,6 +165,7 @@ int dr1Playerv_showDialog( dr1Player *p) {
 	else if ( !strcasecmp(cmds[0], "trade")) dr1Playerv_trade( p, i, cmds);
 	else if ( !strcasecmp(cmds[0], "race")) dr1Playerv_race( p, i, cmds);
 	else if ( !strcasecmp(cmds[0], "name")) dr1Playerv_name( p, i, cmds);
+	else if ( !strcasecmp(cmds[0], "class")) dr1Playerv_class( p, i, cmds);
 	else if ( !strcasecmp(cmds[0], "done")) return 0;
 	else printf("Unknown command: '%s'\n", cmds[0]);
     }

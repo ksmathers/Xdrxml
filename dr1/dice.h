@@ -32,6 +32,7 @@ typedef char* dr1Dice;
  *       "3d6"
  *       "3d4+2"
  *       "dr1-4"
+ *       "3d4*10"
  *
  * Parameters:
  *    ds	Dice string in standard notation ("3d6+1")

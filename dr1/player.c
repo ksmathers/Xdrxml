@@ -131,6 +131,9 @@ bool_t xdr_dr1Player( XDR *xdrs, dr1Player* p) {
    xdr_attr( xdrs, "sex");
    if (!xdr_int( xdrs, &p->sex)) return FALSE;
 
+   xdr_attr( xdrs, "class");
+   if (!xdr_int( xdrs, &p->class)) return FALSE;
+
    return TRUE;
 }
 

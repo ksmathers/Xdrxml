@@ -42,8 +42,12 @@ int dr1Dice_roll( char *ds) {
         d = drand48();
 	val += 1+floor(d * sides);
     }
-    if (pm == '-') offset = -offset;
-    val += offset;
+    if (pm == '*') {
+	val *= offset;
+    } else {
+	if (pm == '-') offset = -offset;
+	val += offset;
+    }
 
     return val;
 }
