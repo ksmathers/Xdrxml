@@ -76,7 +76,15 @@ dr1Monster* dr1Monster_new( char *name) {
  */
 
 int dr1Monster_thac0( dr1Monster *m) {
-    int level = 1;
-    sscanf( m->type->hd, "%dd", &level);
-    return 20 - level;
+    int level;
+    int ndice, sides, offset, mul;
+    dr1Dice_data( &ndice, &sides, &offset, &mul);
+    level = ndice;
+    if (sides > 4) {
+	level *= 2;
+    }
+    if (offset < 0) {
+	level--;
+    }
+    return 21 - level;
 }

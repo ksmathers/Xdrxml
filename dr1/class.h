@@ -15,6 +15,7 @@ typedef struct {
     dr1Dice startingMoney;
     int primaryStat;
     int thac0;			/* THAC0 as a level 1 character */
+    int levelmod;		/* Levels per THAC0 adjustment */	
 } dr1ClassType;
 
 /*-------------------------------------------------------------------

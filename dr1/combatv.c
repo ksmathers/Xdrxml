@@ -26,7 +26,7 @@ int attack( dr1Player *p, dr1Monster *m, int c, char **v) {
 	roll = dr1Dice_roll("d20");
 	if ( roll == 20) {
 	    /* natural 20 gets a bonus */
-	    if ( tohit>20) roll += 4;
+	    if ( tohit>20) roll += 5;
 	    else crit=dr1Dice_roll("d12");
 	}
 
@@ -129,13 +129,15 @@ void dr1Combatv_showPage( dr1Player *p, dr1Monster *m) {
 	}
 
 	if (p->hp < 0) {
-	    printf("Thou'rt slain.  Donai nais requiem.  Resquiat en pacem.\n");
+	    printf("Thou'rt slain.  Donai nais requiem.  Resquiat in pace.\n");
 	    break;
 	}
 
 	if (m->hp < 0) {
 	    printf("The beast is slain.  Thus falls the hammer of god upon the infidel.\n");
-	    printf("In nomen de Padre, facilitus Domine.\n");
+
+	    printf("In nomen de Padre, facio Domine.\n");
+
 	    p->xp += m->type->xp;
 	    break;
 	}
