@@ -122,7 +122,9 @@ int dr1Context_load( dr1Context *ctx, char *fname) {
  */
 void dr1Context_destroy( dr1Context *ctx) {
     xdr_free( (xdrproc_t)xdr_dr1Player, (void*)&ctx->player);
-    xdr_free( (xdrproc_t)xdr_dr1Map, (void*)ctx->map);
+    if (ctx->map) {
+	xdr_free( (xdrproc_t)xdr_dr1Map, (void*)ctx->map);
+    }
     free( ctx->map);
     ctx->map = NULL;
 }

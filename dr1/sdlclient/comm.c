@@ -12,6 +12,9 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <gtk/gtk.h>
+#include <glade/glade.h>
+
 #include "stream.h"
 #include "protocol.h"
 #include "xdrxml.h"
@@ -19,64 +22,20 @@
 #include "player.h"
 #include "common.h"
 
-static struct {
-    int sd;
-    dr1Stream ios;
-    Common *common;
-} ctx = { 0 };
-
-int doConnect( char *server, int port) {
-    struct sockaddr_in addr;
-    struct hostent *svr_addr;
-    long flags;
-
-    svr_addr = gethostbyname( server);
-    assert(svr_addr);
-    addr.sin_family = AF_INET;
-    addr.sin_addr = *(struct in_addr *)svr_addr->h_addr;
-    addr.sin_port = htons( port);
-    ctx.sd = socket( PF_INET, SOCK_STREAM, 0);
-
-    if (connect( ctx.sd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in))) {
-	perror("connect");
-	exit(1);
-    }
-    flags = fcntl( ctx.sd, F_GETFL);
-    if (flags < 0) {
-	perror("fcntl F_GETFL");
-	exit(1);
-    }
-    flags |= O_NONBLOCK;
-    if ( fcntl( ctx.sd, F_SETFL, flags)) {
-	perror("fcntl F_SETFL");
-	exit(1);
-    }
-
-    dr1Stream_create( &ctx.ios, ctx.sd);
-    return 0;
-}
+GtkDestroyNotify onSocketDestroy;
 
 enum {
     M_IDENT,
     M_LOGIN,
     M_READY,
+    M_CCMAPDATA,
+    M_CCPLAYERDATA,
     M_MAPDATA,
     M_PLAYERDATA,
     M_LOCATIONDATA,
     M_CHARACTERCREATEDIALOG,
     M_INVENTORYDIALOG
 };
-
-int sendCommand(char key) {
-    switch (key) {
-        case 'n':
-        case 'e':
-        case 's':
-        case 'w':
-	    dr1Stream_printf( &ctx.ios, DR1CMD_MOVE, key);
-    } /* switch key */
-    return 0;
-}
 
 int handleMessage(char *buf) {
     static int mode = M_IDENT;
@@ -88,10 +47,32 @@ int handleMessage(char *buf) {
 	case M_IDENT:		/* waiting for IDENT */
 	    if (!strcmp( buf, DR1MSG_IDENT)) {
 /*		showDialog( DLG_LOGIN); */
- 		psendMessage( &ctx.ios, DR1CMD_LOGIN, common.name, common.password);
-		mode = M_LOGIN;
+                if (common.login) {
+		    psendMessage( &common.ios, DR1CMD_LOGIN, common.name, common.password);
+		    mode = M_LOGIN;
+		} else {
+		    psendMessage( &common.ios, DR1CMD_NEWPLAYER, common.name, common.password);
+		    mode = M_CHARACTERCREATEDIALOG;
+		}
 	    } else {
-		printf("Expecting '%s', got '%s'\n", DR1MSG_IDENT, buf);
+		printf("PROTOCOL ERROR: Expecting '%s', got '%s'\n", DR1MSG_IDENT, buf);
+	    }
+	    break;
+
+        case M_CHARACTERCREATEDIALOG:
+	    if (!strncmp( buf, DR1MSG_105, 3)) {
+		GtkWidget *wgenerate = glade_xml_get_widget( common.glade, "wgenerate");
+		common.dialog = WGENERATE;
+	        gtk_widget_show( wgenerate);
+	    } else if (!strncmp( buf, DR1MSG_120, 3)) {
+	        mode = M_CCMAPDATA;
+	    } else if (!strncmp( buf, DR1MSG_170, 3)) {
+	        mode = M_CCPLAYERDATA;
+	    } else if (!strncmp( buf, DR1MSG_100, 3)) {
+		GtkWidget *wgenerate = glade_xml_get_widget( common.glade, "wgenerate");
+	        gtk_widget_hide( wgenerate);
+		common.dialog = NONE;
+	        mode = M_READY;
 	    }
 	    break;
 
@@ -144,13 +125,16 @@ int handleMessage(char *buf) {
 	    break;
 
 	case M_MAPDATA: 	/* reading map data */
+	case M_CCMAPDATA: 	/* reading map data */
 	case M_PLAYERDATA: 	/* reading player data */
+	case M_CCPLAYERDATA: 	/* reading player data */
 	    if ( !strcmp( buf, SEPARATOR)) {
 		XDR xdrs;
 		int ok;
 		xdr_xml_sb_create( &xdrs, sb->buf, XDR_DECODE);
 		switch (mode) {
 		    case M_MAPDATA:    /* reading map data */
+		    case M_CCMAPDATA:    /* reading map data */
 			printf("Got map.\n");
 			{
 			    dr1Map* map;
@@ -164,6 +148,7 @@ int handleMessage(char *buf) {
 			}
 			break;
 		    case M_PLAYERDATA: /* reading player data */
+		    case M_CCPLAYERDATA: /* reading player data */
 			printf("Got player data \n");
 			{
 			    dr1Player *p;
@@ -178,7 +163,11 @@ int handleMessage(char *buf) {
 			break;
 		}
 		sbclear( sb);
-		mode = M_READY;
+		if (mode == M_CCMAPDATA || mode == M_CCPLAYERDATA) {
+		    mode = M_CHARACTERCREATEDIALOG;
+		} else {
+		    mode = M_READY;
+		}
 		break;
 	    }
 	    sbstrcat( sb, buf);
@@ -187,53 +176,96 @@ int handleMessage(char *buf) {
     return 0;
 }
 
-void* comm_main( void* iparm) {
-    fd_set r_set, w_set, e_set;
-    fd_set tr_set, tw_set, te_set;
-    int maxsock;
-    int err;
-    int more=0;
-    char buf[80];
-    struct timeval ttv;
-    struct timeval short_wait = { 0, 100000 };
-    struct timeval no_wait = { 0, 0 };
-    Common *common = iparm;
-    ctx.common = common;
+void onInputReady( gpointer userdata, gint socket, GdkInputCondition cond) {
+    assert(socket == common.sd);
 
+    if (cond & GDK_INPUT_EXCEPTION) {
+        perror("readexception");
+    }
 
-    FD_ZERO( &r_set);		/* socket is readable (READABLE) */
-    FD_ZERO( &w_set);		/* write queued data */
-    FD_ZERO( &e_set);		/* error on socket */
+    while (cond & GDK_INPUT_READ || dr1Stream_iqlen( &common.ios)) {
+	/* data from server ready to read */
+	char buf[1024];
 
-/*    dr1Text_infoMessage( "Connecting to server...", common->server); */
-    doConnect( common->server, 2300);
-/*    dr1Text_infoMessage( "Connected.", ctx.screen); */
-    FD_SET( ctx.sd, &r_set);
-    maxsock = ctx.sd;
-    for(;;) {
-	tr_set = r_set; tw_set = w_set; te_set = e_set;
-	ttv = short_wait;
-        
-        if (more && dr1Stream_iqlen( &ctx.ios)) {
-            ttv = no_wait;
-        }
+	printf("R\n");
+        cond &= !GDK_INPUT_READ;
 
-	err = select( maxsock + 1, &tr_set, &tw_set, &te_set, &ttv);
-/*	printf("/"); fflush(stdout); /**/
-	if (err == EINTR) continue;
-	if (err < 0) { perror("select"); abort(); }
-	if (FD_ISSET( ctx.sd, &tr_set) || dr1Stream_iqlen( &ctx.ios)) {
-/*	    printf("R\n"); */
+	if ( dr1Stream_fgets( &common.ios, buf, sizeof(buf)) == 0) {
+	    /* no complete lines ready */
+	    perror("read"); 
+	    break; 
+	}
+/*	printf("buf '%s'\n",buf); /**/
+/*	dr1Text_infoMessage( buf, common.screen); /**/
+	handleMessage( buf);
+    } /* if */
+}
 
-	    /* data from server ready to read */
-	    if ( dr1Stream_fgets( &ctx.ios, buf, sizeof(buf)) == 0) {
-                more=0;
-		perror("read"); continue; 
-	    }
-            more=1;
-/*	    printf("buf '%s'\n",buf); /**/
-/*	    dr1Text_infoMessage( buf, ctx.screen); */
-            handleMessage( buf);
-	} /* if */
+void onOutputReady( gpointer userdata, gint socket, GdkInputCondition cond) {
+    assert( socket == common.sd);
+    dr1Stream_flush( &common.ios);
+    if (dr1Stream_oqlen( &common.ios) == 0) {
+        /* no more output queued.  remove output handler */
+	gtk_input_remove( common.write_uid);
     }
 }
+
+int doConnect( void) {
+    char *server = common.server;
+    int port = 2300;
+    struct sockaddr_in addr;
+    struct hostent *svr_addr;
+    long flags;
+
+    svr_addr = gethostbyname( server);
+    assert(svr_addr);
+    addr.sin_family = AF_INET;
+    addr.sin_addr = *(struct in_addr *)svr_addr->h_addr;
+    addr.sin_port = htons( port);
+    common.sd = socket( PF_INET, SOCK_STREAM, 0);
+
+    if (connect( common.sd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in))) 
+    {
+	perror("connect");
+	exit(1);
+    }
+    flags = fcntl( common.sd, F_GETFL);
+    if (flags < 0) {
+	perror("fcntl F_GETFL");
+	exit(1);
+    }
+    flags |= O_NONBLOCK;
+    if ( fcntl( common.sd, F_SETFL, flags)) {
+	perror("fcntl F_SETFL");
+	exit(1);
+    }
+
+    dr1Stream_create( &common.ios, common.sd);
+
+    common.read_uid = gtk_input_add_full( 
+            common.sd, GDK_INPUT_READ | GDK_INPUT_EXCEPTION, 
+	    onInputReady, NULL, NULL, onSocketDestroy);
+    return 0;
+}
+
+
+
+int sendCommand(char key) {
+    switch (key) {
+        case 'n':
+        case 'e':
+        case 's':
+        case 'w':
+	    psendMessage( &common.ios, DR1CMD_MOVE, key);
+    } /* switch key */
+
+    if (dr1Stream_oqlen( &common.ios)>0) {
+        /* Queued output */
+        common.write_uid = gtk_input_add_full( 
+            common.sd, GDK_INPUT_WRITE,
+	    onOutputReady, NULL, NULL, NULL);
+    }
+    return 0;
+}
+
+

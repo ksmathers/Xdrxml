@@ -177,7 +177,6 @@ dr1Controller_handleNewPlayer( dr1Context *ctx, int argc, char **argv) {
 	if (exists) {
 	    dr1Stream_printf( &ctx->ios, DR1MSG_580, argv[2]);
 	} else {
-	    dr1Stream_printf( &ctx->ios, DR1MSG_200);
 	    status = dr1Playerv_cmd( ctx, argc, argv);
 	}
     } else {
@@ -292,7 +291,6 @@ int dr1Controller_handleCommand( dr1Context *ctx, int argc, char **argv) {
 		dr1Stream_printf( &ctx->ios, DR1MSG_580, argv[2]);
 	    } else {
 		status = dr1Controller_handleNewPlayer( ctx, argc, argv);
-		dr1Stream_printf( &ctx->ios, DR1MSG_200);
 		ctx->dialog = ACTIVE;
 		ctx->state = NEWPLAYER;
 	    }

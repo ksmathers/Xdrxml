@@ -29,7 +29,6 @@ enum { NOLIGHT, TORCHLIGHT, LANTERNLIGHT };
 int darkdist[] = { 0, 1, 3 };
 
 dr1GlyphTable *dr1_npcs1;
-GladeXML *glade;
 
 int lightsource = TORCHLIGHT;
 
@@ -57,7 +56,7 @@ void
 setmap( dr1Map *map) {
     if (common.map) {
 	/* destroy old map */
-	/* FIXME */
+	/* TODO FIXME */
     }
     common.map = map;
 }
@@ -66,8 +65,12 @@ void
 setplayer( dr1Player *player) {
     common.xpos = player->location.x;
     common.ypos = player->location.y;
+    common.player = *player;
     dr1Text_setPlayer( player);
-    /* FIXME: player should be destroyed here */
+    if (common.dialog == WGENERATE) {
+        cgenerate_setPlayer( player);
+    }
+    /* TODO FIXME: player should be destroyed here */
 }
 
 void 
@@ -336,45 +339,42 @@ gint SDLEvent( gpointer userdata) {
 pthread_t comm;
 
 
-int on_newplayer_clicked( GtkButton *gbutton, gpointer userdata) {
-    GtkWidget *window = glade_xml_get_widget( glade, "wlogin");
-    GtkWidget *wgenerate = glade_xml_get_widget( glade, "wgenerate");
-    GtkEntry *name = GTK_ENTRY(glade_xml_get_widget( glade, "name"));
-    GtkEntry *password = GTK_ENTRY(glade_xml_get_widget( glade, "password"));
-    GtkEntry *server = GTK_ENTRY(glade_xml_get_widget( glade, "server"));
+void on_newplayer_clicked( GtkButton *gbutton, gpointer userdata) {
+    GtkWidget *window = glade_xml_get_widget( common.glade, "wlogin");
+    GtkEntry *name = GTK_ENTRY(glade_xml_get_widget( common.glade, "name"));
+    GtkEntry *password = GTK_ENTRY(glade_xml_get_widget( common.glade, "password"));
+    GtkEntry *server = GTK_ENTRY(glade_xml_get_widget( common.glade, "server"));
     common.name = strdup( gtk_entry_get_text( name));
     common.password = strdup( gtk_entry_get_text( password));
     common.server = strdup( gtk_entry_get_text( server));
-    assert(wgenerate);
+    common.login = FALSE;
 
     if ( strlen( common.name) > 0 
     	&& strlen( common.password) > 0 
 	&& strlen( common.server) > 0)
     {
         gtk_widget_hide( window);
-
-        pthread_create( &comm, NULL, comm_main, &common);
-	gtk_widget_show( wgenerate);
+	doConnect();
     }
 
 }
 
 int on_loginok_clicked( GtkButton *gbutton, gpointer userdata) {
-    GtkWidget *window = glade_xml_get_widget( glade, "wlogin");
-    GtkEntry *name = GTK_ENTRY(glade_xml_get_widget( glade, "name"));
-    GtkEntry *password = GTK_ENTRY(glade_xml_get_widget( glade, "password"));
-    GtkEntry *server = GTK_ENTRY(glade_xml_get_widget( glade, "server"));
+    GtkWidget *window = glade_xml_get_widget( common.glade, "wlogin");
+    GtkEntry *name = GTK_ENTRY(glade_xml_get_widget( common.glade, "name"));
+    GtkEntry *password = GTK_ENTRY(glade_xml_get_widget( common.glade, "password"));
+    GtkEntry *server = GTK_ENTRY(glade_xml_get_widget( common.glade, "server"));
     common.name = strdup( gtk_entry_get_text( name));
     common.password = strdup( gtk_entry_get_text( password));
     common.server = strdup( gtk_entry_get_text( server));
+    common.login = TRUE;
 
     if ( strlen( common.name) > 0 
     	&& strlen( common.password) > 0 
 	&& strlen( common.server) > 0)
     {
         gtk_widget_hide( window);
-
-        pthread_create( &comm, NULL, comm_main, &common);
+	doConnect();
     }
 
     printf("User %s, Password %s, Server %s\n", 
@@ -441,10 +441,10 @@ int main( int argc, char **argv) {
     dr1Text_infoMessage("Welcome to Dragon's Reach, adventurer!", common.screen);
 
     /* load the interface */
-    glade = glade_xml_new("res/dr1.glade", NULL);
+    common.glade = glade_xml_new("res/dr1.glade", NULL);
     /* connect the signals in the interface */
 
-    glade_xml_signal_autoconnect(glade);
+    glade_xml_signal_autoconnect(common.glade);
 
     /* start the event loop */
     gtk_timeout_add( 100, SDLEvent, NULL);

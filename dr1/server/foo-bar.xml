@@ -1,31 +1,31 @@
 <context>
     <player>
-        <name>Foo</name>
+        <name>Garin</name>
         <xp value="0x0"/>
         <level value="0x1"/>
-        <hp value="0x7"/>
+        <hp value="0x8"/>
         <wounds value="0x0"/>
         <base_attr>
-            <_str value="0x8"/>
+            <_str value="0x9"/>
             <estr value="0x0"/>
-            <_int value="0x9"/>
+            <_int value="0xd"/>
             <_wis value="0xb"/>
-            <_dex value="0xc"/>
-            <_con value="0xe"/>
-            <_cha value="0xd"/>
+            <_dex value="0xe"/>
+            <_con value="0x8"/>
+            <_cha value="0xc"/>
         </base_attr>
         <curr_attr>
-            <_str value="0x8"/>
+            <_str value="0x9"/>
             <estr value="0x0"/>
-            <_int value="0x9"/>
+            <_int value="0xd"/>
             <_wis value="0xb"/>
-            <_dex value="0xc"/>
-            <_con value="0xe"/>
-            <_cha value="0xd"/>
+            <_dex value="0xe"/>
+            <_con value="0x8"/>
+            <_cha value="0xc"/>
         </curr_attr>
         <purse>
             <pp value="0x0"/>
-            <gp value="0x82"/>
+            <gp value="0x6e"/>
             <ep value="0x0"/>
             <sp value="0x0"/>
             <cp value="0x0"/>
@@ -50,11 +50,11 @@
         </armor>
         <race value="0x0"/>
         <sex value="0x0"/>
-        <class value="0x2"/>
+        <class value="0x3"/>
         <location>
             <mapname>nomap</mapname>
-            <x value="0x13"/>
-            <y value="0xf"/>
+            <x value="0x9"/>
+            <y value="0xa"/>
         </location>
     </player>
     <map>
@@ -1603,7 +1603,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -1675,7 +1675,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -1877,7 +1877,7 @@
                 </x>
                 <x>
                     <code value="0x5b5d"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -1917,7 +1917,7 @@
                 </x>
                 <x>
                     <code value="0x5b5d"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -1962,7 +1962,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -2406,7 +2406,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -2463,7 +2463,7 @@
             <y>
                 <x>
                     <code value="0x587c"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -2558,7 +2558,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -2765,7 +2765,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -3089,7 +3089,7 @@
                 </x>
                 <x>
                     <code value="0x5b5d"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -3179,7 +3179,7 @@
                 </x>
                 <x>
                     <code value="0x5b5d"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -3286,7 +3286,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -3356,7 +3356,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -3623,7 +3623,7 @@
                 </x>
                 <x>
                     <code value="0x7c58"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -3700,7 +3700,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -3765,7 +3765,7 @@
                 </x>
                 <x>
                     <code value="0x5b5d"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -4179,7 +4179,7 @@
                 </x>
                 <x>
                     <code value="0x582d"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -4189,7 +4189,7 @@
                 </x>
                 <x>
                     <code value="0x582d"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -4528,7 +4528,7 @@
                 </x>
                 <x>
                     <code value="0x2f7e"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -4548,7 +4548,7 @@
                 </x>
                 <x>
                     <code value="0x7c58"/>
-                    <seen value="0x1"/>
+                    <seen value="0x0"/>
                     <open value="0x0"/>
                 </x>
                 <x>

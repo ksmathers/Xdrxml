@@ -6,6 +6,9 @@
 #include <assert.h>
 #include "player.h"
 
+extern char *race_name[];
+extern char *class_name[];
+
 
 /*-------------------------------------------------------------------
  * dr1Text

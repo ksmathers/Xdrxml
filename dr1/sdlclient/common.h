@@ -2,6 +2,7 @@
 #define __DR1COMMON__H
 
 #include <SDL.h>
+#include <glade/glade.h>
 #include "player.h"
 
 /*-------------------------------------------------------------------
@@ -21,6 +22,15 @@ typedef struct {
     SDL_Surface *screen;
     dr1Map* map;
     int xpos, ypos;
+    int login;		/* true for login, false for new player */
+    enum { NONE, WGENERATE } dialog;
+    GladeXML *glade;
+
+    /* communications stream */
+    int sd;
+    dr1Stream ios;
+    int read_uid;
+    int write_uid;
 } Common;
 
 extern Common common;

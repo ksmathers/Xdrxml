@@ -587,8 +587,8 @@
 
 	    <widget>
 	      <class>GtkLabel</class>
-	      <name>name</name>
-	      <label></label>
+	      <name>cgname</name>
+	      <label> </label>
 	      <justify>GTK_JUSTIFY_CENTER</justify>
 	      <wrap>False</wrap>
 	      <xalign>0</xalign>
@@ -777,18 +777,28 @@
 
 	      <widget>
 		<class>GtkButton</class>
-		<name>button30</name>
+		<name>sexmale</name>
 		<can_default>True</can_default>
 		<can_focus>True</can_focus>
+		<signal>
+		  <name>clicked</name>
+		  <handler>on_sexmale_clicked</handler>
+		  <last_modification_time>Thu, 25 Jul 2002 23:05:10 GMT</last_modification_time>
+		</signal>
 		<label>Male</label>
 		<relief>GTK_RELIEF_NORMAL</relief>
 	      </widget>
 
 	      <widget>
 		<class>GtkButton</class>
-		<name>button31</name>
+		<name>sexfemale</name>
 		<can_default>True</can_default>
 		<can_focus>True</can_focus>
+		<signal>
+		  <name>clicked</name>
+		  <handler>on_sexfemale_clicked</handler>
+		  <last_modification_time>Thu, 25 Jul 2002 23:05:28 GMT</last_modification_time>
+		</signal>
 		<label>Female</label>
 		<relief>GTK_RELIEF_NORMAL</relief>
 	      </widget>
@@ -839,27 +849,42 @@
 
 		<widget>
 		  <class>GtkButton</class>
-		  <name>button32</name>
+		  <name>racehuman</name>
 		  <can_default>True</can_default>
 		  <can_focus>True</can_focus>
+		  <signal>
+		    <name>clicked</name>
+		    <handler>on_racehuman_clicked</handler>
+		    <last_modification_time>Thu, 25 Jul 2002 23:05:38 GMT</last_modification_time>
+		  </signal>
 		  <label>Human</label>
 		  <relief>GTK_RELIEF_NORMAL</relief>
 		</widget>
 
 		<widget>
 		  <class>GtkButton</class>
-		  <name>button33</name>
+		  <name>racedwarf</name>
 		  <can_default>True</can_default>
 		  <can_focus>True</can_focus>
+		  <signal>
+		    <name>clicked</name>
+		    <handler>on_racedwarf_clicked</handler>
+		    <last_modification_time>Thu, 25 Jul 2002 23:05:47 GMT</last_modification_time>
+		  </signal>
 		  <label>Dwarf</label>
 		  <relief>GTK_RELIEF_NORMAL</relief>
 		</widget>
 
 		<widget>
 		  <class>GtkButton</class>
-		  <name>button34</name>
+		  <name>raceelf</name>
 		  <can_default>True</can_default>
 		  <can_focus>True</can_focus>
+		  <signal>
+		    <name>clicked</name>
+		    <handler>on_raceelf_clicked</handler>
+		    <last_modification_time>Thu, 25 Jul 2002 23:05:59 GMT</last_modification_time>
+		  </signal>
 		  <label>Elf</label>
 		  <relief>GTK_RELIEF_NORMAL</relief>
 		</widget>
@@ -882,27 +907,42 @@
 
 		<widget>
 		  <class>GtkButton</class>
-		  <name>button35</name>
+		  <name>racehalforc</name>
 		  <can_default>True</can_default>
 		  <can_focus>True</can_focus>
+		  <signal>
+		    <name>clicked</name>
+		    <handler>on_racehalforc_clicked</handler>
+		    <last_modification_time>Thu, 25 Jul 2002 23:06:13 GMT</last_modification_time>
+		  </signal>
 		  <label>Half-Orc</label>
 		  <relief>GTK_RELIEF_NORMAL</relief>
 		</widget>
 
 		<widget>
 		  <class>GtkButton</class>
-		  <name>button36</name>
+		  <name>racehalfelf</name>
 		  <can_default>True</can_default>
 		  <can_focus>True</can_focus>
+		  <signal>
+		    <name>clicked</name>
+		    <handler>on_racehalfelf_clicked</handler>
+		    <last_modification_time>Thu, 25 Jul 2002 23:06:29 GMT</last_modification_time>
+		  </signal>
 		  <label>Half-Elf</label>
 		  <relief>GTK_RELIEF_NORMAL</relief>
 		</widget>
 
 		<widget>
 		  <class>GtkButton</class>
-		  <name>button37</name>
+		  <name>racehobbit</name>
 		  <can_default>True</can_default>
 		  <can_focus>True</can_focus>
+		  <signal>
+		    <name>clicked</name>
+		    <handler>on_racehobbit_clicked</handler>
+		    <last_modification_time>Thu, 25 Jul 2002 23:06:37 GMT</last_modification_time>
+		  </signal>
 		  <label>Hobbit</label>
 		  <relief>GTK_RELIEF_NORMAL</relief>
 		</widget>
@@ -925,9 +965,14 @@
 
 		<widget>
 		  <class>GtkButton</class>
-		  <name>button38</name>
+		  <name>racegnome</name>
 		  <can_default>True</can_default>
 		  <can_focus>True</can_focus>
+		  <signal>
+		    <name>clicked</name>
+		    <handler>on_racegnome_clicked</handler>
+		    <last_modification_time>Thu, 25 Jul 2002 23:06:48 GMT</last_modification_time>
+		  </signal>
 		  <label>Gnome</label>
 		  <relief>GTK_RELIEF_NORMAL</relief>
 		</widget>
@@ -1555,27 +1600,42 @@
 
 	      <widget>
 		<class>GtkButton</class>
-		<name>button11</name>
+		<name>train</name>
 		<can_default>True</can_default>
 		<can_focus>True</can_focus>
+		<signal>
+		  <name>clicked</name>
+		  <handler>on_train_clicked</handler>
+		  <last_modification_time>Thu, 25 Jul 2002 23:07:19 GMT</last_modification_time>
+		</signal>
 		<label>Train</label>
 		<relief>GTK_RELIEF_NORMAL</relief>
 	      </widget>
 
 	      <widget>
 		<class>GtkButton</class>
-		<name>button12</name>
+		<name>swap</name>
 		<can_default>True</can_default>
 		<can_focus>True</can_focus>
+		<signal>
+		  <name>clicked</name>
+		  <handler>on_swap_clicked</handler>
+		  <last_modification_time>Thu, 25 Jul 2002 23:07:09 GMT</last_modification_time>
+		</signal>
 		<label>Swap</label>
 		<relief>GTK_RELIEF_NORMAL</relief>
 	      </widget>
 
 	      <widget>
 		<class>GtkButton</class>
-		<name>button40</name>
+		<name>reroll</name>
 		<can_default>True</can_default>
 		<can_focus>True</can_focus>
+		<signal>
+		  <name>clicked</name>
+		  <handler>on_reroll_clicked</handler>
+		  <last_modification_time>Thu, 25 Jul 2002 23:07:27 GMT</last_modification_time>
+		</signal>
 		<label>Reroll</label>
 		<relief>GTK_RELIEF_NORMAL</relief>
 	      </widget>
@@ -1632,8 +1692,13 @@
 
 	    <widget>
 	      <class>GtkEntry</class>
-	      <name>entry2</name>
+	      <name>changename</name>
 	      <can_focus>True</can_focus>
+	      <signal>
+		<name>focus_out_event</name>
+		<handler>on_changename_focus_out_event</handler>
+		<last_modification_time>Fri, 26 Jul 2002 00:04:06 GMT</last_modification_time>
+	      </signal>
 	      <editable>True</editable>
 	      <text_visible>True</text_visible>
 	      <text_max_length>0</text_max_length>
@@ -1692,27 +1757,42 @@
 
 		<widget>
 		  <class>GtkButton</class>
-		  <name>button48</name>
+		  <name>classfighter</name>
 		  <can_default>True</can_default>
 		  <can_focus>True</can_focus>
+		  <signal>
+		    <name>clicked</name>
+		    <handler>on_classfighter_clicked</handler>
+		    <last_modification_time>Thu, 25 Jul 2002 23:07:38 GMT</last_modification_time>
+		  </signal>
 		  <label>Fighter</label>
 		  <relief>GTK_RELIEF_NORMAL</relief>
 		</widget>
 
 		<widget>
 		  <class>GtkButton</class>
-		  <name>button49</name>
+		  <name>classmage</name>
 		  <can_default>True</can_default>
 		  <can_focus>True</can_focus>
+		  <signal>
+		    <name>clicked</name>
+		    <handler>on_classmage_clicked</handler>
+		    <last_modification_time>Thu, 25 Jul 2002 23:07:50 GMT</last_modification_time>
+		  </signal>
 		  <label>Mage</label>
 		  <relief>GTK_RELIEF_NORMAL</relief>
 		</widget>
 
 		<widget>
 		  <class>GtkButton</class>
-		  <name>button50</name>
+		  <name>classcleric</name>
 		  <can_default>True</can_default>
 		  <can_focus>True</can_focus>
+		  <signal>
+		    <name>clicked</name>
+		    <handler>on_classcleric_clicked</handler>
+		    <last_modification_time>Thu, 25 Jul 2002 23:07:59 GMT</last_modification_time>
+		  </signal>
 		  <label>Cleric</label>
 		  <relief>GTK_RELIEF_NORMAL</relief>
 		</widget>
@@ -1735,9 +1815,14 @@
 
 		<widget>
 		  <class>GtkButton</class>
-		  <name>button51</name>
+		  <name>classthief</name>
 		  <can_default>True</can_default>
 		  <can_focus>True</can_focus>
+		  <signal>
+		    <name>clicked</name>
+		    <handler>on_classthief_clicked</handler>
+		    <last_modification_time>Thu, 25 Jul 2002 23:08:06 GMT</last_modification_time>
+		  </signal>
 		  <label>Thief</label>
 		  <relief>GTK_RELIEF_NORMAL</relief>
 		</widget>
@@ -1749,7 +1834,7 @@
 	<widget>
 	  <class>GtkLabel</class>
 	  <child_name>Notebook:tab</child_name>
-	  <name>label15</name>
+	  <name>newname</name>
 	  <label>Name, Class</label>
 	  <justify>GTK_JUSTIFY_CENTER</justify>
 	  <wrap>False</wrap>
@@ -1798,18 +1883,28 @@
 
       <widget>
 	<class>GtkButton</class>
-	<name>button8</name>
+	<name>cgdone</name>
 	<can_default>True</can_default>
 	<can_focus>True</can_focus>
+	<signal>
+	  <name>clicked</name>
+	  <handler>on_cgdone_clicked</handler>
+	  <last_modification_time>Fri, 26 Jul 2002 00:16:08 GMT</last_modification_time>
+	</signal>
 	<stock_button>GNOME_STOCK_BUTTON_OK</stock_button>
 	<relief>GTK_RELIEF_NORMAL</relief>
       </widget>
 
       <widget>
 	<class>GtkButton</class>
-	<name>button10</name>
+	<name>cgcancel</name>
 	<can_default>True</can_default>
 	<can_focus>True</can_focus>
+	<signal>
+	  <name>clicked</name>
+	  <handler>on_cgcancel_clicked</handler>
+	  <last_modification_time>Fri, 26 Jul 2002 00:16:17 GMT</last_modification_time>
+	</signal>
 	<stock_button>GNOME_STOCK_BUTTON_CANCEL</stock_button>
 	<relief>GTK_RELIEF_NORMAL</relief>
       </widget>

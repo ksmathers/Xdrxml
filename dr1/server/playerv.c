@@ -188,7 +188,7 @@ int dr1Playerv_class( dr1Context *ctx, int c, char **v)
 int dr1Playerv_roll( dr1Context *ctx, int c, char **v)
 {
     dr1Player *p = &ctx->player;
-    if (c != 1) return -1;
+    if (c > 1) return -1;
 
     /* reroll attributes */
     p->base_attr = dr1Attr_create_mode4();
@@ -389,7 +389,7 @@ int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
 
 
     if (c == 0) {
-	dr1Stream_printf( &ctx->ios, DR1MSG_190, "(roll, swap, improve, race, sex, class, name, accept)");
+        psendMessage( &ctx->ios, DR1MSG_190, "(roll, swap, improve, race, sex, class, name, accept)");
 	return 0;
     }
 
@@ -397,6 +397,8 @@ int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
     res = 0;
     if ( !strcasecmp(v[0], "newplayer")) {
 	dr1Playerv_init( p);
+	dr1Playerv_roll( ctx, 0, NULL);
+	psendMessage( &ctx->ios, DR1MSG_105);
     } else if ( !strcasecmp(v[0], "roll")) {
 	res=dr1Playerv_roll( ctx, c, v);
     } else if ( !strcasecmp(v[0], "swap")) {
@@ -424,7 +426,7 @@ int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
 	} else {
 	    /* ok */
 	    ctx->dialog = DONE;
-	    dr1Stream_printf( &ctx->ios, DR1MSG_200);
+	    psendMessage( &ctx->ios, DR1MSG_100);
 	    return 0;
 	}
     } else {
@@ -435,9 +437,7 @@ int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
     if (res) {
 	dr1Stream_printf( &ctx->ios, DR1MSG_560, res);
 	return 0;
-    } else {
-	dr1Stream_printf( &ctx->ios, DR1MSG_200);
-    }
+    } 
 
     /*
      * Fix possible problems after changing stats

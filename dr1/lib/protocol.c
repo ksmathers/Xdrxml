@@ -4,17 +4,41 @@
 #include "strbuf.h"
 #include "stream.h"
 
+static void 
+psendUrlEncodedChar( dr1StringBuffer *sb, char c) {
+    if (c == ' ') {
+	sbputc( sb, '+');
+    } else if (c == '+' || c == '%' || c < 32 || c >=127) {
+	sbprintf( sb, "%%%02X", (int)c);
+    } else {
+	sbputc( sb, c);
+    }
+}
+
+static char 
+precvUrlEncodedChar( char **posn) {
+    char *cpos = *posn;
+    char buf[3];
+    char c;
+    if (*cpos == '+') { 
+	c=' ';
+    } else if (*cpos == '%') {
+	buf[0] = *++cpos;
+	buf[1] = *++cpos;
+	buf[2] = 0;
+	c = strtol( buf, NULL, 16);
+    } else {
+        c = *cpos;
+    }
+    *posn = cpos;
+    return c;
+}
+
 static void
 psendUrlEncoded( dr1StringBuffer* sb, char *str) {
     char *cpos = str;
     while (*cpos) {
-        if (*cpos == ' ') {
-	    sbputc( sb, '+');
-        } else if (*cpos == '+' || *cpos == '%' || *cpos < 32 || *cpos >=127) {
-            sbprintf( sb, "%%%02X", (int)*cpos);
-        } else {
-            sbputc( sb, *cpos);
-        }
+        psendUrlEncodedChar( sb, *cpos);
         cpos++;
     }
 }
@@ -25,17 +49,8 @@ precvUrlEncoded( char **posn, dr1StringBuffer *string) {
     int c; 
     char buf[3];
     while (*cpos && *cpos > 32 && *cpos < 127 ) {
-        if (*cpos == '+') { 
-            sbputc( string, ' ');
-        } else if (*cpos == '%') {
-            buf[0] = *++cpos;
-            buf[1] = *++cpos;
-            buf[2] = 0;
-            c = strtol( buf, NULL, 16);
-            sbputc( string, c);
-        } else {
-            sbputc( string, *cpos);
-        }
+        c = precvUrlEncodedChar( &cpos);
+	sbputc( string, c);
         cpos++;
     }
     *posn = cpos;
@@ -53,6 +68,10 @@ psendMessage( dr1Stream* os, char *msg, ...) {
         if (*cpos == '%') {
             cpos++;
             switch (*cpos) {
+                case 'c':
+  		    dparm = va_arg( va, int);
+		    psendUrlEncodedChar( sb, dparm);
+  		    break;
                 case 's':
   		    sparm = va_arg( va, char *);
 		    psendUrlEncoded( sb, sparm);
@@ -79,6 +98,7 @@ precvMessage( char *buf, char *msg, ...) {
     dr1StringBuffer stmp;
     char **sarg;
     int *darg;
+    char *carg;
     int count=0;
 
     dr1StringBuffer_create( &stmp);
@@ -88,6 +108,11 @@ precvMessage( char *buf, char *msg, ...) {
         if (*fmpos == '%') {
 	    fmpos++;
 	    switch (*fmpos) {
+		case 'c':
+		    count++;
+		    carg = va_arg( va, char *);
+		    *carg = precvUrlEncodedChar( &inpos);
+		    break;
 		case 's':
 		    count++;
                     sbclear( &stmp);

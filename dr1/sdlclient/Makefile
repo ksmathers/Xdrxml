@@ -18,9 +18,9 @@ LIBS=   `sdl-config --libs` -L/usr/local/lib -lSDL_ttf \
         `libglade-config gnome --libs` \
 	-lm ../lib/libdr1.a 
 
-dr1: dr1.o util.o glyphset.o text.o comm.o common.o
+dr1: dr1.o util.o glyphset.o text.o comm.o common.o cgenerate.o
 	gcc -Wl,--warn-common -g \
-	     dr1.o util.o glyphset.o text.o comm.o common.o \
+	     dr1.o util.o glyphset.o text.o comm.o common.o cgenerate.o \
 	     -o dr1 ${LIBS} 
 
 test: test.o util.o glyphset.o text.o
