@@ -1,5 +1,16 @@
 #include "class.h"
 
+/*-------------------------------------------------------------------
+ * dr1
+ *
+ *    These structure represent specific character classes (professions)
+ *    and their initialization parameters.
+ *
+ *    The thac0 class column is not taken directly from D&D.  The real
+ *    tables have a first 20, second 20, up to fourth 20 before having
+ *    to roll 21 to hit.  I instead add 4 to a natural 20.
+ */
+
 static dr1ClassType class_mu = {
     "Magic User",
     "d4",

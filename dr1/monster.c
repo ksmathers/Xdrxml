@@ -10,7 +10,7 @@ static dr1MonsterType kobold = {
     /* name      */ "Kobold",
     /* attr      */ { 0, 0, 0, 0, 0, 0},
     /* hd        */ "d4+1",
-    /* ac        */ 15,
+    /* ac        */ 7,
     /* nattacks  */ 1,
     /* damage    */ { &dr1Weapon_halfspear, NULL, NULL, NULL },
     /* xp        */ 10,

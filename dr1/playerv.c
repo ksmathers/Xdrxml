@@ -130,6 +130,7 @@ int dr1Playerv_class( dr1Player *p, int c, char **v) {
 
     p->class = ccode;
     p->hp = dr1Dice_roll( cl->hitdice);
+    p->full_hp = p->hp;
     p->purse.gp = dr1Dice_roll( cl->startingMoney);
     return 0;
 }

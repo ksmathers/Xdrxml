@@ -22,7 +22,7 @@ int attack( dr1Player *p, dr1Monster *m, int c, char **v) {
     /* Player swings */
     if (!fleeing) {
 	crit = 0;
-	tohit = p_thac0 + m->type->ac;
+	tohit = p_thac0 - m->type->ac;
 	roll = dr1Dice_roll("d20");
 	if ( roll == 20) {
 	    /* natural 20 gets a bonus */
@@ -58,7 +58,7 @@ int attack( dr1Player *p, dr1Monster *m, int c, char **v) {
     for (i=0; i < m->type->nattacks; i++) {
 	assert(m->type->damage[i]);
 	/* FIXME */
-	tohit = m_thac0 + dr1Player_ac( p, 0, m->type->damage[i]->ranged, 0);
+	tohit = m_thac0 - dr1Player_ac( p, 0, m->type->damage[i]->ranged, 0);
 	roll = dr1Dice_roll("d20");
 	if ( roll == 20) {
 	    /* natural 20 gets a bonus */
@@ -83,7 +83,7 @@ int attack( dr1Player *p, dr1Monster *m, int c, char **v) {
 	    int dam;
 	    dam = dr1Dice_roll( m->type->damage[i]->damage);
 	    printf("Struck Thee! %d damage.\n", dam);
-	    m->hp -= dam;
+	    p->hp -= dam;
 	} else {
 	    printf("Swish!\n");
 	}

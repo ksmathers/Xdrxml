@@ -1,3 +1,6 @@
+figure out what to do with gauche.  
+- maybe use it for damage when attacker has a critical miss.
+
 implement armor, add to dr1Player_ac() method
 stat bonuses for AC, reaction, etc.
 race bonuses other that stats
