@@ -14,9 +14,14 @@
 #include "lib/map.h"
 #include "lib/glyphset.h"
 #include "lib/strbuf.h"
+#include "lib/protocol.h"
+#include "lib/xdrxml.h"
 #include "glyphset.h"
 #include "util.h"
 #include "text.h"
+#include "comm.h"
+
+#include "../player.h"
 
 enum { NOLIGHT, TORCHLIGHT, LANTERNLIGHT };
 #define AMBIENTLIGHTDIST 10
@@ -25,8 +30,8 @@ int darkdist[] = { 0, 1, 3 };
 struct {
     char *server;
     SDL_Surface *screen;
-    int sd;
-} ctx;
+    dr1Player player;
+} ctx = { NULL };
 
 dr1GlyphTable *dr1_npcs1;
 
@@ -224,80 +229,6 @@ struct dr1Point {
     int y;
 };
 
-int doConnect( char *server, int port) {
-    struct sockaddr_in addr;
-    struct hostent *svr_addr;
-    svr_addr = gethostbyname( server);
-    assert(svr_addr);
-    addr.sin_family = AF_INET;
-    addr.sin_addr = *(struct in_addr *)svr_addr->h_addr;
-    addr.sin_port = htons( port);
-    ctx.sd = socket( PF_INET, SOCK_STREAM, 0);
-
-    if (connect( ctx.sd, &addr, sizeof(struct sockaddr_in))) {
-	perror("connect");
-	exit(1);
-    }
-    return 0;
-}
-
-void* comm_main( void* iparm) {
-    fd_set r_set, w_set, e_set;
-    fd_set tr_set, tw_set, te_set;
-    static dr1StringBuffer *sb = NULL;
-    int maxsock;
-    int err;
-    char buf[80];
-    int size;
-    int mode = 0;
-    struct timeval ttv;
-    struct timeval short_wait = { 0, 100000 };
-    char *server = (char *)iparm;
-
-    if (!sb) {
-	sb = dr1StringBuffer_create( NULL);
-    }
-
-    FD_ZERO( &r_set);		/* socket is readable (READABLE) */
-    FD_ZERO( &w_set);		/* write queued data */
-    FD_ZERO( &e_set);		/* error on socket */
-
-    dr1Text_infoMessage( "Connecting to server...", ctx.screen);
-    doConnect( server, 2300);
-    dr1Text_infoMessage( "Connected.", ctx.screen);
-    FD_SET( ctx.sd, &r_set);
-    maxsock = ctx.sd;
-    for(;;) {
-	tr_set = r_set; tw_set = w_set; te_set = e_set;
-	ttv = short_wait;
-        
-        err = select( maxsock + 1, &tr_set, &tw_set, &te_set, &ttv);
-	printf("/"); fflush(stdout);
-	if (err == EINTR) continue;
-	if (err < 0) { perror("select"); abort(); }
-	if (FD_ISSET( ctx.sd, &tr_set)) {
-	    printf("R\n");
-	    /* data from server ready to read */
-	    size = read( ctx.sd, buf, sizeof(buf));
-	    if (size < 0) { perror("read"); continue; }
-	    buf[size] = 0;
-	    printf("buf %s\n",buf);
-	    dr1Text_infoMessage( buf, ctx.screen);
-	    switch (mode) {
-		case 0:
-		    if (!strncmp( buf, "110", 3)) {
-			sb->cpos = 0;
-			mode = 1;
-		    }
-		    break;
-		case 1: /* reading map data */
-		    sbstrcat( sb, buf);
-		    break;
-	    } /* switch */
-	} /* if */
-    }
-}
-
 int main( int argc, char **argv) {
     char buf[80];
     int xpos = 0;
@@ -325,6 +256,8 @@ int main( int argc, char **argv) {
     }
     atexit(TTF_Quit);
 
+    /* initialize globals */
+    dr1Dice_seed();
 
     {   
         dr1Map *map = NULL;
@@ -412,9 +345,11 @@ int main( int argc, char **argv) {
 			    }
 			    break;
 			case SDL_MOUSEMOTION:
-/*			    printf("Mouse moved by %d,%d to (%d,%d)\n", 
+#if 0
+			    printf("Mouse moved by %d,%d to (%d,%d)\n", 
 				   event.motion.xrel, event.motion.yrel,
-				   event.motion.x, event.motion.y); /**/
+				   event.motion.x, event.motion.y); 
+#endif
 			    break;
 			case SDL_MOUSEBUTTONDOWN:
 			    printf("Mouse button %d pressed at (%d,%d)\n",

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include "text.h"
+#include <string.h>
 
 static struct {
     dr1Text dragons;
@@ -153,11 +154,13 @@ int dr1Text_init( SDL_Surface *screen) {
 	    "Reach", TITLE_PTSIZE, 70, 45, ANCHOR_TOPCENTER);
 
     /* character */
-    dr1Text_setInfo( &_text.name, "Thorin", 
+    dr1Text_setInfo( &_text.name, ctx->player.name,
 	    NAME_PTSIZE, XPOS, lpos(2), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.race, "Dwarf", 
+    dr1Text_setInfo( &_text.race, race_name[ ctx->player.race],
 	    DEFAULT_PTSIZE, XPOS, lpos(5), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.class_level, "Fighter/15", 
+    dr1Text_setInfo( &_text.class_level, "%s/%d",
+	    class_name[ ctx->player.class],
+	    ctx->player.level,
 	    DEFAULT_PTSIZE, XPOS, lpos(7), ANCHOR_TOPLEFT);
     dr1Text_setInfo( &_text.sex, "Male", 
 	    DEFAULT_PTSIZE, XPOS, lpos(9), ANCHOR_TOPLEFT);
