@@ -1,0 +1,31 @@
+#ifndef __D20__H
+#define __D20__H
+
+#ifndef _RPC_XDR_H
+#   include <rpc/xdr.h>
+#endif
+
+/*-------------------------------------------------------------------
+ * d20
+ *
+ *    The structure ...
+ */
+
+typedef struct {
+}
+
+
+/*-------------------------------------------------------------------
+ * d20
+ *
+ *    The method ...
+ *
+ *  PARAMETERS:
+ *
+ *  RETURNS:
+ *
+ *  SIDE EFFECTS:
+ */
+
+
+#endif /* __D20__H */
