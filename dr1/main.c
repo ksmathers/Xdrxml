@@ -39,6 +39,7 @@ int main( int argc, char** argv) {
 	assert(loadOk);
     } else {
         dr1Playerv_showDialog( &player);
+    printf("class=%08x\n", player.class);
     }
 
     /* purchase a potion */
@@ -71,12 +72,14 @@ int main( int argc, char** argv) {
     }
     free(b);
   
+    printf("class=%08x\n", player.class);
     /* dump player */
     printf("Player\n");
     xdr_push_note( &xdrasc, "player");
     xdr_dr1Player( &xdrasc, &player);
     xdr_pop_note( &xdrasc);
 
+    printf("class=%08x\n", player.class);
     /* save player with new item */
     fp = fopen("player.dat", "w");
     xdrstdio_create( &xdrs, fp, XDR_ENCODE);

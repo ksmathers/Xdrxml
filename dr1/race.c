@@ -19,7 +19,7 @@ static dr1AttrAdjust race_halfling = {
     "halfling", { -1, 0, 0, 2, 0, -1 }
 };
 
-static dr1RegistryEntry entries[] = {
+static dr1RegistryEntry race_entries[] = {
     { (int)'MAN ', &race_human },
     { (int)'ELF ', &race_elf },
     { (int)'HOBB', &race_halfling },
@@ -27,6 +27,24 @@ static dr1RegistryEntry entries[] = {
 };
 
 dr1Registry dr1race = {
-    entries
+    race_entries
+};
+
+static dr1AttrAdjust sex_male = {
+    "male", { 0, 0, 0, 0, 0, 0 }
+};
+
+static dr1AttrAdjust sex_female = {
+    "female", { -1, 0, 0, 1, 0, 0 }
+};
+
+static dr1RegistryEntry sex_entries[] = {
+    { (int)'MALE', &sex_male },
+    { (int)'FEMA', &sex_female },
+    { -1, NULL }
+};
+
+dr1Registry dr1sex = {
+    sex_entries
 };
 

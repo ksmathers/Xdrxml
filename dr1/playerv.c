@@ -44,6 +44,34 @@ int dr1Playerv_swap( dr1Player *p, int c, char **v) {
     return 0;
 }
 
+int dr1Playerv_sex( dr1Player *p, int c, char **v) {
+    dr1AttrAdjust *old, *new;
+    int r;
+    char s[80];
+    
+    if (c == 1) {
+	printf("(male, female)\n");
+	gets(s);
+    
+        v[1] = s;
+	c = 2;
+    }
+    if (c != 2) return -1;
+
+    old = dr1Registry_lookup( &dr1sex, p->sex);
+
+    if (!strcasecmp( v[1], "male")) r='MALE';
+    else if (!strcasecmp( v[1], "female")) r='FEMA';
+    else return -1;
+
+    new = dr1Registry_lookup( &dr1race, r);
+    if (!new) return -1;
+    if (old) dr1Attr_adjust( &p->base_attr, &old->offset, -1);
+    dr1Attr_adjust( &p->base_attr, &new->offset, 1);
+    p->race = r;
+    return 0;
+}
+
 int dr1Playerv_race( dr1Player *p, int c, char **v) {
     dr1AttrAdjust *old, *new;
     int r;
@@ -124,6 +152,7 @@ int dr1Playerv_trade( dr1Player *p, int c, char **v) {
 int dr1Playerv_init( dr1Player *p) {
     p->name = strdup( "Unnamed");
     p->race = 'MAN ';
+    p->sex = 'MALE';
     return 0;
 }
 
@@ -132,6 +161,7 @@ int dr1Playerv_showDialog( dr1Player *p) {
     char *cmds[10];
     char buf[80];
     dr1AttrAdjust *race;
+    dr1ClassType *class;
     int i;
 
     dr1Playerv_init( p);
@@ -142,9 +172,12 @@ int dr1Playerv_showDialog( dr1Player *p) {
 
 	dr1Money_format( &p->purse, buf);
 	race = dr1Registry_lookup( &dr1race, p->race);
+	class = dr1Registry_lookup( &dr1class, p->class);
 	printf("---------------------------------------------------------\n");
 	if (p->name) printf("Name: %s\n", p->name);
 	if (race) printf("Race: %s\n", race->type);
+	if (class) printf("Class: %s\n", class->class);
+	printf("Sex: %s\n", p->sex=='FEMA'?"Female":"Male");
 	printf("Purse: %s\n", buf);
 	printf("Str: %2d\n", p->base_attr._str);
 	printf("Int: %2d\n", p->base_attr._int);
@@ -166,8 +199,10 @@ int dr1Playerv_showDialog( dr1Player *p) {
 	else if ( !strcasecmp(cmds[0], "race")) dr1Playerv_race( p, i, cmds);
 	else if ( !strcasecmp(cmds[0], "name")) dr1Playerv_name( p, i, cmds);
 	else if ( !strcasecmp(cmds[0], "class")) dr1Playerv_class( p, i, cmds);
+	else if ( !strcasecmp(cmds[0], "sex")) dr1Playerv_sex( p, i, cmds);
 	else if ( !strcasecmp(cmds[0], "done")) return 0;
 	else printf("Unknown command: '%s'\n", cmds[0]);
     }
+    printf("class=%08x\n", p->class);
 }
 

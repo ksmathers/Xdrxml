@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include "xdrasc.h"
 
 /*
@@ -26,9 +27,11 @@ struct xdr_ops xdrasc_ops = {
 struct xdrasc_st {
 	struct annnode *head;
 	char *attr;
+	FILE *fp;
     };
 
 struct xdrasc_st xdrasc_data = {
+    NULL,
     NULL,
     NULL
 };
@@ -44,38 +47,75 @@ XDR xdrasc = {
     XDR_ANNOTATE
 };
 
+XDR *xdr_asc_create( char *fname, enum xdr_op xop) {
+    XDR *xdrasc;
+    struct xdrasc_st *xdrasc_data;
+
+    xdrasc = malloc( sizeof(XDR));
+    xdrasc_data = malloc( sizeof(struct xdrasc_st));
+
+    xdrasc->x_op = xop;
+    xdrasc->x_ops = &xdrasc_ops;
+    xdrasc->x_public = NULL;
+    xdrasc->x_private = (void *)xdrasc_data;
+    xdrasc->x_base = NULL;
+    xdrasc->x_handy = XDR_ANNOTATE;
+    return xdrasc;
+}
+
 struct annnode {
     struct annnode *next;
     char *note;
 };
 
-void xdr_push_note( XDR *xdrs, const char *s, ...)
+bool_t xdr_push_note( XDR *xdrs, const char *s, ...)
 {
     va_list va;
     va_start( va, s);
     if (xdrs->x_handy & XDR_ANNOTATE) {
 	char buf[80];
+	FILE *fp;
         struct annnode *a = calloc( 1, sizeof( *a));
 
         vsprintf(buf, s, va);
 	a->next = (struct annnode*)XDRASC_DATA(xdrs)->head;
 	a->note = strdup(buf);
+	fp = XDRASC_DATA(xdrs)->fp;
 	XDRASC_DATA(xdrs)->head = (void *)a;
-
-	printf("<%s>\n", a->note);
+	if (xdrs->x_op == XDR_ENCODE) {
+	    if (!fp) fp = stdout;
+	    fprintf(fp, "<%s>\n", a->note);
+	} else if (xdrs->x_op == XDR_DECODE) {
+	    if (!fp) fp = stdin;
+	    fscanf(fp, "<%s>\n", buf);
+	    if (!strcmp(buf, a->note)) return FALSE;
+	}
     }
+    return TRUE;
 }
 
-void xdr_pop_note( XDR *xdrs) 
+bool_t xdr_pop_note( XDR *xdrs) 
 {
     if (xdrs->x_handy & XDR_ANNOTATE) {
+	FILE *fp;
+	char buf[80];
 	struct annnode *a = XDRASC_DATA(xdrs)->head;
 	XDRASC_DATA(xdrs)->head = (void *)a->next;
+	fp = XDRASC_DATA(xdrs)->fp;
 
-	printf("</%s>\n", a->note);
+	if (xdrs->x_op == XDR_ENCODE) {
+	    if (!fp) fp = stdout;
+	    fprintf(fp, "<%s>\n", a->note);
+	} else if (xdrs->x_op == XDR_DECODE) {
+	    if (!fp) fp = stdin;
+	    fscanf(fp, "<%s>\n", buf);
+	    if (!strcmp(buf, a->note)) return FALSE;
+	}
+	
 	free(a->note);
 	free(a);
     }
+    return TRUE;
 }
 
 void xdr_attr( XDR *xdrs, const char *s, ...) {
@@ -98,9 +138,13 @@ bool_t xdrasc_getlong( XDR *__xdrs, long *__lp)
 bool_t xdrasc_putlong( XDR *__xdrs, __const long *__lp)
 {
     /* put a long to " */
-    printf("<%s>", XDRASC_DATA(__xdrs)->attr);
-    printf("0x%lx", *__lp);
-    printf("</%s>\n", XDRASC_DATA(__xdrs)->attr);
+    FILE *fp;
+
+    fp = XDRASC_DATA(__xdrs)->fp;
+    if (!fp) fp = stdout;
+    fprintf(fp, "<%s>", XDRASC_DATA(__xdrs)->attr);
+    fprintf(fp, "0x%lx", *__lp);
+    fprintf(fp, "</%s>\n", XDRASC_DATA(__xdrs)->attr);
 }
 
 bool_t xdrasc_getbytes( XDR *__xdrs, caddr_t __addr,
@@ -114,30 +158,40 @@ bool_t xdrasc_putbytes( XDR *__xdrs, __const char *__addr,
 			     u_int __len)
 {
     /* put some bytes to " */
+    FILE *fp;
     int i;
     char c;
-    printf("<%s>", XDRASC_DATA(__xdrs)->attr);
+    fp = XDRASC_DATA(__xdrs)->fp;
+    if (!fp) fp = stdout;
+    fprintf(fp, "<%s>", XDRASC_DATA(__xdrs)->attr);
 
     for (i=0; i<__len; i++) {
 	c = __addr[ i];
-	if (c >=' ' && c <'~') putchar( c);
+	if (c >=' ' && c <='~' && c != '&' && c != '<') putchar( c);
 	else {
-	   printf("~%02x", c);
+	   fprintf(fp, "&#%d;", c);
 	}
     }
-    printf("</%s>\n", XDRASC_DATA(__xdrs)->attr);
+
+    fprintf(fp, "</%s>\n", XDRASC_DATA(__xdrs)->attr);
 }
 
 u_int xdrasc_getpostn( __const XDR *__xdrs)
 {
     /* returns bytes off from beginning */
-    assert(1==0);
+    FILE *fp;
+    fp = XDRASC_DATA(__xdrs)->fp;
+    assert(fp);
+    return ftell(fp);
 }
 
 bool_t xdrasc_setpostn( XDR *__xdrs, u_int pos)
 {
     /* lets you reposition the stream */
-    assert(1==0);
+    FILE *fp;
+    fp = XDRASC_DATA(__xdrs)->fp;
+    assert(fp);
+    return fseek(fp, pos, SEEK_SET);
 }
 
 int32_t *xdrasc_inline( XDR *__xdrs, int len)
@@ -162,7 +216,10 @@ bool_t xdrasc_getint32( XDR *__xdrs, int32_t *__ip)
 bool_t xdrasc_putint32( XDR *__xdrs, __const int32_t *__ip)
 {
     /* put a int to " */
-    printf("<%s>", XDRASC_DATA(__xdrs)->attr);
-    printf("0x%x", *__ip);
-    printf("</%s>\n", XDRASC_DATA(__xdrs)->attr);
+    FILE *fp;
+    fp = XDRASC_DATA(__xdrs)->fp;
+    if (!fp) fp = stdout;
+    fprintf(fp, "<%s>", XDRASC_DATA(__xdrs)->attr);
+    fprintf(fp, "0x%x", *__ip);
+    fprintf(fp, "</%s>\n", XDRASC_DATA(__xdrs)->attr);
 }

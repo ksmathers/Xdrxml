@@ -24,8 +24,8 @@
 
 enum { XDR_ANNOTATE = 0x1 };
 
-void xdr_push_note( XDR *xdrs, const char *ann, ...);
-void xdr_pop_note( XDR *xdrs);
+bool_t xdr_push_note( XDR *xdrs, const char *ann, ...);
+bool_t xdr_pop_note( XDR *xdrs);
 void xdr_attr( XDR *xdrs, const char *ann, ...);
 
 /*

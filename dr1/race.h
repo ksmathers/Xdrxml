@@ -14,5 +14,6 @@
  */
 
 extern dr1Registry dr1race;
+extern dr1Registry dr1sex;
 
 #endif /* __DR1RACE__H */
