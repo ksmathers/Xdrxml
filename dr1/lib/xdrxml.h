@@ -41,6 +41,8 @@ struct xdr_ops_ext {
         int (*x_printf)( XDR *xdrs, char *fmt, ...);
     };
 
+typedef bool_t (*xdrxmlproc_t )( XDR *xdrs, char *node, void *data);
+
 struct xdrxml_st {
         char path[1024];
 	char *attr;
@@ -63,6 +65,16 @@ struct xdrxml_st {
     };
 
 enum { XDR_ANNOTATE = 0x1 };
+
+void xdrxml_free( xdrxmlproc_t proc, void *data);
+bool_t xdrxml_group( XDR *xdrs, const char *name);
+bool_t xdrxml_endgroup( XDR *xdrs);
+
+bool_t xdrxml_int( XDR *xdrs, char *node, int *data);
+bool_t xdrxml_int32_t( XDR *xdrs, char *node, int32_t *data);
+bool_t xdrxml_long( XDR *xdrs, char *node, long *data);
+bool_t xdrxml_bool( XDR *xdrs, char *node, int *bool) ;
+bool_t xdrxml_wrapstring( XDR *xdrs, char *node, char **s) ;
 
 bool_t xdr_push_note( XDR *xdrs, const char *ann);
 bool_t xdr_pop_note( XDR *xdrs);
@@ -97,11 +109,6 @@ void xdrxml_clearerr( XDR* xdrs);
 int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop);
     /* open an XML xdr stream */
 
-bool_t xdrxml_bool( XDR *xdrs, int *bool) ;
-    /* read/write boolean as node (instead of int) */
-
-bool_t xdrxml_wrapstring( XDR *xdrs, char **s) ;
-    /* read/write strings as strings (instead of int+bytes+bytes) */
 
 bool_t xdrxml_getlong( XDR *__xdrs, long *__lp);
     /* get a long from underlying stream */

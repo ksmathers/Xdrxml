@@ -36,7 +36,7 @@ typedef int (* dr1Item_drop_fnp) ( struct dr1Player *p, dr1Item *i);
 typedef void (* dr1Item_take_fnp) ( struct dr1Player *p, dr1Item *i);
    /* action to perform on adding to inventory */
 
-typedef bool_t (* dr1Item_xdr_fnp) ( XDR *xdrs, dr1Item *i);
+typedef bool_t (* dr1Item_xdr_fnp) ( XDR *xdrs, char *node, dr1Item *i);
    /* save any persistent parts of the object */
 
 typedef void (* dr1Item_copy_fnp) ( dr1Item* copy, dr1Item* orig);
@@ -144,6 +144,6 @@ long dr1Item_size( dr1Item *i);
 /*-------------------------------------------------------------------
  * xdr_dr1ItemPtr( xdrs, dr1Item**)
  */
-bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item**);
+bool_t xdr_dr1ItemPtr( XDR *xdrs, char *node, dr1Item**);
 
 #endif

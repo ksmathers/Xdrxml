@@ -150,13 +150,14 @@ int dr1Monster_thac0( dr1Monster *m) {
  *
  */
 
-bool_t xdr_dr1Monster( XDR *xdrs, dr1Monster* m) {
+bool_t xdr_dr1Monster( XDR *xdrs, char *node, dr1Monster* m) {
     int code;
+
+    xdrxml_group( xdrs, node);
 
     if (xdrs->x_op == XDR_ENCODE) code = m->type->mtype;
 
-    xdr_attr( xdrs, "type");
-    if (!xdr_int( xdrs, &code)) return FALSE;
+    if (!xdrxml_int( xdrs, "type", &code)) return FALSE;
 
     if (xdrs->x_op == XDR_DECODE) {
 	dr1MonsterType* mtype = dr1Registry_lookup( &dr1monsters, code);
@@ -164,5 +165,7 @@ bool_t xdr_dr1Monster( XDR *xdrs, dr1Monster* m) {
 
 	dr1Monster_init( m, mtype->name);
     }
+
+    xdrxml_endgroup( xdrs);
     return TRUE;
 }

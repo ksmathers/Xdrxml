@@ -95,25 +95,26 @@ void dr1Set_remove( dr1Set* set, void *i) {
 /*-------------------------------------------------------------------
  * xdr_dr1Set( xdrs, dr1Set*)
  */
-bool_t xdr_dr1Set( XDR *xdrs, dr1Set* set) {
+bool_t xdr_dr1Set( XDR *xdrs, char *node, dr1Set* set) {
     int i;
 
-    xdr_attr( xdrs, "len");
-    if (!xdr_int( xdrs, &set->len)) return FALSE;
+    xdrxml_group( xdrs, node);
+    if (!xdrxml_int( xdrs, "len", &set->len)) return FALSE;
 
     if (xdrs->x_op == XDR_DECODE) {
 	set->size = set->len;
 	set->items = calloc(set->len, sizeof(void*));
     }
     for ( i=0; i<set->len; i++) {
-        xdr_push_note( xdrs, "item");
+        xdrxml_group( xdrs, "item");
 	if (!set->xdr( xdrs, &set->items[i])) return FALSE;
-        xdr_pop_note( xdrs);
+        xdrxml_endgroup( xdrs);
     }
     if (xdrs->x_op == XDR_FREE) {
 	free( set->items);
 	set->items = NULL;
     }
+    xdrxml_endgroup(xdrs);
     return TRUE;
 }
 

@@ -225,7 +225,8 @@ bool_t xdrxmlsb_putint32( XDR *__xdrs, __const int32_t *__ip)
     sb = xdrd->sb;
 
     while (ni--) sbprintf(sb, "    ");
-    sbprintf(sb, "<%s value=\"0x%lx\"/>\n", attr, (long)*__ip);
+    sbprintf(sb, "<%s>0x%lx</%s>\n", attr, (long)*__ip, attr);
     xdrd->attr = NULL;
     return TRUE;
 }
+

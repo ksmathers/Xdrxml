@@ -53,11 +53,10 @@ void sendmap( dr1Context* ctx) {
     char *buf;
     int res;
     xdrxmlsb_reset( &xdrxmlsb);
-    xdr_push_note( &xdrxmlsb, "map");
-    if (xdr_dr1Map( &xdrxmlsb, ctx->map) != TRUE) {
+
+    if (xdr_dr1Map( &xdrxmlsb, "map", ctx->map) != TRUE) {
 	printf("Error serializing map.\n");
     }
-    xdr_pop_note( &xdrxmlsb);
 
     buf = xdrxmlsb_getbuf( &xdrxmlsb); 
 
@@ -77,11 +76,9 @@ void sendplayer( dr1Context* ctx) {
     char *buf;
     int res;
     xdrxmlsb_reset( &xdrxmlsb);
-    xdr_push_note( &xdrxmlsb, "player");
-    if (xdr_dr1Player( &xdrxmlsb, &ctx->player) != TRUE) {
+    if (xdr_dr1Player( &xdrxmlsb, "player", &ctx->player) != TRUE) {
 	printf("Error serializing player.\n");
     }
-    xdr_pop_note( &xdrxmlsb);
 
     buf = xdrxmlsb_getbuf( &xdrxmlsb); 
 

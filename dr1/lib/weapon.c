@@ -7,7 +7,7 @@
  *
  *    Represents the item archetype for common weapons
  */
-static bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i);
+static bool_t xdr_dr1Weapon( XDR *xdrs, char *node, dr1Item *i);
 
 dr1ItemType dr1Weapon_primary = {
     sizeof( dr1Weapon),		/* size */
@@ -178,51 +178,33 @@ dr1Weapon dr1Weapon_arrow = {
  *
  *  SIDE EFFECTS:
  */
-static bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i) {
+static bool_t xdr_dr1Weapon( XDR *xdrs, char *node, dr1Item *i) {
     bool_t res;
     int tmp;
     dr1Weapon *w = (dr1Weapon*)i;
-    xdr_push_note( xdrs, "damage");
-    res = xdr_dr1Dice( xdrs, &w->damage);
-    xdr_pop_note( xdrs);
-    if (!res) return FALSE;
 
-    xdr_attr( xdrs, "range");
-    res = xdr_int( xdrs, &w->range);
-    if (!res) return FALSE;
+    xdrxml_group( xdrs, node);
+    
+    if (!xdr_dr1Dice( xdrs, "damage", &w->damage)) return FALSE;
+    if (!xdrxml_int( xdrs, "range", &w->range)) return FALSE;
+    if (!xdrxml_int( xdrs, "rof", &w->rof)) return FALSE;
+    if (!xdrxml_int( xdrs, "speed", &w->speed)) return FALSE;
 
-    xdr_attr( xdrs, "rof");
-    res = xdr_int( xdrs, &w->rof);
-    if (!res) return FALSE;
-
-    xdr_attr( xdrs, "speed");
-    res = xdr_int( xdrs, &w->speed);
-    if (!res) return FALSE;
-
-    xdr_attr( xdrs, "dtype");
     tmp = w->dtype;
-    res = xdr_int( xdrs, &tmp);
+    if (!xdrxml_int( xdrs, "dtype", &tmp)) return FALSE;
     w->dtype = tmp;
-    if (!res) return FALSE;
 
-    xdr_attr( xdrs, "plusToHit");
-    if (!xdr_int( xdrs, &w->plusToHit)) return FALSE;
+    if (!xdrxml_int( xdrs, "plusToHit", &w->plusToHit)) return FALSE;
+    if (!xdrxml_int( xdrs, "plusToDamage", &w->plusToDamage)) return FALSE;
+    if (!xdrxml_int( xdrs, "stackable", &w->stackable)) return FALSE;
     
-    xdr_attr( xdrs, "plusToDamage");
-    if (!xdr_int( xdrs, &w->plusToDamage)) return FALSE;
-    
-    xdr_attr( xdrs, "stackable");
-    if (!xdr_int( xdrs, &w->stackable)) return FALSE;
-    
-    xdr_attr( xdrs, "missile");
     tmp = w->missile;
-    res = xdr_int( xdrs, &tmp);
+    if (!xdrxml_int( xdrs, "missile", &tmp)) return FALSE;
     w->missile = tmp;
-    if (!res) return FALSE;
     
-    xdr_attr( xdrs, "min_str");
-    if (!xdr_int( xdrs, &w->min_str)) return FALSE;
+    if (!xdrxml_int( xdrs, "min_str", &w->min_str)) return FALSE;
 
+    xdrxml_endgroup( xdrs);
     return TRUE;
 }
 

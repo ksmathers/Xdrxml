@@ -163,6 +163,6 @@ int dr1Player_ac( dr1Player *p, int surprise, int ranged, enum DR1DamageType dty
  * bool_t xdr_dr1Player( xdrs, dr1Player*)
  *   Returns TRUE on success
  */
-bool_t xdr_dr1Player( XDR *xdrs, dr1Player*);
+bool_t xdr_dr1Player( XDR *xdrs, char *node, dr1Player*);
 
 #endif /* __DR1PLAYER__H */

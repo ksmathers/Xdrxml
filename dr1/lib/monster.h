@@ -121,5 +121,5 @@ extern dr1Registry dr1monsters;
  *
  */
 
-bool_t xdr_dr1Monster( XDR *xdrs, dr1Monster* m);
+bool_t xdr_dr1Monster( XDR *xdrs, char *node, dr1Monster* m);
 #endif /* __DR1MONSTER__H */

@@ -11,7 +11,7 @@
  *    generic armor (generic armor all works the same)
  */
 
-static bool_t xdr_dr1Armor( XDR *xdrs, dr1Item *i);
+static bool_t xdr_dr1Armor( XDR *xdrs, char *node, dr1Item *i);
 dr1ItemType dr1Armor_type = {
     sizeof( dr1Armor),		/* size */
     (int)DR1A_BASICARMOR,	/* code */
@@ -258,16 +258,17 @@ void dr1Armor_copy( dr1Item* dest, dr1Item *source) {
  *  SIDE EFFECTS:
  */
 
-static bool_t xdr_dr1Armor( XDR *xdrs, dr1Item *i) {
+static bool_t xdr_dr1Armor( XDR *xdrs, char *node, dr1Item *i) {
     dr1Armor *a = (dr1Armor *)i;
     int code;
+
+    xdrxml_group( xdrs, node);
 
     if ( xdrs->x_op == XDR_ENCODE) {
 	code = a->type->code;
     }
 
-    xdr_attr( xdrs, "type");
-    if ( !xdr_int( xdrs, &code)) return FALSE;
+    if ( !xdrxml_int( xdrs, "type", &code)) return FALSE;
 
 /*    printf("armor type 0x%x\n", code); /**/
 
@@ -277,8 +278,8 @@ static bool_t xdr_dr1Armor( XDR *xdrs, dr1Item *i) {
 	if (!a->type) return FALSE;
     }
 
-    xdr_attr( xdrs, "damage");
-    if ( !xdr_int( xdrs, &a->damage)) return FALSE;
+    if ( !xdrxml_int( xdrs, "damage", &a->damage)) return FALSE;
+    xdrxml_endgroup( xdrs);
     
     return TRUE;
 }

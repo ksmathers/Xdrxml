@@ -7,7 +7,7 @@
 /*-------------------------------------------------------------------
  * xdr_dr1pHeal( xdrs, dr1Item*)
  */
-static bool_t xdr_dr1pHeal( XDR *xdrs, dr1Item*);
+static bool_t xdr_dr1pHeal( XDR *xdrs, char *node, dr1Item*);
 
 /*-------------------------------------------------------------------
  * dr1pHeal_type
@@ -41,10 +41,13 @@ void dr1pHeal_quaff( dr1Player* p, dr1Item* i, int fn) {
 /*-------------------------------------------------------------------
  * xdr_dr1pHeal( xdrs, dr1pHeal*)
  */
-static bool_t xdr_dr1pHeal( XDR *xdrs, dr1Item* p) {
+static bool_t xdr_dr1pHeal( XDR *xdrs, char *node, dr1Item* p) {
     dr1pHeal *pot = (dr1pHeal*)p;
 
-    xdr_attr( xdrs, "effect");
-    return xdr_dr1Dice( xdrs, &pot->effect);
+    xdrxml_group( xdrs, node);
+    if (!xdr_dr1Dice( xdrs, "effect", &pot->effect)) return FALSE;
+    xdrxml_endgroup( xdrs);
+
+    return TRUE;
 }
 

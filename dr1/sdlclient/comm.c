@@ -151,7 +151,7 @@ int handleMessage(char *buf) {
 			{
 			    dr1Map* map;
 			    map = calloc( 1, sizeof( dr1Map));
-			    ok = xdr_dr1Map( &xdrs, map);
+			    ok = xdr_dr1Map( &xdrs, "map", map);
 			    if (!ok) {
 				printf("Error decoding map data\n");
 				break;
@@ -165,7 +165,7 @@ int handleMessage(char *buf) {
 			{
 			    dr1Player *p;
 			    p = calloc( 1, sizeof(dr1Player));
-			    ok = xdr_dr1Player( &xdrs, p);
+			    ok = xdr_dr1Player( &xdrs, "player", p);
 			    if (!ok) {
 				printf("Error decoding player data\n");
 				break;

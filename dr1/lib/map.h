@@ -106,5 +106,5 @@ dr1Map* dr1Map_readmap( char *fname);
 
 
 int dr1Map_setgraphic( dr1Map *map, char c[2], int x, int y);
-bool_t xdr_dr1Map( XDR *xdrs, dr1Map *);
+bool_t xdr_dr1Map( XDR *xdrs, char *node, dr1Map *);
 #endif /* __DR1MAP__H */

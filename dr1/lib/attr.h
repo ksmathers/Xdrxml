@@ -157,7 +157,7 @@ void dr1Attr_adjust( dr1Attr *a, dr1AttrAdjust *b, int mul);
 /*-------------------------------------------------------------------
  * xdr_dr1Attr( xdrs, dr1Attr*)
  */
-bool_t xdr_dr1Attr( XDR *xdrs, dr1Attr*);
+bool_t xdr_dr1Attr( XDR *xdrs, char *node, dr1Attr*);
 
 
 #endif /* __DR1ATTR__H */

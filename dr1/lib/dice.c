@@ -90,8 +90,10 @@ int dr1Dice_roll( char *ds) {
 /*-------------------------------------------------------------------
  * xdr_dr1Dice( xdrs, dr1Dice*)
  */
-bool_t xdr_dr1Dice( XDR *xdrs, dr1Dice* d) {
-    xdr_attr(xdrs, "dice");
-    return xdrxml_wrapstring( xdrs, d);
+bool_t xdr_dr1Dice( XDR *xdrs, char *node, dr1Dice* d) {
+    xdrxml_group( xdrs, node);
+    if (! xdrxml_wrapstring( xdrs, "dice", d)) return FALSE;
+    xdrxml_endgroup( xdrs);
+    return TRUE;
 }
 

@@ -80,6 +80,13 @@ int xdrxml_nchar( char *path, int c) {
     return i;
 }
 
+void xdrxml_free( xdrxmlproc_t proc, void *data) {
+    XDR xdrs;
+    bzero( &xdrs, sizeof(xdrs));
+    xdrs.x_op = XDR_FREE;
+    proc( &xdrs, NULL, data);
+}
+
 int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop) {
     struct xdrxml_st *xdrd;
 
@@ -144,6 +151,92 @@ void xdrxml_clearerr( XDR *xdrs) {
        struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
        xdrd->error = DR1_ENOERROR;
     }
+}
+
+bool_t xdrxml_bool( XDR *xdrs, char *node, bool_t *bool) {
+    bool_t res;
+
+    xdr_attr( xdrs, node);
+    if (xdrs->x_handy & XDR_ANNOTATE) {
+	/* xml stream */
+	struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+        if (xdrs->x_op == XDR_DECODE) {
+	    res = xdrd->ext->x_getbit( xdrs, bool);
+	} else if (xdrs->x_op == XDR_ENCODE) {
+	    res = xdrd->ext->x_putbit( xdrs, *bool);
+	}
+    } else {
+	res = xdr_bool( xdrs, bool);
+    }
+    return res;
+}
+
+
+int xdrxml_count_children( xmlNodePtr n, char *node) {
+    xmlNodePtr c;
+    int count = 0;
+    for (c=n->children; c != NULL; c = c->next) {
+        if (!strcmp(c->name, node)) count++;
+	if (count > 500) { count=0; break; }
+	if (c == n->last) break;
+    }
+    return count;
+}
+
+bool_t xdrxml_int32_t( XDR *xdrs, char *node, int32_t *data) {
+    bool_t res;
+    xdr_attr( xdrs, node);
+    res = xdr_int32_t( xdrs, data);
+    return res;
+}
+
+bool_t xdrxml_int( XDR *xdrs, char *node, int *data) {
+    bool_t res;
+    xdr_attr( xdrs, node);
+    res = xdr_int( xdrs, data);
+    return res;
+}
+
+bool_t xdrxml_long( XDR *xdrs, char *node, long *data) {
+    bool_t res;
+    xdr_attr( xdrs, node);
+    res = xdr_long( xdrs, data);
+    return res;
+}
+
+bool_t xdrxml_wrapstring( XDR *xdrs, char *node, char **s) 
+{
+    bool_t res;
+    /* send or read a string from the stream */
+    xdr_attr( xdrs, node);
+    if (xdrs->x_handy & XDR_ANNOTATE) {
+	/* xml stream */
+	struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+	if (xdrs->x_op == XDR_ENCODE) {
+	    res = xdrd->ext->x_putstring( xdrs, *s);
+	} else if (xdrs->x_op == XDR_DECODE) {
+	    res = xdrd->ext->x_getstring( xdrs, 0, s);
+	} else if (xdrs->x_op == XDR_FREE) {
+	    if (*s) {
+		free(*s);
+		*s = NULL;
+		res = TRUE;
+	    }
+	} else res=FALSE;
+    } else {
+        res = xdr_wrapstring( xdrs, s);
+    }
+    return res;
+}
+
+bool_t xdrxml_group( XDR *xdrs, const char *s) 
+{
+    xdr_push_note( xdrs, s);
+}
+
+bool_t xdrxml_endgroup( XDR *xdrs)
+{
+    xdr_pop_note( xdrs);
 }
 
 bool_t xdrxml_getstring( XDR *xdrs, int prealloc_len, char **s) {
@@ -279,46 +372,6 @@ bool_t xdrxml_putbit( XDR *xdrs, bool_t bit) {
 }
 
 
-bool_t xdrxml_bool( XDR *xdrs, bool_t *bool) {
-    bool_t res;
-    if (xdrs->x_handy & XDR_ANNOTATE) {
-	/* xml stream */
-	struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
-        if (xdrs->x_op == XDR_DECODE) {
-	    res = xdrd->ext->x_getbit( xdrs, bool);
-	} else if (xdrs->x_op == XDR_ENCODE) {
-	    res = xdrd->ext->x_putbit( xdrs, *bool);
-	}
-    } else {
-	res = xdr_bool( xdrs, bool);
-    }
-    return res;
-}
-
-bool_t xdrxml_wrapstring( XDR *xdrs, char **s) 
-{
-    bool_t res;
-    /* send or read a string from the stream */
-    if (xdrs->x_handy & XDR_ANNOTATE) {
-	/* xml stream */
-	struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
-	if (xdrs->x_op == XDR_ENCODE) {
-	    res = xdrd->ext->x_putstring( xdrs, *s);
-	} else if (xdrs->x_op == XDR_DECODE) {
-	    res = xdrd->ext->x_getstring( xdrs, 0, s);
-	} else if (xdrs->x_op == XDR_FREE) {
-	    if (*s) {
-		free(*s);
-		*s = NULL;
-		res = TRUE;
-	    }
-	} else res=FALSE;
-    } else {
-        res = xdr_wrapstring( xdrs, s);
-    }
-    return res;
-}
-
 bool_t xdr_push_note( XDR *xdrs, const char *s)
 {
     if (xdrs->x_handy == XDR_ANNOTATE) {
@@ -345,6 +398,7 @@ bool_t xdr_push_note( XDR *xdrs, const char *s)
     }
     return TRUE;
 }
+
 
 bool_t xdr_pop_note( XDR *xdrs) 
 {
@@ -558,7 +612,7 @@ bool_t xdrxml_getint32( XDR *__xdrs, int32_t *__ip)
     cur = bfs1( xdrd->cur, attr);
     if (!cur) return FALSE;
 
-    value = xmlGetProp(cur, "value");
+    value = xmlNodeListGetString(xdrd->doc, cur->children, 1);
     if (!value) return FALSE;
 
     *__ip = (int32_t)strtol( value, &err, 0);
@@ -585,7 +639,7 @@ bool_t xdrxml_putint32( XDR *__xdrs, __const int32_t *__ip)
     else fp = stdout;
 
     while (ni--) fprintf(fp, "    ");
-    fprintf(fp, "<%s value=\"0x%lx\"/>\n", attr, (long)*__ip);
+    fprintf(fp, "<%s>0x%lx</%s>\n", attr, (long)*__ip, attr);
     xdrd->attr = NULL;
     return TRUE;
 }

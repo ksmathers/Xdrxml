@@ -83,6 +83,6 @@ int dr1ItemSet_encumbrance( dr1ItemSet* set);
 /*-------------------------------------------------------------------
  * xdr_dr1ItemSet( xdrs, dr1ItemSet*)
  */
-bool_t xdr_dr1ItemSet( XDR *xdrs, dr1ItemSet*);
+bool_t xdr_dr1ItemSet( XDR *xdrs, char *node, dr1ItemSet*);
 
 #endif /* __DR1ITEMSET__H */

@@ -385,22 +385,15 @@ dr1Money dr1Money_normalizex( dr1Money *purse, double charge, int ep) {
 /*-------------------------------------------------------------------
  * xdr_dr1Money( xdrs, dr1Money*)
  */
-bool_t xdr_dr1Money( XDR *xdrs, dr1Money* p) {
+bool_t xdr_dr1Money( XDR *xdrs, char *node, dr1Money* p) {
 
-    xdr_attr( xdrs, "pp");
-    if (!xdr_int( xdrs, &p->pp)) return FALSE;
-
-    xdr_attr( xdrs, "gp");
-    if (!xdr_int( xdrs, &p->gp)) return FALSE;
-
-    xdr_attr( xdrs, "ep");
-    if (!xdr_int( xdrs, &p->ep)) return FALSE;
-
-    xdr_attr( xdrs, "sp");
-    if (!xdr_int( xdrs, &p->sp)) return FALSE;
-
-    xdr_attr( xdrs, "cp");
-    if (!xdr_int( xdrs, &p->cp)) return FALSE;
+    xdrxml_group( xdrs, node);
+    if (!xdrxml_int( xdrs, "pp", &p->pp)) return FALSE;
+    if (!xdrxml_int( xdrs, "gp", &p->gp)) return FALSE;
+    if (!xdrxml_int( xdrs, "ep", &p->ep)) return FALSE;
+    if (!xdrxml_int( xdrs, "sp", &p->sp)) return FALSE;
+    if (!xdrxml_int( xdrs, "cp", &p->cp)) return FALSE;
+    xdrxml_endgroup( xdrs);
     return TRUE;
 }
 

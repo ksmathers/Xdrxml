@@ -95,25 +95,24 @@ int dr1ItemSet_encumbrance( dr1ItemSet* set) {
 /*-------------------------------------------------------------------
  * xdr_dr1ItemSet( xdrs, dr1ItemSet*)
  */
-bool_t xdr_dr1ItemSet( XDR *xdrs, dr1ItemSet* set) {
+bool_t xdr_dr1ItemSet( XDR *xdrs, char *node, dr1ItemSet* set) {
     int i;
 
-    xdr_attr( xdrs, "len");
-    if (!xdr_int( xdrs, &set->len)) return FALSE;
+    xdrxml_group( xdrs, node);
+    if (!xdrxml_int( xdrs, "len", &set->len)) return FALSE;
 
     if (xdrs->x_op == XDR_DECODE) {
 	set->size = set->len;
 	set->items = calloc(set->len, sizeof(dr1Item*));
     }
     for ( i=0; i<set->len; i++) {
-        xdr_push_note( xdrs, "item");
-	if (!xdr_dr1ItemPtr( xdrs, &set->items[i])) return FALSE;
-        xdr_pop_note( xdrs);
+	if (!xdr_dr1ItemPtr( xdrs, "item", &set->items[i])) return FALSE;
     }
     if (xdrs->x_op == XDR_FREE) {
 	free( set->items);
 	set->items = NULL;
     }
+    xdrxml_endgroup( xdrs);
     return TRUE;
 }
 

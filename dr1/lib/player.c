@@ -63,9 +63,7 @@ void dr1Player_save( dr1Player *p, char *fname) {
 	fp = fopen(fname, "w");
 	xdrstdio_create( &xdrs, fp, XDR_ENCODE);
     }
-    xdr_push_note( &xdrs, "player");
-    res = xdr_dr1Player( &xdrs, p);
-    xdr_pop_note( &xdrs);
+    res = xdr_dr1Player( &xdrs, "player", p);
     if (!res) {
 	printf("Error saving player to '%s'\n", fname);
     }
@@ -110,7 +108,7 @@ dr1Player *dr1Player_load( dr1Player *buf, char* fname) {
     } else {
 	p = calloc(1,sizeof(dr1Player));
     }
-    ok = xdr_dr1Player( &xdrs, p);
+    ok = xdr_dr1Player( &xdrs, "player", p);
     xdr_destroy( &xdrs);
     if (fp) fclose( fp);
       
@@ -174,7 +172,7 @@ int dr1Player_ac( dr1Player *p, int surprise, int ranged, enum DR1DamageType dty
  *    Destroy a malloc'd dr1Player structure.
  */
 void dr1Player_destroy( dr1Player *p) {
-    xdr_free( (xdrproc_t)xdr_dr1Player, (void*)p);
+    xdrxml_free( (xdrxmlproc_t)xdr_dr1Player, (void*)p);
 }
 
 /*-------------------------------------------------------------------
@@ -204,68 +202,27 @@ int dr1Player_nattacks() {
 /*-------------------------------------------------------------------
  * xdr_dr1Player( xdrs, dr1Player*)
  */
-bool_t xdr_dr1Player( XDR *xdrs, dr1Player* p) {
-   xdr_attr( xdrs, "name");
-   if (!xdrxml_wrapstring( xdrs, &p->name)) return FALSE;
+bool_t xdr_dr1Player( XDR *xdrs, char *node, dr1Player* p) {
+   xdrxml_group( xdrs, node);
 
-   xdr_attr( xdrs, "xp");
-   if (!xdr_long( xdrs, &p->xp)) return FALSE;
+   if (!xdrxml_wrapstring( xdrs, "name", &p->name)) return FALSE;
+   if (!xdrxml_long( xdrs, "xp", &p->xp)) return FALSE;
+   if (!xdrxml_int( xdrs, "level", &p->level)) return FALSE;
+   if (!xdrxml_int( xdrs, "hp", &p->hp)) return FALSE;
+   if (!xdrxml_int( xdrs, "wounds", &p->wounds)) return FALSE;
+   if (!xdr_dr1Attr( xdrs, "base_attr", &p->base_attr)) return FALSE;
+   if (!xdr_dr1Attr( xdrs, "curr_attr", &p->curr_attr)) return FALSE;
+   if (!xdr_dr1Money( xdrs, "purse", &p->purse)) return FALSE;
+   if (!xdr_dr1ItemSet( xdrs, "pack", &p->pack)) return FALSE;
+   if (!xdr_dr1ItemPtr( xdrs, "weapon", (dr1Item **)&p->weapon)) return FALSE;
+   if (!xdr_dr1ItemPtr( xdrs, "gauche", &p->gauche)) return FALSE;
+   if (!xdr_dr1ItemPtr( xdrs, "armor", (dr1Item **)&p->armor)) return FALSE;
+   if (!xdrxml_int( xdrs, "race", &p->race)) return FALSE;
+   if (!xdrxml_int( xdrs, "sex", &p->sex)) return FALSE;
+   if (!xdrxml_int( xdrs, "class", &p->class)) return FALSE;
+   if (!xdr_dr1Location( xdrs, "location", &p->location)) return FALSE;
 
-   xdr_attr( xdrs, "level");
-   if (!xdr_int( xdrs, &p->level)) return FALSE;
-
-   xdr_attr( xdrs, "hp");
-   if (!xdr_int( xdrs, &p->hp)) return FALSE;
-
-   xdr_attr( xdrs, "wounds");
-   if (!xdr_int( xdrs, &p->wounds)) return FALSE;
-
-   xdr_push_note( xdrs, "base_attr");
-   if (!xdr_dr1Attr( xdrs, &p->base_attr)) return FALSE;
-   xdr_pop_note( xdrs);
-
-   xdr_push_note( xdrs, "curr_attr");
-   if (!xdr_dr1Attr( xdrs, &p->curr_attr)) return FALSE;
-   xdr_pop_note( xdrs);
-
-   xdr_push_note( xdrs, "purse");
-   if (!xdr_dr1Money( xdrs, &p->purse)) return FALSE;
-   xdr_pop_note( xdrs);
-
-   xdr_push_note( xdrs, "pack");
-   if (!xdr_dr1ItemSet( xdrs, &p->pack)) return FALSE;
-   xdr_pop_note( xdrs);
-
-   xdr_push_note( xdrs, "weapon");
-       xdr_push_note( xdrs, "name");
-       if (!xdr_dr1ItemPtr( xdrs, (dr1Item **)&p->weapon)) return FALSE;
-       xdr_pop_note( xdrs);
-   xdr_pop_note( xdrs);
-
-   xdr_push_note( xdrs, "gauche");
-       xdr_push_note( xdrs, "name");
-       if (!xdr_dr1ItemPtr( xdrs, &p->gauche)) return FALSE;
-       xdr_pop_note( xdrs);
-   xdr_pop_note( xdrs);
-
-   xdr_push_note( xdrs, "armor");
-       xdr_push_note( xdrs, "name");
-       if (!xdr_dr1ItemPtr( xdrs, (dr1Item **)&p->armor)) return FALSE;
-       xdr_pop_note( xdrs);
-   xdr_pop_note( xdrs);
-
-   xdr_attr( xdrs, "race");
-   if (!xdr_int( xdrs, &p->race)) return FALSE;
-
-   xdr_attr( xdrs, "sex");
-   if (!xdr_int( xdrs, &p->sex)) return FALSE;
-
-   xdr_attr( xdrs, "class");
-   if (!xdr_int( xdrs, &p->class)) return FALSE;
-
-   xdr_push_note( xdrs, "location");
-   if (!xdr_dr1Location( xdrs, &p->location)) return FALSE;
-   xdr_pop_note( xdrs);
+   xdrxml_endgroup(xdrs);
 
    return TRUE;
 }

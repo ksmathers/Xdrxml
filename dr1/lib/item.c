@@ -127,44 +127,32 @@ dr1Item* dr1Item_dup( dr1Item *orig) {
 /*-------------------------------------------------------------------
  * xdr_dr1ItemPtr( xdrs, dr1Item**)
  */
-static bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
-    xdr_attr( xdrs, "value");
-    if (!xdr_long( xdrs, &i->value)) return FALSE;
-   
-    xdr_attr( xdrs, "name");
-    if (!xdrxml_wrapstring( xdrs, &i->name)) return FALSE;
-   
-    xdr_attr( xdrs, "encumbrance");
-    if (!xdr_int( xdrs, &i->encumbrance)) return FALSE;
-   
-    xdr_attr( xdrs, "inuse");
-    if (!xdr_int( xdrs, &i->inuse)) return FALSE;
-
-    xdr_attr( xdrs, "weapon");
-    if (!xdr_int( xdrs, &i->weapon)) return FALSE;
-
-    xdr_attr( xdrs, "identified");
-    if (!xdr_int( xdrs, &i->identified)) return FALSE;
-
-    xdr_attr( xdrs, "uses");
-    if (!xdr_int( xdrs, &i->uses)) return FALSE;
-
-    xdr_attr( xdrs, "count");
-    if (!xdr_int( xdrs, &i->count)) return FALSE;
+static bool_t xdr_dr1Item( XDR *xdrs, char *node, dr1Item* i) {
+    xdrxml_group( xdrs, node);
+    if (!xdrxml_long( xdrs, "value", &i->value)) return FALSE;
+    if (!xdrxml_wrapstring( xdrs, "name", &i->name)) return FALSE;
+    if (!xdrxml_int( xdrs, "encumbrance", &i->encumbrance)) return FALSE;
+    if (!xdrxml_int( xdrs, "inuse", &i->inuse)) return FALSE;
+    if (!xdrxml_int( xdrs, "weapon", &i->weapon)) return FALSE;
+    if (!xdrxml_int( xdrs, "identified", &i->identified)) return FALSE;
+    if (!xdrxml_int( xdrs, "uses", &i->uses)) return FALSE;
+    if (!xdrxml_int( xdrs, "count", &i->count)) return FALSE;
 
     if (i->type->xdr) {
-	if (!i->type->xdr( xdrs, i)) return FALSE;
+	if (!i->type->xdr( xdrs, "variant", i)) return FALSE;
     }
+    xdrxml_endgroup( xdrs);
     return TRUE;
 }
 
 /*-------------------------------------------------------------------
  * xdr_dr1ItemPtr( xdrs, dr1Item**)
  */
-bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
+bool_t xdr_dr1ItemPtr( XDR *xdrs, char *node, dr1Item **itemp) {
     int tcode = 0;
     dr1ItemType *ityp;
     
+    xdrxml_group( xdrs, node);
     /*
      * Get the virtual type pointer 
      */
@@ -178,11 +166,10 @@ bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
 	}
     } 
     
-    xdr_attr( xdrs, "code");
-    if (!xdr_int( xdrs, &tcode)) { return FALSE; }
+    if (!xdrxml_int32_t( xdrs, "code", &tcode)) { return FALSE; }
 
     if (xdrs->x_op == XDR_DECODE) {
-/*	printf("got tcode 0x%x\n", tcode); /**/
+	printf("got tcode 0x%x\n", tcode); /**/
 	if (tcode == DR1ILLEGAL) {
 	    ityp = NULL;
 	} else {
@@ -201,7 +188,7 @@ bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
 	    *itemp = calloc( 1, ityp->size);
 	    (*itemp)->type = ityp;
 	}
-	if (!xdr_dr1Item( xdrs, *itemp)) return FALSE;
+	if (!xdr_dr1Item( xdrs, "item", *itemp)) return FALSE;
 	if (xdrs->x_op == XDR_FREE) {
 	    free(*itemp);
 	    *itemp = NULL;
@@ -210,6 +197,7 @@ bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
         /* Null object */
 	*itemp = NULL;
     }
+    xdrxml_endgroup( xdrs);
 
     return TRUE;
 }

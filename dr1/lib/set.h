@@ -89,6 +89,6 @@ void dr1Set_remove( dr1Set* set, void *i);
 /*-------------------------------------------------------------------
  * xdr_dr1Set( xdrs, dr1Set*)
  */
-bool_t xdr_dr1Set( XDR *xdrs, dr1Set*);
+bool_t xdr_dr1Set( XDR *xdrs, char *node, dr1Set*);
 
 #endif /* __DR1SET__H */

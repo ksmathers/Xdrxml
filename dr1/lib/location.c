@@ -62,13 +62,14 @@ dr1Location dr1Location_moveTo( dr1Location *_from, dr1Location *_to, int dist) 
 /*-------------------------------------------------------------------
  * xdr_dr1Location( xdrs, dr1Location*)
  */
-bool_t xdr_dr1Location( XDR *xdrs, dr1Location* l) {
-    xdr_attr( xdrs, "mapname");
-    if (!xdrxml_wrapstring( xdrs, &l->mapname)) return FALSE;
-    xdr_attr( xdrs, "x");
-    if (!xdr_int( xdrs, &l->x)) return FALSE;
-    xdr_attr( xdrs, "y");
-    if (!xdr_int( xdrs, &l->y)) return FALSE;
+bool_t xdr_dr1Location( XDR *xdrs, char *node, dr1Location* l) {
+    xdrxml_group( xdrs, node);
+
+    if (!xdrxml_wrapstring( xdrs, "mapname", &l->mapname)) return FALSE;
+    if (!xdrxml_int( xdrs, "x", &l->x)) return FALSE;
+    if (!xdrxml_int( xdrs, "y", &l->y)) return FALSE;
+
+    xdrxml_endgroup( xdrs);
     return TRUE;
 }
 

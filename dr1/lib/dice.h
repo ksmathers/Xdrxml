@@ -75,7 +75,7 @@ void dr1Dice_seed();
 /*-------------------------------------------------------------------
  * xdr_dr1Dice( xdrs, dr1Dice*)
  */
-bool_t xdr_dr1Dice( XDR *xdrs, dr1Dice*);
+bool_t xdr_dr1Dice( XDR *xdrs, char *node, dr1Dice*);
 
 #endif /* _DR1DICE__H */
 

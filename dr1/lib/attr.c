@@ -350,27 +350,18 @@ dr1Attr dr1Attr_create_mode4( void) {
 /*-------------------------------------------------------------------
  * xdr_dr1Attr( xdrs, dr1Attr*)
  */
-bool_t xdr_dr1Attr( XDR *xdrs, dr1Attr *a) {
-    xdr_attr( xdrs, "_str");
-    if (!xdr_int( xdrs, &a->_str)) return FALSE;
+bool_t xdr_dr1Attr( XDR *xdrs, char *node, dr1Attr *a) {
+    xdrxml_group( xdrs, node);
 
-    xdr_attr( xdrs, "estr");
-    if (!xdr_int( xdrs, &a->estr)) return FALSE;
+    if (!xdrxml_int( xdrs, "str", &a->_str)) return FALSE;
+    if (!xdrxml_int( xdrs, "estr", &a->estr)) return FALSE;
+    if (!xdrxml_int( xdrs, "int", &a->_int)) return FALSE;
+    if (!xdrxml_int( xdrs, "wis", &a->_wis)) return FALSE;
+    if (!xdrxml_int( xdrs, "dex", &a->_dex)) return FALSE;
+    if (!xdrxml_int( xdrs, "con", &a->_con)) return FALSE;
+    if (!xdrxml_int( xdrs, "cha", &a->_cha)) return FALSE;
 
-    xdr_attr( xdrs, "_int");
-    if (!xdr_int( xdrs, &a->_int)) return FALSE;
-
-    xdr_attr( xdrs, "_wis");
-    if (!xdr_int( xdrs, &a->_wis)) return FALSE;
-
-    xdr_attr( xdrs, "_dex");
-    if (!xdr_int( xdrs, &a->_dex)) return FALSE;
-
-    xdr_attr( xdrs, "_con");
-    if (!xdr_int( xdrs, &a->_con)) return FALSE;
-
-    xdr_attr( xdrs, "_cha");
-    if (!xdr_int( xdrs, &a->_cha)) return FALSE;
+    xdrxml_endgroup( xdrs);
     return TRUE;
 }
 

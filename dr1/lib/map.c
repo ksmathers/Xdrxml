@@ -315,57 +315,52 @@ dr1Map_createView( dr1Map *map, int xpos, int ypos, int light, int infravision)
  *  SIDE EFFECTS:
  */
 
+#define XDRXML_DATA(xdrs) ((struct xdrxml_st *)xdrs->x_private)
 bool_t
-xdr_dr1Glyph( XDR *xdrs, dr1Glyph *glyph) {
+xdr_dr1Glyph( XDR *xdrs, char *node, dr1Glyph *glyph) {
     bool_t flag;
     char *fname = NULL;
 
+    xdrxml_group( xdrs, node);
     /* src */
     if (xdrs->x_op == XDR_ENCODE) {
 	fname = dr1GlyphTable_file( glyph->src);
     }
-    xdr_attr( xdrs, "src");
-    if (!xdrxml_wrapstring( xdrs, &fname)) return FALSE;
+    if (!xdrxml_wrapstring( xdrs, "src", &fname)) return FALSE;
     if (xdrs->x_op == XDR_DECODE) {
 	glyph->src = dr1GlyphSet_find( fname);
 	free(fname);
     }
 
     /* row */
-    xdr_attr( xdrs, "r");
-    if (!xdr_int( xdrs, &glyph->r)) return FALSE;
+    if (!xdrxml_int( xdrs, "r", &glyph->r)) return FALSE;
 
     /* col */
-    xdr_attr( xdrs, "c");
-    if (!xdr_int( xdrs, &glyph->c)) return FALSE;
+    if (!xdrxml_int( xdrs, "c", &glyph->c)) return FALSE;
 
     /* flags */
     /* anim */
-    xdr_attr( xdrs, "anim");
     flag = glyph->anim;
-    if (!xdrxml_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "anim", &flag)) return FALSE;
     glyph->anim = flag;
 
-    xdr_attr( xdrs, "wall");
     flag = glyph->wall;
-    if (!xdrxml_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "wall", &flag)) return FALSE;
     glyph->wall = flag;
 
-    xdr_attr( xdrs, "opaque");
     flag = glyph->opaque;
-    if (!xdrxml_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "opaque", &flag)) return FALSE;
     glyph->opaque = flag;
 
-    xdr_attr( xdrs, "door");
     flag = glyph->door;
-    if (!xdrxml_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "door", &flag)) return FALSE;
     glyph->door = flag;
 
-    xdr_attr( xdrs, "startinvisible");
     flag = glyph->startinvisible;
-    if (!xdrxml_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "startinvisible", &flag)) return FALSE;
     glyph->startinvisible = flag;
 
+    xdrxml_endgroup( xdrs);
     return TRUE;
 }
 
@@ -380,48 +375,42 @@ xdr_dr1Glyph( XDR *xdrs, dr1Glyph *glyph) {
  *  SIDE EFFECTS:
  */
 bool_t
-xdr_dr1MapGraphic( XDR *xdrs, dr1MapGraphic *gr) {
+xdr_dr1MapGraphic( XDR *xdrs, char *node, dr1MapGraphic *gr) {
     bool_t flag;
     int i;
 
+    xdrxml_group( xdrs, node);
     /* code */
-    xdr_attr( xdrs, "code");
-    if (!xdr_int32_t( xdrs, &gr->code)) return FALSE;
+    if (!xdrxml_int32_t( xdrs, "code", &gr->code)) return FALSE;
     
-    /* nglyphs */
-    xdr_attr( xdrs, "nglyphs");
-    if (!xdr_int( xdrs, &gr->nglyphs)) return FALSE;
-
     /* glyph array */
     if (xdrs->x_op == XDR_DECODE) {
+        xmlNodePtr cur = XDRXML_DATA(xdrs)->cur;
+        gr->nglyphs = xdrxml_count_children( cur, "glyph");
 	gr->glyph = calloc( gr->nglyphs, sizeof(dr1Glyph));
     }
     for (i=0; i<gr->nglyphs; i++) {
-	xdr_push_note( xdrs, "glyph");
-	if (!xdr_dr1Glyph( xdrs, &gr->glyph[i])) return FALSE;
-	xdr_pop_note( xdrs);
+	if (!xdr_dr1Glyph( xdrs, "glyph", &gr->glyph[i])) return FALSE;
     }
     if (xdrs->x_op == XDR_FREE) {
 	free( gr->glyph);
     }
     
     /* start */
-    xdr_attr( xdrs, "start");
     flag = gr->start;
-    if (!xdrxml_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "start", &flag)) return FALSE;
     gr->start = flag;
 
     /* light */
-    xdr_attr( xdrs, "light");
     flag = gr->light;
-    if (!xdrxml_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "light", &flag)) return FALSE;
     gr->light = flag;
 
     /* dark */
-    xdr_attr( xdrs, "dark");
     flag = gr->dark;
-    if (!xdrxml_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "dark", &flag)) return FALSE;
     gr->dark = flag;
+    xdrxml_endgroup( xdrs);
 
     return TRUE;
 }
@@ -437,9 +426,10 @@ xdr_dr1MapGraphic( XDR *xdrs, dr1MapGraphic *gr) {
  */
 
 bool_t
-xdr_dr1MapSquare( XDR *xdrs, dr1MapSquare *square, dr1Map *map) {
+xdr_dr1MapSquare( XDR *xdrs, char *node, dr1MapSquare *square, dr1Map *map) {
     int code;
     bool_t flag;
+    xdrxml_group( xdrs, node);
     /* graphic */
     if (xdrs->x_op == XDR_ENCODE) {
         if (square->graphic) {
@@ -449,8 +439,7 @@ xdr_dr1MapSquare( XDR *xdrs, dr1MapSquare *square, dr1Map *map) {
 	}
     }
 
-    xdr_attr( xdrs, "code");
-    if (!xdr_int32_t( xdrs, &code)) return FALSE;
+    if (!xdrxml_int32_t( xdrs, "code", &code)) return FALSE;
     if (xdrs->x_op == XDR_DECODE) {
         if (code == 0) {
 	    square->graphic = NULL;
@@ -460,22 +449,20 @@ xdr_dr1MapSquare( XDR *xdrs, dr1MapSquare *square, dr1Map *map) {
     }
 
     /* seen */
-    xdr_attr( xdrs, "seen");
     flag = square->seen;
-    if (!xdr_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "seen", &flag)) return FALSE;
     square->seen = flag;
 
     /* invisible */
-    xdr_attr( xdrs, "invisible");
     flag = square->invisible;
-    if (!xdrxml_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "invisible", &flag)) return FALSE;
     square->invisible = flag;
 
     /* open */
-    xdr_attr( xdrs, "open");
     flag = square->open;
-    if (!xdr_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "open", &flag)) return FALSE;
     square->open = flag;
+    xdrxml_endgroup( xdrs);
 
     return TRUE;
 }
@@ -490,38 +477,29 @@ xdr_dr1MapSquare( XDR *xdrs, dr1MapSquare *square, dr1Map *map) {
  *  SIDE EFFECTS:
  */
 
-#define XDRXML_DATA(xdrs) ((struct xdrxml_st *)xdrs->x_private)
-static int countNodes( xmlNodePtr n, xmlElementType e) {
-    xmlNodePtr c;
-    int count = 0;
-    for (c=n->children; c != NULL; c = n->next) {
-        printf("c.type = %d, e = %d\n", c->type, e);
-	sleep(1);
-        if (c->type == e) count++;
-    }
-    return count;
-}
 
 bool_t
-xdr_dr1Map( XDR *xdrs, dr1Map *map) {
+xdr_dr1Map( XDR *xdrs, char *node, dr1Map *map) {
     int i;
     int x, y;
     bool_t flag;
 
-    xdr_attr( xdrs, "ngraphics");
-    if (!xdr_int( xdrs, &map->ngraphics)) return FALSE;
+    xdrxml_group( xdrs, node);
+#if 0
+    if (!xdrxml_int( xdrs, "ngraphics", &map->ngraphics)) return FALSE;
+#endif
 
     /* graphics */
     if (xdrs->x_op == XDR_DECODE) {
+        xmlNodePtr cur = XDRXML_DATA(xdrs)->cur;
+        map->ngraphics = xdrxml_count_children( cur, "graphic");
 	map->graphics = calloc(map->ngraphics, sizeof(dr1MapGraphic));
     }
 
     for (i=0; i<map->ngraphics; i++) {
-	xdr_push_note( xdrs, "graphic");
-	if ( !xdr_dr1MapGraphic( xdrs, &map->graphics[i])) {
+	if ( !xdr_dr1MapGraphic( xdrs, "graphic", &map->graphics[i])) {
 	    return FALSE;
 	}
-	xdr_pop_note( xdrs);
     }
 
     if (xdrs->x_op == XDR_FREE) {
@@ -529,66 +507,58 @@ xdr_dr1Map( XDR *xdrs, dr1Map *map) {
     }
 
 #if 0
-    xdr_attr( xdrs, "xsize");
-    if (!xdr_int( xdrs, &map->xsize)) return FALSE;
-
-    xdr_attr( xdrs, "ysize");
-    if (!xdr_int( xdrs, &map->ysize)) return FALSE;
+    if (!xdrxml_int( xdrs, "xsize", &map->xsize)) return FALSE;
+    if (!xdrxml_int( xdrs, "ysize", &map->ysize)) return FALSE;
 #endif
 
     /* grid */
 
-    xdr_push_note( xdrs, "grid");
+    xdrxml_group( xdrs, "grid");
     
     if (xdrs->x_op == XDR_DECODE) {
 #if 1
         xmlNodePtr n = XDRXML_DATA(xdrs)->cur;
-	map->ysize = countNodes( n, XML_ELEMENT_NODE);
+	map->ysize = xdrxml_count_children( n, "y");
 	printf("ysize %d\n", map->ysize);
 
-	n=xdrxml_bfs1(n, "x");
-	map->xsize = countNodes( n, XML_TEXT_NODE);
+        n=n->children;
+	while (strcmp(n->name, "y")) { n=n->next; }
+	map->xsize = xdrxml_count_children( n, "x");
 	printf("xsize %d\n", map->xsize);
 #endif
 	map->grid = calloc( map->xsize * map->ysize, sizeof(dr1MapSquare));
     }
 
     for (y=0; y<map->ysize; y++) {
-        xdr_push_note( xdrs, "y");
+        xdrxml_group( xdrs, "y");
 	for (x=0; x<map->xsize; x++) {
-	    xdr_push_note( xdrs, "x");
-	    if (!xdr_dr1MapSquare( xdrs, &map->grid[y * map->xsize + x], map)) 
+	    if (!xdr_dr1MapSquare( xdrs, "x", &map->grid[y * map->xsize + x], map)) 
 	    {
 		return FALSE;
 	    }
-	    xdr_pop_note( xdrs);
 	}
-	xdr_pop_note( xdrs);
+	xdrxml_endgroup( xdrs);
     }
-    xdr_pop_note( xdrs);
+    xdrxml_endgroup( xdrs);
 
     if (xdrs->x_op == XDR_FREE) {
 	free( map->grid);
     }
 
-    xdr_attr( xdrs, "starty");
-    if (!xdr_int( xdrs, &map->starty)) return FALSE;
-
-    xdr_attr( xdrs, "startx");
-    if (!xdr_int( xdrs, &map->startx)) return FALSE;
+    if (!xdrxml_int( xdrs, "starty", &map->starty)) return FALSE;
+    if (!xdrxml_int( xdrs, "startx", &map->startx)) return FALSE;
 
     /* outdoors */
-    xdr_attr( xdrs, "outdoors");
     flag = map->outdoors;
-    if (!xdr_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "outdoors", &flag)) return FALSE;
     map->outdoors = flag;
 
     /* town */
-    xdr_attr( xdrs, "town");
     flag = map->town;
-    if (!xdr_bool( xdrs, &flag)) return FALSE;
+    if (!xdrxml_bool( xdrs, "town", &flag)) return FALSE;
     map->town = flag;
 
+    xdrxml_endgroup( xdrs);
     return TRUE;
 }
 

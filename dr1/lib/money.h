@@ -189,6 +189,6 @@ dr1Money dr1Money_normalizex( dr1Money *purse, double charge, int ep);
 /*-------------------------------------------------------------------
  * xdr_dr1Money( xdrs, dr1Money*)
  */
-bool_t xdr_dr1Money( XDR *xdrs, dr1Money*);
+bool_t xdr_dr1Money( XDR *xdrs, char *node, dr1Money*);
 
 #endif /* __DR1MONEY__H */

@@ -35,17 +35,12 @@ int dr1Context_save( dr1Context *ctx) {
 	fp = fopen(fname, "w");
 	xdrstdio_create( &xdrs, fp, XDR_ENCODE);
     }
-    xdr_push_note( &xdrs, "context");
 
-    xdr_push_note( &xdrs, "player");
-    res = xdr_dr1Player( &xdrs, &ctx->player);
-    xdr_pop_note( &xdrs);
+    xdrxml_group( &xdrs, "context");
+    res = xdr_dr1Player( &xdrs, "player", &ctx->player);
+    res = xdr_dr1Map( &xdrs, "map", ctx->map);
+    xdrxml_endgroup( &xdrs);
 
-    xdr_push_note( &xdrs, "map");
-    res = xdr_dr1Map( &xdrs, ctx->map);
-    xdr_pop_note( &xdrs);
-
-    xdr_pop_note( &xdrs);
     if (!res) {
 	printf("Error saving to '%s'\n", fname);
     }
@@ -88,23 +83,22 @@ int dr1Context_load( dr1Context *ctx, char *fname) {
 
     assert(ctx);
 
-    xdr_push_note( &xdrs, "context");
+    xdrxml_group( &xdrs, "context");
 
-    xdr_push_note( &xdrs, "player");
-    ok = xdr_dr1Player( &xdrs, &ctx->player);
-    xdr_pop_note( &xdrs);
-
-    xdr_push_note( &xdrs, "map");
-    ctx->map = calloc( 1, sizeof(dr1Map));
-    ok = xdr_dr1Map( &xdrs, ctx->map);
+    ok = xdr_dr1Player( &xdrs, "player", &ctx->player);
     if (!ok) {
-	/* save file missing a map, load the default map instead. */
-	ctx->map = dr1Map_readmap( "lib/maps/town.map");
-	ok = 1; 
+	printf("Error reading player\n");
+    } else {
+	ctx->map = calloc( 1, sizeof(dr1Map));
+	ok = xdr_dr1Map( &xdrs, "map", ctx->map);
+	if (!ok) {
+	    /* save file missing a map, load the default map instead. */
+	    ctx->map = dr1Map_readmap( "lib/maps/town.map");
+	    ok = 1; 
+	}
     }
-    xdr_pop_note( &xdrs);
 
-    xdr_pop_note( &xdrs);
+    xdrxml_endgroup( &xdrs);
     xdr_destroy( &xdrs);
     if (fp) fclose( fp);
       
@@ -121,9 +115,9 @@ int dr1Context_load( dr1Context *ctx, char *fname) {
  *    Destroy a malloc'd dr1Context structure.
  */
 void dr1Context_destroy( dr1Context *ctx) {
-    xdr_free( (xdrproc_t)xdr_dr1Player, (void*)&ctx->player);
+    xdrxml_free( (xdrxmlproc_t)xdr_dr1Player, (void*)&ctx->player);
     if (ctx->map) {
-	xdr_free( (xdrproc_t)xdr_dr1Map, (void*)ctx->map);
+	xdrxml_free( (xdrxmlproc_t)xdr_dr1Map, (void*)ctx->map);
     }
     free( ctx->map);
     ctx->map = NULL;
