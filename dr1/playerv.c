@@ -65,7 +65,7 @@ static int check_classattr( dr1Player *p) {
 	assert(stat);
 	assert(min);
         if (*stat < *min) {
-	    printf("Your %s is too low to be a %s\n", attribute[i], cl->class);
+	    printf("Your %s is too low to be a %s\n", dr1attribute[i], cl->class);
 	    return -1;
 	}
     }

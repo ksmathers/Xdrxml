@@ -16,7 +16,7 @@
 enum Attribute {
     STRENGTH, INTELLIGENCE, WISDOM, DEXTERITY, CONSTITUTION, CHARISMA
 };
-extern char *attribute[];
+extern char *dr1attribute[];
 
 /*-------------------------------------------------------------------
  * dr1Attr

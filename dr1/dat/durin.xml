@@ -1,0 +1,117 @@
+<player>
+    <name>
+        <long value="0x5"/>
+        <bytes>Durin</bytes>
+        <bytes>=00=00=00</bytes>
+    </name>
+    <xp value="0xd9"/>
+    <level value="0x1"/>
+    <hp value="0x8"/>
+    <wounds value="0x0"/>
+    <base_attr>
+        <_str value="0x12"/>
+        <estr value="0x49"/>
+        <_int value="0x8"/>
+        <_wis value="0x6"/>
+        <_dex value="0xb"/>
+        <_con value="0x12"/>
+        <_cha value="0xa"/>
+    </base_attr>
+    <curr_attr>
+        <_str value="0x12"/>
+        <estr value="0x49"/>
+        <_int value="0x8"/>
+        <_wis value="0x6"/>
+        <_dex value="0xb"/>
+        <_con value="0x12"/>
+        <_cha value="0xa"/>
+    </curr_attr>
+    <purse>
+        <pp value="0x24"/>
+        <gp value="0x3"/>
+        <ep value="0x0"/>
+        <sp value="0xc"/>
+        <cp value="0x15e"/>
+    </purse>
+    <pack>
+        <len value="0x1"/>
+        <item>
+            <size value="0x38"/>
+            <code value="0x1"/>
+            <value value="0x2ee0"/>
+            <name>
+                <long value="0x7"/>
+                <bytes>Longbow</bytes>
+                <bytes>=00</bytes>
+            </name>
+            <encumbrance value="0x64"/>
+            <unique value="0x0"/>
+            <inuse value="0x0"/>
+            <weapon value="0x1"/>
+            <identified value="0x1"/>
+            <uses value="0x0"/>
+            <damage>
+                <long value="0x2"/>
+                <bytes>d6</bytes>
+                <bytes>=00=00</bytes>
+            </damage>
+            <range value="0x78"/>
+            <rof value="0x2"/>
+            <speed value="0x6"/>
+            <dtype value="0x0"/>
+        </item>
+    </pack>
+    <weapon>
+        <size value="0x38"/>
+        <code value="0x1"/>
+        <value value="0xbb8"/>
+        <name>
+            <long value="0x9"/>
+            <bytes>Longsword</bytes>
+            <bytes>=00=00=00</bytes>
+        </name>
+        <encumbrance value="0x96"/>
+        <unique value="0x0"/>
+        <inuse value="0x0"/>
+        <weapon value="0x1"/>
+        <identified value="0x1"/>
+        <uses value="0x0"/>
+        <damage>
+            <long value="0x2"/>
+            <bytes>d8</bytes>
+            <bytes>=00=00</bytes>
+        </damage>
+        <range value="0x0"/>
+        <rof value="0x0"/>
+        <speed value="0x6"/>
+        <dtype value="0x2"/>
+    </weapon>
+    <gauche>
+        <size value="0x0"/>
+    </gauche>
+    <armor>
+        <size value="0x2c"/>
+        <code value="0x2001"/>
+        <value value="0x3e80"/>
+        <name>
+            <long value="0xa"/>
+            <bytes>Splintmail</bytes>
+            <bytes>=00=00</bytes>
+        </name>
+        <encumbrance value="0x190"/>
+        <unique value="0x0"/>
+        <inuse value="0x0"/>
+        <weapon value="0x0"/>
+        <identified value="0x1"/>
+        <uses value="0x0"/>
+        <type value="0x3"/>
+        <damage value="0x0"/>
+    </armor>
+    <race value="0x4"/>
+    <sex value="0x0"/>
+    <class value="0x3"/>
+    <location>
+        <x value="0x13"/>
+        <y value="0xe"/>
+    </location>
+</player>

@@ -61,6 +61,7 @@ XDR xdrxml = {
  * utility functions 
  */
 static void mark( xmlNodePtr node) {
+/*    printf("mark %s\n", node->name); /**/
     ((char *)node->name)[0] = 0;
 }
 
@@ -69,6 +70,7 @@ static xmlNodePtr bfs1( xmlNodePtr node, const char *name) {
     while (cur != NULL && strcasecmp( cur->name, name) != 0) {
     	cur = cur->next;
     }
+/*    printf("%s %s\n", cur?"found":"lost", name); /**/
     return cur;
 }
 
@@ -86,10 +88,8 @@ int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop) {
 	/*
 	 * build an XML tree from a the file;
 	 */
-	printf("Parsing %s\n", fname);
 	xdrd->doc = xmlParseFile( fname);
 	assert(xdrd->doc);
-	printf("Doc loaded\n");
 	if (xdrd->doc == NULL) return -1;
 	xdrd->cur = xmlDocGetRootElement(xdrd->doc);
 	if (xdrd->cur == NULL) return -1;
@@ -111,6 +111,11 @@ int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop) {
     xdrs->x_handy = XDR_ANNOTATE;
 
     return 0;
+}
+
+bool_t xdr_dr1String( XDR *xdrs, const char *s) 
+{
+    
 }
 
 bool_t xdr_push_note( XDR *xdrs, const char *s)
@@ -184,14 +189,15 @@ void xdr_attr( XDR *xdrs, const char *s)
 bool_t xdrxml_getlong( XDR *__xdrs, long *__lp)
 {
     /* get a long from underlying stream */
-    xmlNodePtr cur = XDRXML_DATA(__xdrs)->cur;
-    char *attr = XDRXML_DATA(__xdrs)->attr;
+    struct xdrxml_st *xdrd = XDRXML_DATA(__xdrs);
+    char *attr = xdrd->attr;
+    xmlNodePtr cur;
     char *value;
     char *err;
 
     if (!attr) attr="long";
 
-    cur = bfs1( cur, attr);
+    cur = bfs1( xdrd->cur, attr);
     if (!cur) return FALSE;
 
     value = xmlGetProp(cur, "value");
@@ -203,6 +209,7 @@ bool_t xdrxml_getlong( XDR *__xdrs, long *__lp)
 	return FALSE;
     }
     mark(cur);
+    xdrd->attr = NULL;
 
     return TRUE;
 }
@@ -268,6 +275,7 @@ bool_t xdrxml_getbytes( XDR *__xdrs, caddr_t __addr,
 	    __addr[i] = c;
 	}
     }
+    XDRXML_DATA(__xdrs)->attr = 0;
     return TRUE;
 }
 
@@ -338,14 +346,15 @@ void xdrxml_destroy( XDR *__xdrs)
 bool_t xdrxml_getint32( XDR *__xdrs, int32_t *__ip)
 {
     /* get a int from underlying stream */
-    xmlNodePtr cur = XDRXML_DATA(__xdrs)->cur;
-    char *attr = XDRXML_DATA(__xdrs)->attr;
+    struct xdrxml_st *xdrd = XDRXML_DATA(__xdrs);
+    char *attr = xdrd->attr;
+    xmlNodePtr cur;
     char *value;
     char *err;
 
     if (!attr) attr="long";
 
-    cur = bfs1( cur, attr);
+    cur = bfs1( xdrd->cur, attr);
     if (!cur) return FALSE;
 
     value = xmlGetProp(cur, "value");
@@ -358,14 +367,15 @@ bool_t xdrxml_getint32( XDR *__xdrs, int32_t *__ip)
     }
     mark(cur);
 
+    xdrd->attr = NULL;
     return TRUE;
 }
 
 bool_t xdrxml_putint32( XDR *__xdrs, __const int32_t *__ip)
 {
     /* put a int to stream */
-    struct xdrxml_st *xdrd = XDRXML_DATA(__xdrs);
     FILE *fp;
+    struct xdrxml_st *xdrd = XDRXML_DATA(__xdrs);
     char *attr = xdrd->attr;
     int ni = nchar( xdrd->path, '/');
 

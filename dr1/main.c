@@ -76,7 +76,8 @@ int buy( dr1Player *p, int c, char **v) {
     b = dr1Merchant_buy( merc, what);
     if (!b) return -1;
     offr = dr1Barter_startingOffer( b);
-    printf("You have %dgp\n", p->purse.gp);
+    dr1Money_format( &p->purse, buf);
+    printf("You have %s\n", mbuf);
     printf("Buying %s\n", what);
     do {
 /*        printf("mood %d\n", dr1apothecary.mood); /**/
@@ -201,7 +202,6 @@ int main( int argc, char** argv) {
     LIBXML_TEST_VERSION
     xmlKeepBlanksDefault(0);
     
-#if 0
     /* initialize globals */
     bzero( &player, sizeof(player));
     dr1Dice_seed();
@@ -209,7 +209,6 @@ int main( int argc, char** argv) {
     dr1Tanner_init();
     dr1Wright_init();
     dr1Smithy_init();
-#endif
 
     /* restore player from disk */
     if (argc == 2) {
@@ -253,12 +252,6 @@ int main( int argc, char** argv) {
 	if (r) printf("Command returned code %d\n", r);
     }
   
-    /* dump player */
-    printf("Player\n");
-    xdr_push_note( &xdrxml, "player");
-    xdr_dr1Player( &xdrxml, &player);
-    xdr_pop_note( &xdrxml);
-
     /* save player with new item */
     dr1Player_save( &player, fname);
     

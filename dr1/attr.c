@@ -9,7 +9,7 @@
  *   Convert from enum Attribute to string
  */
 
-char *attribute[] = {
+char *dr1attribute[] = {
     "Strength", "Intelligence", "Wisdom", 
     "Dexterity", "Constitution", "Charisma"
 };

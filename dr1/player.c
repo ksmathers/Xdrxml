@@ -94,10 +94,10 @@ dr1Player *dr1Player_load( dr1Player *buf, char* fname) {
 
     cpos = rindex( fname, '.');
     if (cpos && strcasecmp(cpos, ".xml")==0) {
-        printf("Loading xml\n");
+/*        printf("Loading xml\n"); /**/
 	xdr_xml_create( &xdrs, fname, XDR_DECODE);
     } else {
-        printf("Loading binary\n");
+/*        printf("Loading binary\n"); /**/
 	fp = fopen( fname, "r");
 	if (!fp) return NULL;
 
