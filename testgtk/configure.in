@@ -27,7 +27,7 @@ else
   AC_DEFINE_UNQUOTED(PACKAGE_LOCALE_DIR, "${prefix}/${DATADIRNAME}/locale")
 fi
 
-AC_OUTPUT([
+AC_OUTPUT([ po/Makefile.in m4/Makefile 
 Makefile
 macros/Makefile
 src/Makefile

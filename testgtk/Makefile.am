@@ -1,8 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = intl po macros src
+SUBDIRS = m4  po macros src
 
-EXTRA_DIST = \
+EXTRA_DIST = config.rpath  \
 	autogen.sh \
 	dr1.glade
 
@@ -27,3 +27,5 @@ dist-hook:
 	  done \
 	fi
 
+
+ACLOCAL_AMFLAGS = -I m4
