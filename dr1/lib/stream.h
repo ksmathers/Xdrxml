@@ -11,7 +11,8 @@ typedef struct dr1Stream {
     int fd;
     int inputready;
     int error;
-    dr1StringBuffer buf;
+    dr1StringBuffer ibuf;
+    dr1StringBuffer obuf;
 } dr1Stream;
 
 

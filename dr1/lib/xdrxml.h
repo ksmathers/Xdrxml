@@ -40,7 +40,6 @@ struct xdr_ops_ext {
     };
 
 struct xdrxml_st {
-        int isPublic;		/* public or private mode */
         char path[1024];
 	char *attr;
 	int error;

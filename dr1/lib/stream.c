@@ -3,11 +3,13 @@
 #include <stdarg.h>
 
 #include "stream.h"
+#include "protocol.h"
 
 dr1Stream* dr1Stream_create( dr1Stream *str, int sd) {
     if (!str) str = calloc( 1, sizeof(dr1Stream));
     str->fd = sd;
-    dr1StringBuffer_create( &str->buf);
+    dr1StringBuffer_create( &str->ibuf);
+    dr1StringBuffer_create( &str->obuf);
     return str;
 }
 
@@ -27,34 +29,51 @@ int dr1Stream_read( dr1Stream *str, char *buf, int min, int max) {
     return count;
 }
 
+int dr1Stream_write( dr1Stream *str, char *buf, int size) {
+    int count = 0;
+    int nwrite;
+
+    do {
+	nwrite = write( str->fd, buf, size-count);
+	if (nwrite < 0) {
+	    str->error = errno;
+	    perror("write");
+	    break;
+	}
+	count += nwrite;
+    } while (count < size);
+    return count;
+}
+
 int dr1Stream_fgets( dr1Stream *str, char *buf, int size) {
     char tbuf[1024];
     int nread;
-    char *cpos;
+    int len;
 
+    printf("in fgets()\n");
     /* Buffer ahead to the next newline */
-    cpos = index( str->buf.buf, '\n');
-    while (!cpos) {
+    len = sbindex( &str->ibuf, '\n')+1;
+    while (!len) {
 	nread = dr1Stream_read( str, tbuf, 1, sizeof( tbuf));
 	if (nread == 0) {
-	    cpos = str->buf.buf + str->buf.cpos;
+	    len = str->ibuf.cpos;
 	    break;
 	}
-	sbcat( &str->buf, tbuf, nread);
-	cpos = index( str->buf.buf, '\n');
+	sbcat( &str->ibuf, tbuf, nread);
+	len = sbindex( &str->ibuf, '\n')+1;
     }
 
     /* Got a line, now copy to the buffer */
-    nread = cpos - str->buf.buf;
-    if (nread >= size) nread = size-1;
-    memcpy( buf, str->buf.buf, nread);
-    buf[nread] = 0;
-    sbtail( &str->buf, nread);
-    return nread;
+    if (len >= size) len = size-1;
+    memcpy( buf, str->ibuf.buf, len);
+    buf[len] = 0;
+    sbtail( &str->ibuf, len);
+    return len;
 }
 
 int dr1Stream_gets( dr1Stream *str, char *buf, int size) {
     int len;
+    printf("in gets()\n");
     len = dr1Stream_fgets( str, buf, size);
     if (len == 0) return -1;
     if (buf[len-1] == '\n') {
@@ -66,9 +85,24 @@ int dr1Stream_gets( dr1Stream *str, char *buf, int size) {
     return len;
 }
 
+int dr1Stream_getdoc( dr1Stream *str, dr1StringBuffer *buf) {
+    int len, tlen = 0;
+    char line[1024];
+    do {
+	len = dr1Stream_fgets( str, line, sizeof(line));
+	if (strstr( line, SEPARATOR)) break;
+	sbcat( buf, line, len);
+	tlen += len;
+    } while (len > 0);
+    return tlen;
+}
+
 int dr1Stream_printf( dr1Stream *str, char *fmt, ...) {
+    int len;
     va_list va;
     va_start( va, fmt);
-    vsbprintf( &str->buf, fmt, va);
+    vsbprintf( &str->obuf, fmt, va);
+    dr1Stream_write( str, str->obuf.buf, str->obuf.cpos);
+    sbclear( &str->obuf);
     va_end( va);
 }

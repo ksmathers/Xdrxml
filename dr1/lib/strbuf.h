@@ -45,6 +45,21 @@ dr1StringBuffer*
 dr1StringBuffer_create( dr1StringBuffer *sb);
 
 /*-------------------------------------------------------------------
+ * sbclear
+ *
+ *    Clear all data from the buffer, returning it to its just 
+ *    initialized state.
+ *
+ *  PARAMETERS:
+ *    sb   StringBuffer
+ *
+ *  RETURNS:
+ *
+ *  SIDE EFFECTS:
+ */
+void sbclear( dr1StringBuffer *sb);
+
+/*-------------------------------------------------------------------
  * sbprintf
  *
  *    The method prints a formatted string to the string buffer. 
@@ -134,4 +149,21 @@ sbcat( dr1StringBuffer *sb, char *str, int len);
 int
 sbtail( dr1StringBuffer *sb, int first_char);
 
+/*-------------------------------------------------------------------
+ * sbindex
+ *
+ *    Find a character in the buffer
+ *
+ *  PARAMETERS:
+ *     sb   String buffer to modify
+ *     ch   Character to look for
+ *
+ *  RETURNS:
+ *     Index of the character matching 'ch', or -1 if not found.
+ *
+ *  SIDE EFFECTS:
+ */
+
+int
+sbtail( dr1StringBuffer *sb, int ch);
 #endif /* __DR1STRBUF__H */

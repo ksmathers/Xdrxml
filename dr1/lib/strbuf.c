@@ -26,6 +26,14 @@ dr1StringBuffer_grow( dr1StringBuffer *sb, int len) {
     return 0;
 }
 
+void
+sbclear( dr1StringBuffer* sb) {
+    free( sb->buf);
+    sb->buf = NULL;
+    sb->bufsize = 0;
+    sb->cpos = 0;
+}
+
 int
 vsbprintf( dr1StringBuffer *sb, char *fmt, va_list va) {
     int len;
@@ -83,4 +91,13 @@ sbtail( dr1StringBuffer *sb, int start_char) {
     memcpy( sb->buf, sb->buf + start_char, sb->cpos - start_char);
     sb->buf[sb->cpos] = 0;
     sb->cpos -= start_char;
+}
+
+int 
+sbindex( dr1StringBuffer *sb, int ch) {
+    int count=0;
+    char *s = sb->buf;
+    while (count < sb->cpos && *s != ch) s++, count++;
+    if (count < sb->cpos) return count;
+    return -1;
 }
