@@ -3,6 +3,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <assert.h>
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+#include <libxml/xpointer.h>
 
 #include "player.h"
 #include "playerv.h"
@@ -13,7 +16,7 @@
 #include "money.h"
 #include "barter.h"
 #include "dice.h"
-#include "xdrasc.h"
+#include "xdrxml.h"
 #include "itemset.h"
 #include "monster.h"
 #include "combatv.h"
@@ -174,14 +177,31 @@ int rest( dr1Player *p, int c, char **v) {
     return 0;
 }
 
+int save( dr1Player *p, int c, char **v) {
+    char *fname;
+    if (c == 1) {
+	fname="player.dat";
+	c = 2;
+    } else {
+	if (c != 2) return -1;
+	fname = v[1];
+    }
+    dr1Player_save( p, fname);
+    return 0;
+}
+
 int main( int argc, char** argv) {
-    FILE *fp;
-    XDR xdrs;
     dr1Player player;
     struct stat pdat;
     int pdatf;
     dr1Player *loadOk;
+    char *fname = "player.dat";
+
+    /* initialize XML library */
+    LIBXML_TEST_VERSION
+    xmlKeepBlanksDefault(0);
     
+#if 0
     /* initialize globals */
     bzero( &player, sizeof(player));
     dr1Dice_seed();
@@ -189,12 +209,16 @@ int main( int argc, char** argv) {
     dr1Tanner_init();
     dr1Wright_init();
     dr1Smithy_init();
+#endif
 
     /* restore player from disk */
-    pdatf = stat( "player.dat", &pdat);
+    if (argc == 2) {
+        fname = argv[1];
+    }
+    pdatf = stat( fname, &pdat);
 
     if (!pdatf && S_ISREG(pdat.st_mode)) {
-	loadOk = dr1Player_load( &player, "player.dat");
+	loadOk = dr1Player_load( &player, fname);
 	assert(loadOk);
     } else {
         dr1Playerv_showDialog( &player);
@@ -211,7 +235,7 @@ int main( int argc, char** argv) {
 	printf("---------------------------------------------------------\n");
 	if (player.name) printf("Name: %s\n", player.name);
 
-	printf("(buy, equip, sell, rest, hunt, quit)\n");
+	printf("(buy, equip, sell, rest, hunt, save, quit)\n");
 	printf("Command: ");
 	fgets( cmd, sizeof(cmd), stdin);
 
@@ -223,6 +247,7 @@ int main( int argc, char** argv) {
 	else if ( !strcmp(cmds[0], "equip")) r=equip( p, i, cmds);
 	else if ( !strcmp(cmds[0], "hunt")) r=hunt( p, i, cmds);
 	else if ( !strcmp(cmds[0], "rest")) r=rest( p, i, cmds);
+	else if ( !strcmp(cmds[0], "save")) r=save( p, i, cmds);
 	else if ( !strcmp(cmds[0], "quit")) break;
 	else printf("Unknown command: '%s'\n", cmds[0]);
 	if (r) printf("Command returned code %d\n", r);
@@ -230,16 +255,12 @@ int main( int argc, char** argv) {
   
     /* dump player */
     printf("Player\n");
-    xdr_push_note( &xdrasc, "player");
-    xdr_dr1Player( &xdrasc, &player);
-    xdr_pop_note( &xdrasc);
+    xdr_push_note( &xdrxml, "player");
+    xdr_dr1Player( &xdrxml, &player);
+    xdr_pop_note( &xdrxml);
 
     /* save player with new item */
-    fp = fopen("player.dat", "w");
-    xdrstdio_create( &xdrs, fp, XDR_ENCODE);
-    xdr_dr1Player( &xdrs, &player);
-    xdr_destroy( &xdrs);
-    fclose( fp);
+    dr1Player_save( &player, fname);
     
     return 0;
 } // main

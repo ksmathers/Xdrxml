@@ -29,6 +29,7 @@ struct xdr_ops xdrxml_ops = {
     };
 
 struct xdrxml_st {
+        char path[1024];
 	char *attr;
 	FILE *fp;		/* output stream */
 	xmlDocPtr doc;		/* input stream */
@@ -37,6 +38,9 @@ struct xdrxml_st {
     };
 
 struct xdrxml_st xdrxml_data = {
+    "",
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL
@@ -53,11 +57,14 @@ XDR xdrxml = {
     XDR_ANNOTATE
 };
 
-void mark( xmlNodePtr node) {
+/*
+ * utility functions 
+ */
+static void mark( xmlNodePtr node) {
     ((char *)node->name)[0] = 0;
 }
 
-xmlNodePtr bfs1( xmlNodePtr node, const char *name) {
+static xmlNodePtr bfs1( xmlNodePtr node, const char *name) {
     xmlNodePtr cur = node->children;
     while (cur != NULL && strcasecmp( cur->name, name) != 0) {
     	cur = cur->next;
@@ -65,22 +72,27 @@ xmlNodePtr bfs1( xmlNodePtr node, const char *name) {
     return cur;
 }
 
-XDR *xdr_xml_create( char *fname, enum xdr_op xop) {
-    XDR *xdrxml;
-    struct xdrxml_st *xdrd;
+static int nchar( char *path, int c) {
+    int i=0;
+    while (*path) if (*path++ == c) i++;
+    return i;
+}
 
-    LIBXML_TEST_VERSION
-    xmlKeepBlanksDefault(0);
+int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop) {
+    struct xdrxml_st *xdrd;
 
     xdrd = calloc( 1, sizeof(struct xdrxml_st));
     if (xop == XDR_DECODE) {
 	/*
 	 * build an XML tree from a the file;
 	 */
-	xdrd->doc = xmlParseFile(fname);
-	if (xdrd->doc == NULL) return NULL;
+	printf("Parsing %s\n", fname);
+	xdrd->doc = xmlParseFile( fname);
+	assert(xdrd->doc);
+	printf("Doc loaded\n");
+	if (xdrd->doc == NULL) return -1;
 	xdrd->cur = xmlDocGetRootElement(xdrd->doc);
-	if (xdrd->cur == NULL) return NULL;
+	if (xdrd->cur == NULL) return -1;
     } 
 
     if (xop == XDR_ENCODE) {
@@ -88,27 +100,37 @@ XDR *xdr_xml_create( char *fname, enum xdr_op xop) {
 	 * Open file for writing
 	 */
 	xdrd->fp = fopen( fname, "w");
-	if (xdrd->fp == NULL) return NULL;
+	if (xdrd->fp == NULL) return -1;
     }
 
-    xdrxml = malloc( sizeof(XDR));
+    xdrs->x_op = xop;
+    xdrs->x_ops = &xdrxml_ops;
+    xdrs->x_public = NULL;
+    xdrs->x_private = (void *)xdrd;
+    xdrs->x_base = NULL;
+    xdrs->x_handy = XDR_ANNOTATE;
 
-    xdrxml->x_op = xop;
-    xdrxml->x_ops = &xdrxml_ops;
-    xdrxml->x_public = NULL;
-    xdrxml->x_private = (void *)xdrd;
-    xdrxml->x_base = NULL;
-    xdrxml->x_handy = XDR_ANNOTATE;
-
-    return xdrxml;
+    return 0;
 }
 
 bool_t xdr_push_note( XDR *xdrs, const char *s)
 {
     if (xdrs->x_handy == XDR_ANNOTATE) {
+        char buf[80];
         struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+	int ni = nchar( xdrd->path, '/');
+
+        /* add node to the path */
+	sprintf(buf, "/%s", s);
+	strcat( xdrd->path, buf);
+
+	/* process the node */
 	if (xdrs->x_op == XDR_ENCODE) {
-	    fprintf( xdrd->fp, "<%s>\n", s); 
+	    FILE *fp = xdrd->fp;
+
+	    if (!fp) fp = stdout;
+	    while (ni--) fprintf(fp, "    ");
+	    fprintf( fp, "<%s>\n", s); 
 	}
 
 	if (xdrs->x_op == XDR_DECODE) {
@@ -124,9 +146,22 @@ bool_t xdr_push_note( XDR *xdrs, const char *s)
 bool_t xdr_pop_note( XDR *xdrs) 
 {
     if (xdrs->x_handy & XDR_ANNOTATE) {
+        char *cpos;
         struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+
+        /* remove the node from the path */
+	cpos = rindex( xdrd->path, '/');
+	if (cpos) { *cpos = 0; cpos++; }
+
+	/* process the node */
 	if (xdrs->x_op == XDR_ENCODE) {
-	    /* FIXME */
+	    FILE *fp = xdrd->fp;
+	    int ni = nchar( xdrd->path, '/');
+
+	    if (!fp) fp = stdout;
+
+	    while (ni--) fprintf(fp, "    ");
+	    fprintf( fp, "</%s>\n", cpos); 
 	}
 	if (xdrs->x_op == XDR_DECODE) {
 	    xmlNodePtr cur;
@@ -178,12 +213,14 @@ bool_t xdrxml_putlong( XDR *__xdrs, __const long *__lp)
     struct xdrxml_st *xdrd = XDRXML_DATA(__xdrs);
     FILE *fp;
     char *attr = xdrd->attr;
+    int ni = nchar( xdrd->path, '/');
 
     if (!attr) attr = "long";
     if (xdrd->fp) fp = xdrd->fp;
     else fp = stdout;
 
-    fprintf(fp, "<%s value=\"0x%lx\"/>", attr, *__lp);
+    while (ni--) fprintf(fp, "    ");
+    fprintf(fp, "<%s value=\"0x%lx\"/>\n", attr, *__lp);
     xdrd->attr = NULL;
     return TRUE;
 }
@@ -242,21 +279,23 @@ bool_t xdrxml_putbytes( XDR *__xdrs, __const char *__addr,
     int i;
     unsigned char c;
     char *attr = XDRXML_DATA(__xdrs)->attr;
-    fp = XDRXML_DATA(__xdrs)->fp;
+    int ni = nchar( XDRXML_DATA(__xdrs)->path, '/');
 
+    fp = XDRXML_DATA(__xdrs)->fp;
     if (!fp) fp = stdout;
     if (!attr) attr = "bytes";
     
+    while (ni--) fprintf(fp, "    ");
     fprintf(fp, "<%s>", attr);
     for (i=0; i<__len; i++) {
 	c = __addr[ i];
 	if (c >=' ' && c <='~' && c != '=' && c != '&' && c != '<') {
-	    putchar( c);
+	    putc( c, fp);
 	} else {
-	   fprintf(fp, "=%02x", c);
+	    fprintf(fp, "=%02x", c);
 	}
     } /* for */
-    fprintf(fp, "</%s>", attr);
+    fprintf(fp, "</%s>\n", attr);
 
     XDRXML_DATA(__xdrs)->attr = 0;
     return TRUE;
@@ -290,7 +329,10 @@ int32_t *xdrxml_inline( XDR *__xdrs, int len)
 void xdrxml_destroy( XDR *__xdrs)
 {
     /* free privates of this xdr_stream */
-    assert(1==0);
+    struct xdrxml_st* xdrd = XDRXML_DATA(__xdrs);
+    if (xdrd->fp) fclose(xdrd->fp);
+   /* if (xdrd->doc) FIXME /**/
+
 }
 
 bool_t xdrxml_getint32( XDR *__xdrs, int32_t *__ip)
@@ -325,12 +367,14 @@ bool_t xdrxml_putint32( XDR *__xdrs, __const int32_t *__ip)
     struct xdrxml_st *xdrd = XDRXML_DATA(__xdrs);
     FILE *fp;
     char *attr = xdrd->attr;
+    int ni = nchar( xdrd->path, '/');
 
     if (!attr) attr = "long";
     if (xdrd->fp) fp = xdrd->fp;
     else fp = stdout;
 
-    fprintf(fp, "<%s value=\"0x%lx\"/>", attr, (long)*__ip);
+    while (ni--) fprintf(fp, "    ");
+    fprintf(fp, "<%s value=\"0x%lx\"/>\n", attr, (long)*__ip);
     xdrd->attr = NULL;
     return TRUE;
 }

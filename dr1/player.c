@@ -3,7 +3,7 @@
 #include <assert.h>
 
 #include "player.h"
-#include "xdrasc.h"
+#include "xdrxml.h"
 #include "class.h"
 #include "armor.h"
 
@@ -36,6 +36,42 @@ struct dr1Player_stat[] dr1Player_create_cont = {
     };
 #endif
 
+/*-------------------------------------------------------------------
+ * dr1Player_save
+ *
+ *    Save a player object to disk
+ *
+ *  PARAMETERS:
+ *    fn   Filename to be loaded
+ *
+ *  RETURNS:
+ */
+
+void dr1Player_save( dr1Player *p, char *fname) {
+    /* save player with new item */
+    FILE *fp = NULL;
+    bool_t res;
+    char *cpos;
+    XDR xdrs;
+
+    cpos = rindex( fname, '.');
+    if (cpos && strcasecmp(cpos, ".xml")==0) {
+        printf("Saving xml\n");
+	xdr_xml_create( &xdrs, fname, XDR_ENCODE);
+    } else {
+        printf("Saving binary\n");
+	fp = fopen(fname, "w");
+	xdrstdio_create( &xdrs, fp, XDR_ENCODE);
+    }
+    xdr_push_note( &xdrs, "player");
+    res = xdr_dr1Player( &xdrs, p);
+    xdr_pop_note( &xdrs);
+    if (!res) {
+	printf("Error saving player to '%s'\n", fname);
+    }
+    xdr_destroy( &xdrs);
+    if (fp) fclose( fp);
+}
 
 /*-------------------------------------------------------------------
  * dr1Player_load
@@ -50,13 +86,23 @@ struct dr1Player_stat[] dr1Player_create_cont = {
  *    was a problem loading the file.
  */
 dr1Player *dr1Player_load( dr1Player *buf, char* fname) {
-    FILE *fp;
+    FILE *fp = NULL;
     bool_t ok;
     dr1Player *p;
     XDR xdrs;
+    char *cpos;
 
-    fp = fopen( fname, "r");
-    if (!fp) return NULL;
+    cpos = rindex( fname, '.');
+    if (cpos && strcasecmp(cpos, ".xml")==0) {
+        printf("Loading xml\n");
+	xdr_xml_create( &xdrs, fname, XDR_DECODE);
+    } else {
+        printf("Loading binary\n");
+	fp = fopen( fname, "r");
+	if (!fp) return NULL;
+
+	xdrstdio_create( &xdrs, fp, XDR_DECODE);
+    }
 
     if (buf) {
         p = buf;
@@ -64,11 +110,9 @@ dr1Player *dr1Player_load( dr1Player *buf, char* fname) {
     } else {
 	p = calloc(1,sizeof(dr1Player));
     }
-
-    xdrstdio_create( &xdrs, fp, XDR_DECODE);
     ok = xdr_dr1Player( &xdrs, p);
     xdr_destroy( &xdrs);
-    fclose( fp);
+    if (fp) fclose( fp);
       
     if (!ok) {
 	dr1Player_destroy( p);

@@ -2,7 +2,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "money.h"
-#include "xdrasc.h"
+#include "xdrxml.h"
 
 /*-------------------------------------------------------------------
  * dr1Money_encumbrance

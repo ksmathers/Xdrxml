@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <string.h>
 #include "itemset.h"
-#include "xdrasc.h"
+#include "xdrxml.h"
 
 /*-------------------------------------------------------------------
  * dr1ItemSetAdd

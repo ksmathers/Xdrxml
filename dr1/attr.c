@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "attr.h"
 #include "dice.h"
-#include "xdrasc.h"
+#include "xdrxml.h"
 
 /*-------------------------------------------------------------------
  * attribute

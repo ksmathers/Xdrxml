@@ -37,6 +37,9 @@ void xdr_attr( XDR *xdrs, const char *ann);
 
 extern XDR xdrxml;
 
+int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop);
+    /* open an XML xdr stream */
+
 bool_t xdrxml_getlong( XDR *__xdrs, long *__lp);
     /* get a long from underlying stream */
 

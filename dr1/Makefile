@@ -2,18 +2,18 @@
 	gcc -c -g -Wall -Wno-comment -I. $< -o $@
 #	gcc -c -g -Wall -Wno-comment -Wno-multichar -I. $< -o $@
 
-main: main.o money.o merchant.o apothecary.o dice.o player.o \
+dr1: main.o money.o merchant.o apothecary.o dice.o player.o \
 	    barter.o itemset.o item.o attr.o registry.o \
-	    itemreg.o xdrasc.o playerv.o race.o class.o \
+	    itemreg.o xdrxml.o playerv.o race.o class.o \
 	    smithy.o weapon.o monster.o combatv.o armor.o \
 	    ttype.o tanner.o wright.o location.o \
 	    potions/heal.o 
-	gcc -g main.o money.o merchant.o apothecary.o dice.o \
+	gcc -g -odr1 main.o money.o merchant.o apothecary.o dice.o \
 	player.o barter.o itemset.o item.o attr.o registry.o \
-	itemreg.o xdrasc.o playerv.o race.o class.o \
+	itemreg.o xdrxml.o playerv.o race.o class.o \
 	smithy.o weapon.o monster.o combatv.o armor.o \
 	ttype.o tanner.o wright.o location.o \
-	potions/heal.o -lm
+	potions/heal.o -lxml2 -lm
 
 depend:
 	makedepend -I. \
@@ -59,8 +59,11 @@ apothecary.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 apothecary.o: /usr/include/libio.h /usr/include/_G_config.h
 apothecary.o: /usr/include/bits/stdio_lim.h apothecary.h merchant.h item.h
 apothecary.o: money.h barter.h itemset.h potions/heal.h player.h attr.h
-apothecary.o: weapon.h globals.h armor.h
-armor.o: registry.h armor.h xdrasc.h /usr/include/rpc/xdr.h
+apothecary.o: weapon.h globals.h armor.h location.h /usr/include/math.h
+apothecary.o: /usr/include/bits/huge_val.h /usr/include/bits/mathdef.h
+apothecary.o: /usr/include/bits/mathcalls.h
+apothecary.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/float.h
+armor.o: registry.h armor.h xdrxml.h /usr/include/rpc/xdr.h
 armor.o: /usr/include/features.h /usr/include/sys/cdefs.h
 armor.o: /usr/include/gnu/stubs.h /usr/include/sys/types.h
 armor.o: /usr/include/bits/types.h
@@ -105,7 +108,7 @@ attr.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h
 attr.o: /usr/include/stdio.h
 attr.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 attr.o: /usr/include/libio.h /usr/include/_G_config.h
-attr.o: /usr/include/bits/stdio_lim.h xdrasc.h
+attr.o: /usr/include/bits/stdio_lim.h xdrxml.h
 barter.o: /usr/include/string.h /usr/include/features.h
 barter.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
 barter.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
@@ -151,7 +154,7 @@ class.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h
 class.o: /usr/include/stdio.h
 class.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 class.o: /usr/include/libio.h /usr/include/_G_config.h
-class.o: /usr/include/bits/stdio_lim.h
+class.o: /usr/include/bits/stdio_lim.h attr.h
 combatv.o: /usr/include/string.h /usr/include/features.h
 combatv.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
 combatv.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
@@ -176,7 +179,11 @@ combatv.o: /usr/include/stdio.h
 combatv.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 combatv.o: /usr/include/libio.h /usr/include/_G_config.h
 combatv.o: /usr/include/bits/stdio_lim.h player.h attr.h weapon.h globals.h
-combatv.o: armor.h monster.h registry.h dice.h
+combatv.o: armor.h location.h /usr/include/math.h
+combatv.o: /usr/include/bits/huge_val.h /usr/include/bits/mathdef.h
+combatv.o: /usr/include/bits/mathcalls.h
+combatv.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/float.h
+combatv.o: monster.h registry.h dice.h class.h ttype.h money.h
 dice.o: /usr/include/stdlib.h /usr/include/features.h
 dice.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
 dice.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
@@ -203,6 +210,18 @@ dice.o: /usr/include/stdint.h /usr/include/bits/wordsize.h
 dice.o: /usr/include/bits/socket.h /usr/include/bits/sockaddr.h
 dice.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
 dice.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h
+fooread.o: /usr/include/stdio.h /usr/include/features.h
+fooread.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
+fooread.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
+fooread.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
+fooread.o: /usr/include/bits/types.h /usr/include/libio.h
+fooread.o: /usr/include/_G_config.h /usr/include/bits/stdio_lim.h
+fooread.o: /usr/include/string.h /usr/include/stdlib.h
+fooread.o: /usr/include/sys/types.h /usr/include/time.h /usr/include/endian.h
+fooread.o: /usr/include/bits/endian.h /usr/include/sys/select.h
+fooread.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+fooread.o: /usr/include/sys/sysmacros.h /usr/include/alloca.h
+fooread.o: /usr/include/assert.h
 item.o: /usr/include/assert.h /usr/include/features.h
 item.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h money.h item.h
 item.o: itemreg.h /usr/include/rpc/xdr.h /usr/include/sys/types.h
@@ -225,7 +244,7 @@ item.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h
 item.o: /usr/include/stdio.h
 item.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 item.o: /usr/include/libio.h /usr/include/_G_config.h
-item.o: /usr/include/bits/stdio_lim.h registry.h xdrasc.h armor.h
+item.o: /usr/include/bits/stdio_lim.h registry.h xdrxml.h armor.h
 itemreg.o: itemreg.h /usr/include/rpc/xdr.h /usr/include/features.h
 itemreg.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
 itemreg.o: /usr/include/sys/types.h /usr/include/bits/types.h
@@ -250,12 +269,15 @@ itemreg.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 itemreg.o: /usr/include/libio.h /usr/include/_G_config.h
 itemreg.o: /usr/include/bits/stdio_lim.h registry.h potions/heal.h item.h
 itemreg.o: dice.h /usr/include/string.h player.h attr.h weapon.h globals.h
-itemreg.o: armor.h
+itemreg.o: armor.h location.h /usr/include/math.h
+itemreg.o: /usr/include/bits/huge_val.h /usr/include/bits/mathdef.h
+itemreg.o: /usr/include/bits/mathcalls.h
+itemreg.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/float.h
 itemset.o: /usr/include/assert.h /usr/include/features.h
 itemset.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
 itemset.o: /usr/include/string.h
 itemset.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
-itemset.o: itemset.h item.h xdrasc.h /usr/include/rpc/xdr.h
+itemset.o: itemset.h item.h xdrxml.h /usr/include/rpc/xdr.h
 itemset.o: /usr/include/sys/types.h /usr/include/bits/types.h
 itemset.o: /usr/include/time.h /usr/include/endian.h
 itemset.o: /usr/include/bits/endian.h /usr/include/sys/select.h
@@ -276,6 +298,33 @@ itemset.o: /usr/include/stdio.h
 itemset.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 itemset.o: /usr/include/libio.h /usr/include/_G_config.h
 itemset.o: /usr/include/bits/stdio_lim.h
+location.o: location.h /usr/include/math.h /usr/include/features.h
+location.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
+location.o: /usr/include/bits/huge_val.h /usr/include/bits/mathdef.h
+location.o: /usr/include/bits/mathcalls.h
+location.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/float.h
+location.o: xdrxml.h /usr/include/rpc/xdr.h /usr/include/sys/types.h
+location.o: /usr/include/bits/types.h
+location.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
+location.o: /usr/include/time.h /usr/include/endian.h
+location.o: /usr/include/bits/endian.h /usr/include/sys/select.h
+location.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+location.o: /usr/include/sys/sysmacros.h /usr/include/rpc/types.h
+location.o: /usr/include/stdlib.h /usr/include/alloca.h
+location.o: /usr/include/sys/time.h /usr/include/bits/time.h
+location.o: /usr/include/sys/param.h
+location.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/limits.h
+location.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/syslimits.h
+location.o: /usr/include/linux/limits.h /usr/include/linux/param.h
+location.o: /usr/include/asm/param.h /usr/include/netinet/in.h
+location.o: /usr/include/stdint.h /usr/include/bits/wordsize.h
+location.o: /usr/include/bits/socket.h /usr/include/bits/sockaddr.h
+location.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
+location.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h
+location.o: /usr/include/stdio.h
+location.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
+location.o: /usr/include/libio.h /usr/include/_G_config.h
+location.o: /usr/include/bits/stdio_lim.h
 main.o: /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h
 main.o: /usr/include/gnu/stubs.h
 main.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
@@ -286,8 +335,12 @@ main.o: /usr/include/sys/stat.h /usr/include/bits/stat.h
 main.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
 main.o: /usr/include/bits/confname.h /usr/include/getopt.h
 main.o: /usr/include/string.h /usr/include/assert.h player.h attr.h weapon.h
-main.o: globals.h armor.h playerv.h apothecary.h merchant.h item.h money.h
-main.o: barter.h itemset.h smithy.h dice.h /usr/include/rpc/xdr.h
+main.o: globals.h armor.h location.h /usr/include/math.h
+main.o: /usr/include/bits/huge_val.h /usr/include/bits/mathdef.h
+main.o: /usr/include/bits/mathcalls.h
+main.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/float.h
+main.o: playerv.h apothecary.h merchant.h item.h money.h barter.h itemset.h
+main.o: smithy.h tanner.h wright.h dice.h /usr/include/rpc/xdr.h
 main.o: /usr/include/sys/types.h /usr/include/time.h /usr/include/endian.h
 main.o: /usr/include/bits/endian.h /usr/include/sys/select.h
 main.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
@@ -301,7 +354,7 @@ main.o: /usr/include/asm/param.h /usr/include/netinet/in.h
 main.o: /usr/include/stdint.h /usr/include/bits/wordsize.h
 main.o: /usr/include/bits/socket.h /usr/include/bits/sockaddr.h
 main.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
-main.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h xdrasc.h
+main.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h xdrxml.h
 main.o: monster.h registry.h combatv.h
 merchant.o: /usr/include/stdio.h /usr/include/features.h
 merchant.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
@@ -333,7 +386,7 @@ money.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/float.h
 money.o: /usr/include/string.h
 money.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
 money.o: /usr/include/ctype.h /usr/include/bits/types.h /usr/include/endian.h
-money.o: /usr/include/bits/endian.h money.h xdrasc.h /usr/include/rpc/xdr.h
+money.o: /usr/include/bits/endian.h money.h xdrxml.h /usr/include/rpc/xdr.h
 money.o: /usr/include/sys/types.h /usr/include/time.h
 money.o: /usr/include/sys/select.h /usr/include/bits/select.h
 money.o: /usr/include/bits/sigset.h /usr/include/sys/sysmacros.h
@@ -374,7 +427,10 @@ monster.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h
 monster.o: /usr/include/stdio.h
 monster.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 monster.o: /usr/include/libio.h /usr/include/_G_config.h
-monster.o: /usr/include/bits/stdio_lim.h monster.h registry.h
+monster.o: /usr/include/bits/stdio_lim.h monster.h registry.h location.h
+monster.o: /usr/include/math.h /usr/include/bits/huge_val.h
+monster.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
+monster.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/float.h
 player.o: /usr/include/stdio.h /usr/include/features.h
 player.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
 player.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
@@ -382,8 +438,12 @@ player.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 player.o: /usr/include/bits/types.h /usr/include/libio.h
 player.o: /usr/include/_G_config.h /usr/include/bits/stdio_lim.h
 player.o: /usr/include/string.h /usr/include/assert.h player.h attr.h
-player.o: weapon.h globals.h armor.h xdrasc.h /usr/include/rpc/xdr.h
-player.o: /usr/include/sys/types.h /usr/include/time.h /usr/include/endian.h
+player.o: weapon.h globals.h armor.h location.h /usr/include/math.h
+player.o: /usr/include/bits/huge_val.h /usr/include/bits/mathdef.h
+player.o: /usr/include/bits/mathcalls.h
+player.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/float.h
+player.o: xdrxml.h /usr/include/rpc/xdr.h /usr/include/sys/types.h
+player.o: /usr/include/time.h /usr/include/endian.h
 player.o: /usr/include/bits/endian.h /usr/include/sys/select.h
 player.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
 player.o: /usr/include/sys/sysmacros.h /usr/include/rpc/types.h
@@ -404,8 +464,8 @@ playerv.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
 playerv.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 playerv.o: /usr/include/bits/types.h /usr/include/libio.h
 playerv.o: /usr/include/_G_config.h /usr/include/bits/stdio_lim.h
-playerv.o: /usr/include/string.h playerv.h attr.h race.h
-playerv.o: /usr/include/rpc/xdr.h /usr/include/sys/types.h
+playerv.o: /usr/include/string.h /usr/include/assert.h playerv.h attr.h
+playerv.o: race.h /usr/include/rpc/xdr.h /usr/include/sys/types.h
 playerv.o: /usr/include/time.h /usr/include/endian.h
 playerv.o: /usr/include/bits/endian.h /usr/include/sys/select.h
 playerv.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
@@ -468,6 +528,29 @@ smithy.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 smithy.o: /usr/include/libio.h /usr/include/_G_config.h
 smithy.o: /usr/include/bits/stdio_lim.h smithy.h merchant.h item.h money.h
 smithy.o: barter.h itemset.h weapon.h globals.h armor.h
+tanner.o: dice.h /usr/include/string.h /usr/include/features.h
+tanner.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
+tanner.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
+tanner.o: /usr/include/rpc/xdr.h /usr/include/sys/types.h
+tanner.o: /usr/include/bits/types.h /usr/include/time.h /usr/include/endian.h
+tanner.o: /usr/include/bits/endian.h /usr/include/sys/select.h
+tanner.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+tanner.o: /usr/include/sys/sysmacros.h /usr/include/rpc/types.h
+tanner.o: /usr/include/stdlib.h /usr/include/alloca.h /usr/include/sys/time.h
+tanner.o: /usr/include/bits/time.h /usr/include/sys/param.h
+tanner.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/limits.h
+tanner.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/syslimits.h
+tanner.o: /usr/include/linux/limits.h /usr/include/linux/param.h
+tanner.o: /usr/include/asm/param.h /usr/include/netinet/in.h
+tanner.o: /usr/include/stdint.h /usr/include/bits/wordsize.h
+tanner.o: /usr/include/bits/socket.h /usr/include/bits/sockaddr.h
+tanner.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
+tanner.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h
+tanner.o: /usr/include/stdio.h
+tanner.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
+tanner.o: /usr/include/libio.h /usr/include/_G_config.h
+tanner.o: /usr/include/bits/stdio_lim.h tanner.h merchant.h item.h money.h
+tanner.o: barter.h itemset.h armor.h
 test.o: /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h
 test.o: /usr/include/gnu/stubs.h
 test.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
@@ -497,8 +580,16 @@ timeq.o: /usr/include/time.h /usr/include/endian.h /usr/include/bits/endian.h
 timeq.o: /usr/include/sys/select.h /usr/include/bits/select.h
 timeq.o: /usr/include/bits/sigset.h /usr/include/sys/sysmacros.h
 timeq.o: /usr/include/alloca.h player.h attr.h weapon.h globals.h armor.h
+timeq.o: location.h /usr/include/math.h /usr/include/bits/huge_val.h
+timeq.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
+timeq.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/float.h
 timeq.o: timeq.h
-weapon.o: weapon.h globals.h money.h xdrasc.h /usr/include/rpc/xdr.h
+ttype.o: /usr/include/assert.h /usr/include/features.h
+ttype.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
+ttype.o: /usr/include/string.h
+ttype.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
+ttype.o: ttype.h money.h
+weapon.o: weapon.h globals.h money.h xdrxml.h /usr/include/rpc/xdr.h
 weapon.o: /usr/include/features.h /usr/include/sys/cdefs.h
 weapon.o: /usr/include/gnu/stubs.h /usr/include/sys/types.h
 weapon.o: /usr/include/bits/types.h
@@ -521,6 +612,29 @@ weapon.o: /usr/include/stdio.h
 weapon.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
 weapon.o: /usr/include/libio.h /usr/include/_G_config.h
 weapon.o: /usr/include/bits/stdio_lim.h
+wright.o: dice.h /usr/include/string.h /usr/include/features.h
+wright.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
+wright.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
+wright.o: /usr/include/rpc/xdr.h /usr/include/sys/types.h
+wright.o: /usr/include/bits/types.h /usr/include/time.h /usr/include/endian.h
+wright.o: /usr/include/bits/endian.h /usr/include/sys/select.h
+wright.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+wright.o: /usr/include/sys/sysmacros.h /usr/include/rpc/types.h
+wright.o: /usr/include/stdlib.h /usr/include/alloca.h /usr/include/sys/time.h
+wright.o: /usr/include/bits/time.h /usr/include/sys/param.h
+wright.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/limits.h
+wright.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/syslimits.h
+wright.o: /usr/include/linux/limits.h /usr/include/linux/param.h
+wright.o: /usr/include/asm/param.h /usr/include/netinet/in.h
+wright.o: /usr/include/stdint.h /usr/include/bits/wordsize.h
+wright.o: /usr/include/bits/socket.h /usr/include/bits/sockaddr.h
+wright.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
+wright.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h
+wright.o: /usr/include/stdio.h
+wright.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
+wright.o: /usr/include/libio.h /usr/include/_G_config.h
+wright.o: /usr/include/bits/stdio_lim.h wright.h merchant.h item.h money.h
+wright.o: barter.h itemset.h weapon.h globals.h
 xdrasc.o: /usr/include/assert.h /usr/include/features.h
 xdrasc.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
 xdrasc.o: /usr/include/string.h
@@ -543,3 +657,25 @@ xdrasc.o: /usr/include/stdint.h /usr/include/bits/wordsize.h
 xdrasc.o: /usr/include/bits/socket.h /usr/include/bits/sockaddr.h
 xdrasc.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
 xdrasc.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h
+xdrxml.o: /usr/include/assert.h /usr/include/features.h
+xdrxml.o: /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h
+xdrxml.o: /usr/include/string.h
+xdrxml.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stddef.h
+xdrxml.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/stdarg.h
+xdrxml.o: /usr/include/stdio.h /usr/include/bits/types.h /usr/include/libio.h
+xdrxml.o: /usr/include/_G_config.h /usr/include/bits/stdio_lim.h xdrxml.h
+xdrxml.o: /usr/include/rpc/xdr.h /usr/include/sys/types.h /usr/include/time.h
+xdrxml.o: /usr/include/endian.h /usr/include/bits/endian.h
+xdrxml.o: /usr/include/sys/select.h /usr/include/bits/select.h
+xdrxml.o: /usr/include/bits/sigset.h /usr/include/sys/sysmacros.h
+xdrxml.o: /usr/include/rpc/types.h /usr/include/stdlib.h
+xdrxml.o: /usr/include/alloca.h /usr/include/sys/time.h
+xdrxml.o: /usr/include/bits/time.h /usr/include/sys/param.h
+xdrxml.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/limits.h
+xdrxml.o: /usr/lib/gcc-lib/i686-pc-linux-gnu/pgcc-2.91.66/include/syslimits.h
+xdrxml.o: /usr/include/linux/limits.h /usr/include/linux/param.h
+xdrxml.o: /usr/include/asm/param.h /usr/include/netinet/in.h
+xdrxml.o: /usr/include/stdint.h /usr/include/bits/wordsize.h
+xdrxml.o: /usr/include/bits/socket.h /usr/include/bits/sockaddr.h
+xdrxml.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
+xdrxml.o: /usr/include/bits/in.h /usr/include/bits/byteswap.h

@@ -64,6 +64,19 @@ typedef struct dr1Player {
 
 
 /*-------------------------------------------------------------------
+ * dr1Player_save
+ *
+ *    Save a player object to disk
+ *
+ *  PARAMETERS:
+ *    fn   Filename to be loaded
+ *
+ *  RETURNS:
+ */
+
+void dr1Player_save( dr1Player *p, char *fname);
+
+/*-------------------------------------------------------------------
  * dr1Player_load
  *
  *    Load a player object from disk
