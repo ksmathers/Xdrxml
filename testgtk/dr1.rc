@@ -1,0 +1,42 @@
+
+style "window" 
+{
+#    bg_pixmap[NORMAL]="crack.xpm"
+}
+
+style "ice"
+{
+    bg_pixmap[NORMAL]="ice.xpm"
+    font="-*-zapf chancery-*-*-*-*-24-*-*-*-*-*-iso8859-1"
+#    fg[NORMAL]="#2faf00"
+    fg[NORMAL]="#ff3030"
+}
+
+style "pixbutton" = "button"
+{
+    bg_pixmap[NORMAL]="ice.xpm"
+}
+
+style "pixparent" = "button"
+{
+    bg_pixmap[NORMAL]="<parent>"
+}
+
+style "subtitle" 
+{
+    font="-*-zapf chancery-*-*-*-*-24-*-*-*-*-*-iso8859-1"
+#    fg[NORMAL]="#2faf00"
+    fg[NORMAL]="#ff3030"
+}
+
+style "title" 
+{
+    font="-*-zapf chancery-*-*-*-*-56-*-*-*-*-*-iso8859-1"
+#    fg[NORMAL]="#2faf00"
+    fg[NORMAL]="#ff3030"
+}
+
+widget "wlogin" style "window"
+widget "wlogin.*viewport1" style "ice"
+widget "wlogin.*drtitle" style "title"
+
