@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <rpc/xdr.h>
+#include <fcntl.h>
 
 #include <pthread.h>
 #include <errno.h>
@@ -24,6 +25,8 @@ static struct {
 int doConnect( char *server, int port) {
     struct sockaddr_in addr;
     struct hostent *svr_addr;
+    long flags;
+
     svr_addr = gethostbyname( server);
     assert(svr_addr);
     addr.sin_family = AF_INET;
@@ -35,6 +38,17 @@ int doConnect( char *server, int port) {
 	perror("connect");
 	exit(1);
     }
+    flags = fcntl( ctx.sd, F_GETFL);
+    if (flags < 0) {
+	perror("fcntl F_GETFL");
+	exit(1);
+    }
+    flags |= O_NONBLOCK;
+    if ( fcntl( ctx.sd, F_SETFL, flags)) {
+	perror("fcntl F_SETFL");
+	exit(1);
+    }
+
     dr1Stream_create( &ctx.ios, ctx.sd);
     return 0;
 }

@@ -66,15 +66,19 @@ static char* _msgattr[] = { "Str:", "Int:", "Wis:", "Dex:", "Con:", "Cha:" };
 
 int dr1Text_setInfo( dr1Text *buf, char *string, int ptsize, int x, int y, enum Position pos) 
 {
-    static int init = 0;
     static TTF_Font *font;
-    static int savedptsize;
     static SDL_Surface *temp;
     static SDL_Color white = { 0xFF, 0xFF, 0xFF, 0 };
     static SDL_Color black = { 0, 0, 0, 0 };
     if (ptsize <= 0) ptsize = DEFAULT_PTSIZE;
 
     strncpy( buf->text, string, sizeof(buf->text));
+
+    if (buf->text[0] == 0) {
+        /* null string */
+	buf->textbuf = NULL;
+	return 0;
+    }
 
     /* Open the font file with the requested point size */
     /* font = TTF_OpenFont("../font/Wizard__.ttf", ptsize); /**/
@@ -144,6 +148,7 @@ int dr1Text_setInfo( dr1Text *buf, char *string, int ptsize, int x, int y, enum 
 	    buf->textbuf = temp;
     }
     TTF_CloseFont(font);
+    return 0;
 }
 
 void
@@ -160,25 +165,14 @@ dr1Text_infoMessage( char *s, SDL_Surface *screen) {
 }
 
 int dr1Text_showInfo( SDL_Surface *screen, dr1Text *txt) {
+    if (!txt->textbuf) return 0;
     SDL_BlitSurface(txt->textbuf, NULL, screen, &txt->dstrect);
+    return 0;
 }
 
 #if 0
 int dr1Text_setPlayer( dr1Player *p) {
     int i;
-}
-#endif
-
-int dr1Text_init( SDL_Surface *screen) {
-    int i;
-    char buf[80];
-    /* title */
-    dr1Text_setInfo( &_text.dragons, 
-	    "Dragon's", TITLE_PTSIZE, 70, 20, ANCHOR_TOPCENTER);
-    dr1Text_setInfo( &_text.reach, 
-	    "Reach", TITLE_PTSIZE, 70, 45, ANCHOR_TOPCENTER);
-
-    /* character */
     dr1Text_setInfo( &_text.name, common.player.name,
 	    NAME_PTSIZE, XPOS, lpos(2), ANCHOR_TOPLEFT);
     dr1Text_setInfo( &_text.race, race_name[ common.player.race],
@@ -213,23 +207,68 @@ int dr1Text_init( SDL_Surface *screen) {
 	    DEFAULT_PTSIZE, XPOS, lpos(33), ANCHOR_TOPLEFT);
     dr1Text_setInfo( &_text.encumbrance, "Carry: 135#", 
 	    DEFAULT_PTSIZE, XPOS, lpos(35), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.attack_action, "Whack!", 
+}
+#endif
+
+int dr1Text_init( SDL_Surface *screen) {
+    int i;
+    /* title */
+    dr1Text_setInfo( &_text.dragons, 
+	    "Dragon's", TITLE_PTSIZE, 70, 20, ANCHOR_TOPCENTER);
+    dr1Text_setInfo( &_text.reach, 
+	    "Reach", TITLE_PTSIZE, 70, 45, ANCHOR_TOPCENTER);
+
+    /* character */
+    dr1Text_setInfo( &_text.name, "",
+	    NAME_PTSIZE, XPOS, lpos(2), ANCHOR_TOPLEFT);
+    dr1Text_setInfo( &_text.race, race_name[ common.player.race],
+	    DEFAULT_PTSIZE, XPOS, lpos(5), ANCHOR_TOPLEFT);
+    dr1Text_setInfo( &_text.class_level, "",
+	    DEFAULT_PTSIZE, XPOS, lpos(7), ANCHOR_TOPLEFT);
+    dr1Text_setInfo( &_text.sex, "",
+	    DEFAULT_PTSIZE, XPOS, lpos(9), ANCHOR_TOPLEFT);
+    dr1Text_setInfo( &_text.experience, "",
+	    DEFAULT_PTSIZE, XPOS, lpos(11), ANCHOR_TOPLEFT);
+    dr1Text_setInfo( &_text.hits, "",
+	    DEFAULT_PTSIZE, XPOS, lpos(13), ANCHOR_TOPLEFT);
+    dr1Text_setInfo( &_text.fatigue, "Fat:",
+	    DEFAULT_PTSIZE, XPOS, lpos(15), ANCHOR_TOPLEFT);
+
+    /* stats */
+    for (i=0; i<6; i++) {
+	dr1Text_setInfo( &_text.stats_labels[i], _msgattr[i], 
+		DEFAULT_PTSIZE, 60, lpos(17+(i<<1)), ANCHOR_TOPRIGHT);
+	dr1Text_setInfo( &_text.stats_values[i], "",
+		DEFAULT_PTSIZE, 65, lpos(17+(i<<1)), ANCHOR_TOPLEFT);
+    }
+
+    /* equip */
+    dr1Text_setInfo( &_text.weapon, "",
+	    DEFAULT_PTSIZE, XPOS, lpos(29), ANCHOR_TOPLEFT);
+    dr1Text_setInfo( &_text.gauche, "",
+	    DEFAULT_PTSIZE, XPOS, lpos(31), ANCHOR_TOPLEFT);
+    dr1Text_setInfo( &_text.armor, "",
+	    DEFAULT_PTSIZE, XPOS, lpos(33), ANCHOR_TOPLEFT);
+    dr1Text_setInfo( &_text.encumbrance, "",
+	    DEFAULT_PTSIZE, XPOS, lpos(35), ANCHOR_TOPLEFT);
+    dr1Text_setInfo( &_text.attack_action, "",
 	    DEFAULT_PTSIZE, XPOS, lpos(37), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.attack_result, "23 Damage", 
+    dr1Text_setInfo( &_text.attack_result, "",
 	    DEFAULT_PTSIZE, XPOS, lpos(39), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.enemy, "Vampire", 
+    dr1Text_setInfo( &_text.enemy, "",
 	    DEFAULT_PTSIZE, XPOS, lpos(41), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.defend_action, "Struck Thee!", 
+    dr1Text_setInfo( &_text.defend_action, "",
 	    DEFAULT_PTSIZE, XPOS, lpos(43), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.defend_result, "Drain 3 lvl", 
+    dr1Text_setInfo( &_text.defend_result, "",
 	    DEFAULT_PTSIZE, XPOS, lpos(45), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.command_echo, "P", 
+    dr1Text_setInfo( &_text.command_echo, "",
 	    DEFAULT_PTSIZE, XPOS, lpos(47), ANCHOR_TOPLEFT);
     
     for ( i=0; i<4; i++) {
 	dr1Text_setInfo( &_text._scrollmsg[i], "*", 
 		MESSAGE_PTSIZE, 140, mpos(i<<1), ANCHOR_TOPLEFT);
     }
+    return 0;
 }
 
 int dr1Text_show( SDL_Surface *screen) {
@@ -260,5 +299,6 @@ int dr1Text_show( SDL_Surface *screen) {
     for (i=0; i<4; i++) {
 	dr1Text_showInfo( screen, &_text._scrollmsg[i]);
     }
+    return 0;
 }
 

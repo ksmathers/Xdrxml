@@ -4,7 +4,7 @@ CFLAGS=-I../lib -I.. \
 	`freetype-config --cflags`
 LIBS=   `sdl-config --libs` -L/usr/local/lib -lSDL_ttf \
 	`freetype-config --libs` \
-	-lxml2 ../lib/libdr1.a
+	-lxml2 ../lib/libdr1.a -L. -lefence
 OBJSPLAYER=\
 	../player.o ../class.o ../armor.o ../weapon.o ../registry.o \
 	../item.o ../attr.o ../itemset.o ../location.o ../dice.o \
