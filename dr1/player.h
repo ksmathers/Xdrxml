@@ -39,6 +39,37 @@ typedef struct dr1Player {
 } dr1Player;
 
 /*-------------------------------------------------------------------
+ * dr1Player_load
+ *
+ *    Load a player object from disk
+ *
+ *  PARAMETERS:
+ *    p    Player buffer, or NULL
+ *    fn   Filename to be loaded
+ *
+ *  RETURNS:
+ *    Pointer to the dr1Player structure passed in, or NULL 
+ *    if there was a problem loading the file.  If p is NULL
+ *    a new player structure is malloc'd and returned.
+ *
+ *  SIDE EFFECT:
+ *    Several substructures are malloc'd so the caller should
+ *    dr1Player_destroy() the structure before disposing of
+ *    it.
+ */
+dr1Player *dr1Player_load( dr1Player *p, char* fname);
+
+/*-------------------------------------------------------------------
+ * dr1Player_destroy
+ *
+ *    Destroy a malloc'd dr1Player structure.
+ *
+ *  PARAMETERS:
+ *    p    Player structure to destroy
+ */
+void dr1Player_destroy( dr1Player *);
+
+/*-------------------------------------------------------------------
  * dr1Player_encumbrance
  *
  *    Calculates the encubrance that the Player is carrying in pounds.

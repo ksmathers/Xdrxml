@@ -25,7 +25,6 @@ typedef struct {
     dr1Item** items;
 } dr1ItemSet;
 
-
 /*-------------------------------------------------------------------
  * dr1ItemSet_add
  *

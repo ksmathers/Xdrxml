@@ -1,12 +1,12 @@
-#ifndef __D20__H
-#define __D20__H
+#ifndef __DR1__H
+#define __DR1__H
 
 #ifndef _RPC_XDR_H
 #   include <rpc/xdr.h>
 #endif
 
 /*-------------------------------------------------------------------
- * d20
+ * dr1
  *
  *    The structure ...
  */
@@ -16,7 +16,7 @@ typedef struct {
 
 
 /*-------------------------------------------------------------------
- * d20
+ * dr1
  *
  *    The method ...
  *
@@ -28,4 +28,4 @@ typedef struct {
  */
 
 
-#endif /* __D20__H */
+#endif /* __DR1__H */

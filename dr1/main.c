@@ -30,12 +30,9 @@ int main( int argc, char** argv) {
 
     /* restore player from disk */
     pdatf = stat( "player.dat", &pdat);
+
     if (!pdatf && S_ISREG(pdat.st_mode)) {
-	fp = fopen("player.dat", "r");
-	xdrstdio_create( &xdrs, fp, XDR_DECODE);
-	xdr_dr1Player( &xdrs, &player);
-	xdr_destroy( &xdrs);
-	fclose( fp);
+	dr1Player_load( &player, "player.dat");
     } else {
 	player.name = "Byron";
 	player.purse.gp = dr1Dice_roll("3d4") * 10;

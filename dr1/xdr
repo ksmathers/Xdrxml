@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------
- * xdr_d20Money( xdrs, d20Money*)
+ * xdr_dr1Money( xdrs, dr1Money*)
  */
-bool_t xdr_d20Money( XDR *xdrs, d20Money*);
+bool_t xdr_dr1Money( XDR *xdrs, dr1Money*);
 
