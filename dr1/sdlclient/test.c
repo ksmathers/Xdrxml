@@ -301,7 +301,9 @@ int setInfo( dr1Text *buf, char *string, int ptsize, int x, int y, enum Position
     if (ptsize <= 0) ptsize = DEFAULT_PTSIZE;
 
     /* Open the font file with the requested point size */
-    font = TTF_OpenFont("Wizard__.ttf", ptsize);
+    /* font = TTF_OpenFont("../font/Wizard__.ttf", ptsize); /**/
+    /* font = TTF_OpenFont("../font/American.ttf", ptsize); /**/
+    font = TTF_OpenFont("../font/MORPHEUS.TTF", ptsize);
     if (!font) {
 	    fprintf(stderr, "Couldn't load %d pt font from %s: %s\n",
 				    ptsize, "Wizard__.ttf", SDL_GetError());
@@ -379,9 +381,11 @@ int main( int argc, char **argv) {
     int oxpos, oypos;
     dr1Text dr1__name;
     dr1Text dr1__class;
+    dr1Text _hits;
     dr1Text _attr[6];
     dr1Text _attrval[6];
     char *msgattr[6] = { "Str:", "Int:", "Wis:", "Dex:", "Con:", "Cha:" };
+    dr1Text _scrollmsg[4];
     int i;
     
     /* Initialize graphics */
@@ -422,16 +426,23 @@ int main( int argc, char **argv) {
 	dr1_castle1 = LoadBMP( GFXDIR "/24x35/db-indoor-castle-1.bmp", screen);
 	dr1_objects1 = LoadBMP( GFXDIR "/24x35/db-objects-1.bmp", screen);
 	dr1_objects2 = LoadBMP( GFXDIR "/24x35/db-objects-2.bmp", screen);
-	setInfo( &_dragons, "Dragon's", 28, 67, 30, ANCHOR_TOPCENTER);
-	setInfo( &_reach, "Reach", 28, 67, 55, ANCHOR_TOPCENTER);
+	setInfo( &_dragons, "Dragon's", 28, 70, 30, ANCHOR_TOPCENTER);
+	setInfo( &_reach, "Reach", 28, 70, 55, ANCHOR_TOPCENTER);
 
 #define lpos(ln) (95 + (ln) * 11)
+#define mpos(ln) (screen->h - 103 + (ln) * 10)
         setInfo( &dr1__name, "Thorin", 24, 20, lpos(0), ANCHOR_TOPLEFT);
-	setInfo( &dr1__class, "Fighter", 20, 20, lpos(3), ANCHOR_TOPLEFT);
+	setInfo( &dr1__class, "Fighter/15", 20, 20, lpos(3), ANCHOR_TOPLEFT);
+	setInfo( &_hits, "Hits: 24/32", 20, 20, lpos(5), ANCHOR_TOPLEFT);
+	for (i = 0; i < 4; i++) {
+	    setInfo( &_scrollmsg[i], 
+		"The quick brown fox jumped over the lazy dog.", 
+		18, 140, mpos(i<<1), ANCHOR_TOPLEFT);
+	}
 
 	for (i = 0; i < 6; i++) {
-	    setInfo( &_attr[i], msgattr[i], 20, 60, lpos((i<<1)+5), ANCHOR_TOPRIGHT);
-	    setInfo( &_attrval[i], "18/00", 20, 65, lpos((i<<1)+5), ANCHOR_TOPLEFT);
+	    setInfo( &_attr[i], msgattr[i], 20, 60, lpos((i<<1)+7), ANCHOR_TOPRIGHT);
+	    setInfo( &_attrval[i], (i==0?"18/00":"18"), 20, 65, lpos((i<<1)+7), ANCHOR_TOPLEFT);
 	}
 	loadBorder( screen);
 
@@ -451,12 +462,16 @@ int main( int argc, char **argv) {
 		showBorder( screen);
 		showInfo( screen, &_dragons);
 		showInfo( screen, &_reach);
+		showInfo( screen, &_hits);
+		showInfo( screen, &dr1__name);
+		showInfo( screen, &dr1__class);
+		for (i = 0; i < 4; i++) {
+		    showInfo( screen, &_scrollmsg[i]);
+		}
 		for (i=0; i<6; i++) {
 		    showInfo( screen, &_attr[i]);
 		    showInfo( screen, &_attrval[i]);
 		}
-		showInfo( screen, &dr1__name);
-		showInfo( screen, &dr1__class);
 		SDL_Flip( screen);
 		usleep( 100000L);
 		while ( SDL_PollEvent(&event) ) {
