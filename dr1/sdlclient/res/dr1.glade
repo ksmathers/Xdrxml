@@ -6,7 +6,7 @@
   <program_name>dr1</program_name>
   <directory></directory>
   <source_directory>src</source_directory>
-  <pixmaps_directory>pixmaps</pixmaps_directory>
+  <pixmaps_directory>.</pixmaps_directory>
   <language>C</language>
   <gnome_support>True</gnome_support>
   <gettext_support>True</gettext_support>
@@ -55,7 +55,7 @@
 	<widget>
 	  <class>GtkPixmap</class>
 	  <name>pixmap2</name>
-	  <filename>pixmaps/m08L.xpm</filename>
+	  <filename>m08L.xpm</filename>
 	  <xalign>0.5</xalign>
 	  <yalign>0.5</yalign>
 	  <xpad>0</xpad>
@@ -1459,7 +1459,7 @@
 		  <name>pixmap5</name>
 		  <width>80</width>
 		  <height>70</height>
-		  <filename>pixmaps/weights2.xpm</filename>
+		  <filename>weights2.xpm</filename>
 		  <xalign>0.5</xalign>
 		  <yalign>0.5</yalign>
 		  <xpad>10</xpad>
@@ -1837,7 +1837,7 @@
     <widget>
       <class>GtkPixmap</class>
       <name>pixmap7</name>
-      <filename>pixmaps/logo.xpm</filename>
+      <filename>logo.xpm</filename>
       <xalign>0.5</xalign>
       <yalign>0.5</yalign>
       <xpad>0</xpad>
@@ -1864,7 +1864,7 @@
       <widget>
 	<class>GtkPixmap</class>
 	<name>pixmap6</name>
-	<filename>pixmaps/stgeorge.xpm</filename>
+	<filename>stgeorge.xpm</filename>
 	<xalign>0.5</xalign>
 	<yalign>0.5</yalign>
 	<xpad>5</xpad>
@@ -2105,6 +2105,11 @@
 	<name>newplayer</name>
 	<can_default>True</can_default>
 	<can_focus>True</can_focus>
+	<signal>
+	  <name>clicked</name>
+	  <handler>on_newplayer_clicked</handler>
+	  <last_modification_time>Wed, 24 Jul 2002 23:20:03 GMT</last_modification_time>
+	</signal>
 	<label>New Player</label>
 	<relief>GTK_RELIEF_NORMAL</relief>
       </widget>

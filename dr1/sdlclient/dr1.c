@@ -335,6 +335,30 @@ gint SDLEvent( gpointer userdata) {
 /* Login Handler */
 pthread_t comm;
 
+
+int on_newplayer_clicked( GtkButton *gbutton, gpointer userdata) {
+    GtkWidget *window = glade_xml_get_widget( glade, "wlogin");
+    GtkWidget *wgenerate = glade_xml_get_widget( glade, "wgenerate");
+    GtkEntry *name = GTK_ENTRY(glade_xml_get_widget( glade, "name"));
+    GtkEntry *password = GTK_ENTRY(glade_xml_get_widget( glade, "password"));
+    GtkEntry *server = GTK_ENTRY(glade_xml_get_widget( glade, "server"));
+    common.name = strdup( gtk_entry_get_text( name));
+    common.password = strdup( gtk_entry_get_text( password));
+    common.server = strdup( gtk_entry_get_text( server));
+    assert(wgenerate);
+
+    if ( strlen( common.name) > 0 
+    	&& strlen( common.password) > 0 
+	&& strlen( common.server) > 0)
+    {
+        gtk_widget_hide( window);
+
+        pthread_create( &comm, NULL, comm_main, &common);
+	gtk_widget_show( wgenerate);
+    }
+
+}
+
 int on_loginok_clicked( GtkButton *gbutton, gpointer userdata) {
     GtkWidget *window = glade_xml_get_widget( glade, "wlogin");
     GtkEntry *name = GTK_ENTRY(glade_xml_get_widget( glade, "name"));
@@ -377,7 +401,7 @@ int main( int argc, char **argv) {
     glade_gnome_init();
 
     /* Read RC file */
-    gtk_rc_parse( "dr1.rc");
+    gtk_rc_parse( "res/dr1.rc");
 
  
     /* Initialize graphics */
@@ -417,7 +441,7 @@ int main( int argc, char **argv) {
     dr1Text_infoMessage("Welcome to Dragon's Reach, adventurer!", common.screen);
 
     /* load the interface */
-    glade = glade_xml_new("dr1.glade", NULL);
+    glade = glade_xml_new("res/dr1.glade", NULL);
     /* connect the signals in the interface */
 
     glade_xml_signal_autoconnect(glade);
