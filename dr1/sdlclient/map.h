@@ -25,6 +25,7 @@ struct dr1MapGraphic {
     dr1Glyph *glyph; 
     int start:1;
     int light:1;	/* ambient light */
+    int dark:1;		/* magically dark */
 };
 
 

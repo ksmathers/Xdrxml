@@ -4,7 +4,9 @@
 
 #include "map.h"
 #include "util.h"
+#define NOLIGHTDIST 0
 #define TORCHLIGHTDIST 1
+#define LANTERNLIGHTDIST 3
 #define AMBIENTLIGHTDIST 10
 
 SDL_Surface *dr1_npcs1;
@@ -16,6 +18,11 @@ SDL_Surface *dr1_dung3;
 SDL_Surface *dr1_castle1;
 SDL_Surface *dr1_objects1;
 SDL_Surface *dr1_objects2;
+
+#define TORCH 1
+#define LANTERN 2
+#define NOLIGHT 0
+int lightsource = TORCH;
 
 SDL_Surface *LoadBMP(char *file, SDL_Surface *screen)
 {
@@ -158,6 +165,7 @@ int main( int argc, char **argv) {
 			    /* reject if beyond light distance */
 			    if (!gr->graphic->light) {
 				int dx, dy, d;
+				int ld;
 				
 				dx = xpos - c;
 				if (dx < 0) dx = -dx;
@@ -168,11 +176,29 @@ int main( int argc, char **argv) {
 				} else { 
 				    d = dy + (dx>>1);
 				}
-				if (ambientlight) {
-				    if (d>AMBIENTLIGHTDIST) continue;
+
+				if (gr->graphic->dark) {
+				    /* magically dark square */
+				    ld = NOLIGHTDIST;
 				} else {
-				    if (d>TORCHLIGHTDIST) continue;
+				    if (ambientlight) {
+				        /* lit square */
+					ld = AMBIENTLIGHTDIST;
+				    } else {
+				        /* unlit square */
+					if (lightsource == TORCH) {
+					    /* using torch light */
+					    ld = TORCHLIGHTDIST;
+					} else if (lightsource == LANTERN) {
+					    /* using lantern */
+					    ld = LANTERNLIGHTDIST;
+					} else {
+					    /* using sense of touch */
+					    ld = NOLIGHTDIST;
+					}
+				    }
 				}
+				if (d>ld) continue;
 			    }
 
 			    /* reject if not in view */
@@ -245,6 +271,7 @@ int main( int argc, char **argv) {
 				       !gr->open) 
 				   )
 				{
+				    if (gr->graphic) gr->seen = 1;
 				    xpos = oxpos;
 				    ypos = oypos;
 				}

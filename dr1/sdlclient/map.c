@@ -132,6 +132,9 @@ dr1Map readmap( char *fname) {
 		case 's':
 		    map.graphics[ngraph].start = 1;
 		    break;
+		case 'D':
+		    map.graphics[ngraph].dark = 1;
+		    break;
 		case 'l':
 		    map.graphics[ngraph].light = 1;
 		    break;
