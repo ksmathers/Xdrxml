@@ -263,6 +263,11 @@ int centry( struct NameEntry *ne) {
 		 ne->complextype->name,
 		 ne->name, ne->name);
 	    break;
+	case T_ENUM:
+	    emit(1, "if (!xdr_%s( xdrs, \"%s\", &s->%s)) return FALSE;",
+		 ne->enumtype->name,
+		 ne->name, ne->name);
+	    break;
 	case T_POINTER:
 	    emit(1, "if (!xdr_%sPtr( xdrs, \"%s\", &s->%s)) return FALSE;",
 		 ne->complextype->name,
@@ -418,7 +423,7 @@ int cenum( struct EnumList *el) {
     emit(2, "}");
     emit(1, "} else {");
     emit(2, "xval=TRUE;");
-    emit(2, "switch (e) {");
+    emit(2, "switch (*e) {");
     
     for (i=0; i<el->value_size; i++) {
         lcvalue = strlwr(strdup( el->value[i]));
@@ -476,7 +481,7 @@ int main( int argc, char **argv) {
     char *fnameb;
     char *FNAMEB;
     char ofile[MAXPATHLEN];
-    yydebug=1; /**/
+/*    yydebug=1; /**/
     if (argc != 2) {
 	fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
 	exit(1);
