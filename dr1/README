@@ -69,4 +69,10 @@ To Run:
 
     The custom client test code is in the sdlclient subdirectory.
     Feel free to try it out, but it isn't yet connected to the 
-    server.
+    server. 
+
+    $ cd gfx/24x35
+    $ make
+    $ cd -
+    $ cd sdlclient
+    $ make
