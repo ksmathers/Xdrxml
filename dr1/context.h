@@ -38,6 +38,41 @@ typedef struct dr1Context {
 } dr1Context;
 
 /*-------------------------------------------------------------------
+ * dr1Context_save
+ *
+ *    Saves the player game state 
+ *
+ *  PARAMETERS:
+ *    ctx   The context to save
+ *
+ *  RETURNS:
+ *    0 success
+ *    1 error
+ */
+int dr1Context_save( dr1Context *ctx);
+
+/*-------------------------------------------------------------------
+ * dr1Context_load
+ *
+ *    Load player context from disk
+ *
+ *  PARAMETERS:
+ *    fname   File name to load from
+ *
+ *  RETURNS:
+ *    NULL Error loading file
+ *    Pointer to newly malloc'd context
+ */
+dr1Context* dr1Context_load( char *fname);
+
+/*-------------------------------------------------------------------
+ * dr1Context_destroy
+ *
+ *    Destroy a malloc'd dr1Context structure.
+ */
+void dr1Context_destroy( dr1Context *ctx);
+
+/*-------------------------------------------------------------------
  * dr1Context_return
  *
  *    Sets the error message from a failed subroutine
