@@ -156,3 +156,54 @@ void dr1Context_error( dr1Context *ctx, char *fmt, ...) {
     vsnprintf( ctx->error, sizeof(ctx->error), fmt, va);
 }
 
+/*-------------------------------------------------------------------
+ */
+void dr1Context_enable( dr1Context *ctx, dr1CmdSet* set) {
+    assert(ctx->cmds.n<MAXNSETS);
+    ctx->cmds.sets[ctx->cmds.n] = set;
+    ctx->cmds.n++;
+}
+
+void dr1Context_disable( dr1Context *ctx, dr1CmdSet* set) {
+    int i,j;
+    assert(ctx->cmds.n>0);
+
+    for (i=0,j=0; i < ctx->cmds.n; i++) {
+	if (j) {
+	    ctx->cmds.sets[i-j] = ctx->cmds.sets[i];
+	}
+        if (ctx->cmds.sets[i] == set) {
+	    j++;
+	}
+    }
+    ctx->cmds.n -= j;
+}
+/*-------------------------------------------------------------------
+ */
+static int cmd_in_set( dr1CmdSet *set, char *cmd) {
+    int found=0;
+    char *tmp = strdup(set->cmds);
+    char *tc;
+    tc = strtok( tmp, ":");
+    while (tc) {
+	if (!strcmp( tc, cmd)) { found=1; break; }
+	tc = strtok( NULL, ":");
+    }
+    free(tmp);
+    return found;
+}
+
+int dr1Context_handle( dr1Context *ctx, int argc, char **argv) {
+    int i;
+    int res;
+    assert( argc > 0);
+    res = -1;
+    for (i=0; i < ctx->cmds.n; i++) {
+	if ( cmd_in_set( ctx->cmds.sets[i], argv[0])) {
+	    res = ctx->cmds.sets[i]->h( ctx, argc, argv);
+	    break;
+	}
+    }
+    return res;
+}
+

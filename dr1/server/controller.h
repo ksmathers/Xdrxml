@@ -2,6 +2,18 @@
 #define __CONTROLLER__H
 
 #include "context.h"
+
+/*
+ * enable/disable login commands
+ */
+void dr1Controller_disableLogin( dr1Context *ctx);
+void dr1Controller_enableLogin( dr1Context *ctx);
+/*
+ * enable/disable in game commands
+ */
+void dr1Controller_disableGame( dr1Context *ctx);
+void dr1Controller_enableGame( dr1Context *ctx);
+
 /*
  * sendmap 
  *

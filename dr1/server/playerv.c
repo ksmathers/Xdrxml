@@ -10,14 +10,17 @@
 #include "dice.h"
 #include "class.h"
 #include "context.h"
+#include "controller.h"
 #include "dr1.h"
 
 
-/* struct representing arguments to the playerv command calls */
-struct dr1Playerv_args_t {
-    int c; char **v;
-    int *estr;
-};
+#define MAPDIR "../lib/maps"
+
+/* struct representing the commands that this dialogue handles */
+dr1CmdSet player_cmdset = {
+	"roll:swap:improve:race:sex:class:name:accept:done:cancel",
+	dr1Playerv_cmd
+    };
 
 /*
  * Utility functions
@@ -56,7 +59,7 @@ static void fixestr( dr1Player *p, struct dr1StartingValues *sv) {
     p->curr_attr = p->base_attr;
 }
 
-static int check_classattr( dr1Player *p) {
+static int check_classattr( dr1Context *ctx, dr1Player *p) {
     /*
      * Test that character class attribute requirements 
      * Return 0 if OK 
@@ -80,14 +83,15 @@ static int check_classattr( dr1Player *p) {
 	assert(stat);
 	assert(min);
         if (*stat < *min) {
-	    printf("Your %s is too low to be a %s\n", dr1attribute[i], cl->class);
+	    dr1Context_error( ctx, "Your %s is too low to be a %s", 
+	        dr1attribute[i], cl->class);
 	    return -1;
 	}
     }
     return 0;
 }
 
-static int apply_class( dr1Player *p, int ccode, struct dr1StartingValues *sv) 
+static int apply_class( dr1Context *ctx, int ccode) 
 {
     /*
      * Apply the starting values for a particular character class
@@ -98,6 +102,8 @@ static int apply_class( dr1Player *p, int ccode, struct dr1StartingValues *sv)
      * a player cannot select another class and then come back to this
      * class to reroll starting values (which would be cheating).
      */
+    dr1Player *p = &ctx->player;
+    struct dr1StartingValues *sv = &ctx->creationstate;
     int idx;
     dr1Player pnew;
     dr1ClassType *cl;
@@ -133,7 +139,7 @@ static int apply_class( dr1Player *p, int ccode, struct dr1StartingValues *sv)
 	return -1;
     }
 
-    if ( check_classattr( &pnew)) {
+    if ( check_classattr( ctx, &pnew)) {
 	return -1;
     }
     *p = pnew;
@@ -181,7 +187,7 @@ int dr1Playerv_class( dr1Context *ctx, int c, char **v)
 	return -2;
     }
     
-    res = apply_class( p, ccode, &ctx->creationstate);
+    res = apply_class( ctx, ccode);
     return 0;
 }
 
@@ -201,7 +207,7 @@ int dr1Playerv_roll( dr1Context *ctx, int c, char **v)
 
     /* reapply original sex, race, and class adjustments */
     apply_racesex( p);
-    apply_class( p, p->class, &ctx->creationstate);
+    apply_class( ctx, p->class);
     return 0;
 }
 
@@ -236,7 +242,7 @@ int dr1Playerv_sex( dr1Context *ctx, int c, char **v) {
     if (old) dr1Attr_adjust( &p->base_attr, old, -1);
     dr1Attr_adjust( &p->base_attr, new, 1);
     p->sex = r;
-    if (check_classattr( p)<0) p->class=DR1C_INVALID;
+    if (check_classattr( ctx, p)<0) p->class=DR1C_INVALID;
     return 0;
 }
 
@@ -247,8 +253,6 @@ int dr1Playerv_race( dr1Context *ctx, int c, char **v) {
     dr1Player *p = &ctx->player;
     
     if (c != 2) {
-	dr1Stream_printf( &ctx->ios, "(human, elf, halfling, dwarf, halforc)\n");
-	dr1Stream_printf( &ctx->ios, "Race: ");
 	return -1;
     }
 
@@ -261,7 +265,6 @@ int dr1Playerv_race( dr1Context *ctx, int c, char **v) {
     else if (!strcasecmp( v[1], "halforc")) r=DR1R_HALFORC;
     else {
 	dr1Context_error( ctx, "Invalid race '%s'", v[1]);
-	dr1Stream_printf( &ctx->ios, "Invalid race '%s'", v[1]);
 	return -1;
     }
 
@@ -274,7 +277,7 @@ int dr1Playerv_race( dr1Context *ctx, int c, char **v) {
     /* apply exceptional strength if appropriate */
     fixestr(p,&ctx->creationstate);
 
-    if (check_classattr( p)<0) p->class=DR1C_INVALID;
+    if (check_classattr( ctx, p)<0) p->class=DR1C_INVALID;
     return 0;
 }
 
@@ -312,7 +315,7 @@ int dr1Playerv_swap( dr1Context *ctx, int c, char **v) {
     fixestr(p,&ctx->creationstate);
 
     /* reset class if attributes are out of range */
-    if ( check_classattr( p)<0) p->class = DR1C_INVALID;
+    if ( check_classattr( ctx, p)<0) p->class = DR1C_INVALID;
     return 0;
 }
 
@@ -361,7 +364,7 @@ int dr1Playerv_improve( dr1Context *ctx, int c, char **v) {
     fixestr( &ctx->player, &ctx->creationstate);
 
     /* check if the stats are in bounds for your class */
-    if ( check_classattr( &ctx->player)<0) ctx->player.class = DR1C_INVALID;
+    if ( check_classattr( ctx, &ctx->player)<0) ctx->player.class = DR1C_INVALID;
 
     return 0;
 }
@@ -375,6 +378,13 @@ int dr1Playerv_init( dr1Player *p) {
     return 0;
 }
 
+
+void dr1Playerv_disable( dr1Context *ctx) {
+    dr1Context_disable( ctx, &player_cmdset);
+}
+void dr1Playerv_enable( dr1Context *ctx) {
+    dr1Context_enable( ctx, &player_cmdset);
+}
 int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
     /*
      * Execute a player character creation command.  
@@ -387,10 +397,8 @@ int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
 
     printf("%d: dr1Playerv_showDialog\n", ctx->ios.fd);
 
-
     if (c == 0) {
-        psendMessage( &ctx->ios, DR1MSG_190, "(roll, swap, improve, race, sex, class, name, accept)");
-	return 0;
+	return -1;
     }
 
     /* interpret command */
@@ -413,6 +421,9 @@ int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
 	res=dr1Playerv_class( ctx, c, v);
     } else if ( !strcasecmp(v[0], "sex")) {
 	res=dr1Playerv_sex( ctx, c, v);
+    } else if ( !strcasecmp(v[0], "cancel")) {
+	psendMessage( &ctx->ios, DR1MSG_500);
+        res=1;
     } else if ( !strcasecmp(v[0], "done")) {
 	if ( !strcmp(p->name, "Unnamed")) {
 	    psendMessage( &ctx->ios, DR1MSG_310, DR1ENONAME, "Your character needs a name.");
@@ -425,8 +436,19 @@ int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
 	    return 0;
 	} else {
 	    /* ok */
-	    ctx->dialog = DONE;
 	    psendMessage( &ctx->ios, DR1MSG_100);
+	    dr1Playerv_disable( ctx);
+	    ctx->map = dr1Map_readmap( MAPDIR "/town.map");
+            if (! ctx->map) {
+   		return 1;
+	    } else {
+		ctx->player.location.x = ctx->map->startx;
+		ctx->player.location.y = ctx->map->starty;
+		sendplayer( ctx);
+		sendmap( ctx);
+	    }
+	    ctx->loggedin = TRUE;
+	    dr1Controller_enableGame( ctx);
 	    return 0;
 	}
     } else {
@@ -445,6 +467,9 @@ int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
     fixestr(p, &ctx->creationstate);
     dr1Money_format( &p->purse, buf);
     sendplayer( ctx);
+    if (*ctx->error) {
+	psendMessage( &ctx->ios, DR1MSG_310, 0, ctx->error);
+    }
 
     return 0;
 }

@@ -29,4 +29,6 @@ enum { DIALOG_ERROR=-1, DIALOG_OK, DIALOG_DONE };
 
 int dr1Playerv_cmd( dr1Context* ctx, int argc, char **argv);
 
+void dr1Playerv_enable( dr1Context* ctx);
+void dr1Playerv_disable( dr1Context* ctx);
 #endif /* __DR1PLAYERV__H */

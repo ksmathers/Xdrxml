@@ -53,6 +53,7 @@ void pc_init( int cs) {
 
     /* announce ourselves on the new player connection */
     psendMessage( &ctx[cs]->ios, DR1MSG_IDENT);
+    dr1Controller_enableLogin( ctx[cs]);
 }
 
 int pc_runcmd( int cs, enum runstate_t state) {
@@ -77,9 +78,12 @@ int pc_runcmd( int cs, enum runstate_t state) {
 
 	/* tokenize the command */
 	i=0;
-	cmds[i++] = strtok( buf, " \t\r\n");
-	while ((cmds[i] = strtok( NULL, " \t\r\n")) != 0) {
-	    if (++i == sizeof(cmds)/sizeof(*cmds)) break;
+	cmds[0] = strtok( buf, " \t\r\n");
+	if (cmds[0]) {
+	    i++;
+	    while ((cmds[i] = strtok( NULL, " \t\r\n")) != 0) {
+		if (++i == sizeof(cmds)/sizeof(*cmds)) break;
+	    }
 	}
 	nargs = i;
     } else if (state == EXECUTE) {
@@ -94,7 +98,8 @@ int pc_runcmd( int cs, enum runstate_t state) {
 int pc_finit( cs) {
     printf("%d: finitplayer\n", cs);
     dr1Stream_finit( &ctx[cs]->ios);
-    if ( ctx[cs]->state == TOWN || ctx[cs]->state == DUNGEON) {
+    if ( ctx[cs]->loggedin) {
+        /* did the player complete a login? */
 	dr1Context_save( ctx[cs]);
     }
     dr1Context_destroy( ctx[cs]);

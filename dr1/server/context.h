@@ -15,19 +15,32 @@
  *    Represents the player context.
  */
 struct dr1Context;
-typedef int (*dr1Command_fnp)(struct dr1Context *ctx);
 
-typedef struct {
-    dr1Command_fnp cmd;
-    void *auto_data;
-    void *args;
-    char *argtype;
-    int result;
-} dr1Cmd;
 
+/*-------------------------------------------------------------------
+ * dr1CmdSet
+ *
+ *    The Player structure is the top level structure for all Attributes
+ *    of a Player character.
+ */
+
+typedef int (handler)(struct dr1Context *ctx, int argc, char **argv);
+typedef struct dr1CmdSet {
+    char *cmds;			/* list of commands to accept */
+    handler *h;			/* handler for the command set */
+} dr1CmdSet;
+
+#define MAXNSETS 20
+typedef struct dr1CmdState {
+    int n;			/* number of command sets active */
+    dr1CmdSet* sets[MAXNSETS];	/* pointers to active command sets */
+} dr1CmdState;
+
+/*-------------------------------------------------------------------
+ * enums
+ *
+ */
 enum { START_MU, START_THIEF, START_CLERIC, START_FIGHTER, START_MAX };
-enum states { LOGIN, NEWPLAYER, TOWN, DUNGEON };
-enum dialog { ACTIVE, DONE, CANCEL };
 
 struct dr1StartingValues {
     /* starting values per class; reset with each reroll */
@@ -42,7 +55,6 @@ struct dr1CombatState {
 
 
 struct dr1PurchaseState {
-    int state;
     char _who[80];
     char _what[80];
     char _many[80];
@@ -52,15 +64,20 @@ struct dr1PurchaseState {
 };
 
 typedef struct dr1Context {
-    dr1Stream ios;		/* stream connected to the player */
+
+    /* PERSISTENT STATE */
+
     char fname[80];		/* players xml character file */
-    char error[80];		/* error string */
     char login[80];
     char passwd[80];
     dr1Player player;		/* the loaded player */
     dr1Map *map;		/* the active map */
-    int state;			/* current protocol */
-    int dialog;			/* dialog completion status */
+
+    /* TRANSIENT STATE */
+
+    int loggedin;		/* true if logged in */
+    dr1Stream ios;		/* stream connected to the player */
+    char error[80];		/* error string */
     int inputready;		/* the socket is readable */
 
     /* Character creation state */
@@ -72,7 +89,9 @@ typedef struct dr1Context {
 
     /* Purchase state */
     struct dr1PurchaseState purchasestate;
-    
+
+    /* Command State */
+    struct dr1CmdState cmds;    /* command handlers for current context */
 } dr1Context;
 
 /*-------------------------------------------------------------------
@@ -131,5 +150,37 @@ void dr1Context_resetCreationState( dr1Context *ctx);
  *    ctx->error is the formatted error string
  */
 void dr1Context_error( dr1Context *ctx, char *fmt, ...);
+
+
+/*-------------------------------------------------------------------
+ * dr1Context_enable
+ *
+ *    Enables a set of commands.  New incoming commands that match
+ *    the supplied command list will be passed to the supplied 
+ *    handler.  
+ *
+ *  PARAMETERS:
+ *    dr1CmdSet* set	Set of commands to enable
+ *
+ *  RETURNS:
+ */
+void dr1Context_enable( dr1Context *ctx, dr1CmdSet* set);
+void dr1Context_disable( dr1Context *ctx, dr1CmdSet* set);
+
+/*-------------------------------------------------------------------
+ * dr1Context_handle
+ *
+ *    Handle a command.
+ *
+ *  PARAMETERS:
+ *    int argc		Number of arguments
+ *    char **argv	Values of the arguments
+ *
+ *  RETURNS:
+ *    <0		Error processing command
+ *    0			All ok.
+ *    
+ */
+int dr1Context_handle( dr1Context *ctx, int argc, char **argv);
 
 #endif /* __DR1CONTEXT__H */

@@ -9,7 +9,41 @@
 
 #include "dr1.h"
 
-#define MAPDIR "../lib/maps"
+
+/*
+ * login commands
+ */
+handler handleLogin;
+dr1CmdSet controller_login_cmds = {
+    "iam:newplayer",
+    handleLogin
+};
+
+void dr1Controller_disableLogin( dr1Context *ctx) {
+    printf("%d: disable login\n", ctx->ios.fd);
+    dr1Context_disable( ctx, &controller_login_cmds);
+}
+void dr1Controller_enableLogin( dr1Context *ctx) {
+    printf("%d: enable login\n", ctx->ios.fd);
+    dr1Context_enable( ctx, &controller_login_cmds);
+}
+
+/*
+ * in game commands 
+ */
+handler handleGameCmds;
+dr1CmdSet controller_game_cmds = {
+    "move:save",
+    handleGameCmds
+};
+void dr1Controller_disableGame( dr1Context *ctx) {
+    printf("%d: disable game\n", ctx->ios.fd);
+    dr1Context_disable( ctx, &controller_game_cmds);
+}
+void dr1Controller_enableGame( dr1Context *ctx) {
+    printf("%d: enable game\n", ctx->ios.fd);
+    dr1Context_enable( ctx, &controller_game_cmds);
+}
 
 /*
  * sendmap 
@@ -31,7 +65,7 @@ void sendmap( dr1Context* ctx) {
 	    0, 0, ctx->map->xsize, ctx->map->ysize);
     res = dr1Stream_printf( &ctx->ios, buf);
     if (res < 0) { perror( "sendmap.c: printf"); }
-    res = dr1Stream_printf( &ctx->ios, SEPARATOR);
+    res = dr1Stream_printf( &ctx->ios, "%s\n", SEPARATOR);
     if (res < 0) { perror( "sendmap.c: printf2"); }
 }
 
@@ -54,7 +88,7 @@ void sendplayer( dr1Context* ctx) {
     psendMessage( &ctx->ios, DR1MSG_170);
     res = dr1Stream_printf( &ctx->ios, buf);
     if (res < 0) perror("controller.c:sendplayer");
-    res = dr1Stream_printf( &ctx->ios, SEPARATOR);
+    res = dr1Stream_printf( &ctx->ios, "%s\n", SEPARATOR);
     if (res < 0) perror("controller.c:sendplayer-2");
 }
 
@@ -120,7 +154,7 @@ setLoginPassword(dr1Context *ctx, char *login, char *passwd)
 }
 
 /*--------------------------------------------------------------------------
- * dr1Controller_handleLogin
+ * dologin
  *
  *     Runs through the login sequence.
  *
@@ -138,11 +172,13 @@ setLoginPassword(dr1Context *ctx, char *login, char *passwd)
  *     ctx is changed to reflect the state of the interaction with the user
  *     data written to the player socket
  */
-int dr1Controller_handleLogin( dr1Context *ctx, int argc, char **argv) {
+int dologin( dr1Context *ctx, int argc, char **argv) {
+
     int loadOk;
     int exists;
+    int status=0;
 
-    printf("%d: handleLogin\n", ctx->ios.fd);
+    printf("%d: dologin\n", ctx->ios.fd);
 
     exists = ! setLoginPassword( ctx, argv[1], argv[2]);
 
@@ -151,48 +187,45 @@ int dr1Controller_handleLogin( dr1Context *ctx, int argc, char **argv) {
 	loadOk = dr1Context_load( ctx, ctx->fname);
 	if (!loadOk) {
 	    psendMessage(&ctx->ios, DR1MSG_520, ctx->fname);
-	    return 1;
+	    status = 1;
+	} else {
+	    ctx->loggedin = TRUE;
+	    psendMessage(&ctx->ios, DR1MSG_100);
+	    sendplayer( ctx);
+	    sendmap( ctx); 
+	    dr1Controller_disableLogin( ctx);
+	    dr1Controller_enableGame( ctx);
 	}
-	psendMessage(&ctx->ios, DR1MSG_100);
-	sendplayer( ctx);
-	sendmap( ctx); 
-	return 0;
     } else {
         /* invalid login */
 	psendMessage(&ctx->ios, DR1MSG_500);
-	return 1;
+	status = 1;
     }
-    return 0;
+    return status;
 }
 	
 int
-dr1Controller_handleNewPlayer( dr1Context *ctx, int argc, char **argv) {
+donewplayer( dr1Context *ctx, int argc, char **argv) {
     /* */
     int status = 0;
     int exists;
-    if (!strcasecmp( argv[0], "cancel")) {
-	ctx->dialog = CANCEL;
-    } else if (!strcasecmp( argv[0], "newplayer")) {
-	exists = ! setLoginPassword( ctx, argv[1], argv[2]);
-	if (exists) {
-	    psendMessage( &ctx->ios, DR1MSG_580, argv[2]);
-	} else {
-	    status = dr1Playerv_cmd( ctx, argc, argv);
-	}
+    exists = ! setLoginPassword( ctx, argv[1], argv[2]);
+    if (exists) {
+	psendMessage( &ctx->ios, DR1MSG_580, argv[2]);
     } else {
-        status = dr1Playerv_cmd( ctx, argc, argv);
-	if (ctx->dialog == DIALOG_DONE) {
-	    psendMessage(&ctx->ios, DR1MSG_100);
-	    ctx->map = dr1Map_readmap( MAPDIR "/town.map");
-            if (! ctx->map) {
-   		status = 1;
-	    } else {
-		ctx->player.location.x = ctx->map->startx;
-		ctx->player.location.y = ctx->map->starty;
-		sendplayer( ctx);
-		sendmap( ctx);
-	    }
-	}
+        dr1Playerv_enable( ctx);
+	status = dr1Playerv_cmd( ctx, argc, argv);
+    }
+    return status;
+}
+
+int 
+handleLogin( dr1Context *ctx, int argc, char **argv) {
+    int status = 0;
+    if (!strcmp( argv[0], "iam")) {
+	status = dologin( ctx, argc, argv);
+    } else if (!strcmp( argv[0], "newplayer")) {
+	status = donewplayer( ctx, argc, argv);
     }
     return status;
 }
@@ -234,29 +267,25 @@ int domove( dr1Context *ctx, int argc, char **argv) {
     return 0;
 }
 
-#if 0
-struct {
-} cmdsets = {
-    loginplayer, { "iam" },
-    createplayer, { "trade", "swap", "name", "class", "sex", "race", "done" },
-    town, { "buy", "sell", "equip", "talk", "move", "use", "enter", "rent" },
-    dungeon, { "equip", "talk", "attack", "move", "use", "enter" },
-    dead, { "quit" }
-};
-#endif
+int 
+handleGameCmds( dr1Context *ctx, int argc, char **argv) {
+    int status=0;
+    if (!strcmp( argv[0], "move")) {
+	status = domove( ctx, argc, argv);
+    } else if (!strcmp( argv[0], "save")) {
+	status = savegame( ctx);
+    }
+    return status;
+}
 
 /*-------------------------------------------------------------------
  * dr1Controller_handleCommand
  *
- *    The method checks the current command against the player connection
- *    state, and passes it off to the appropriate subhandler.
- *
- *    There are subhandlers for:
- *      login
- *      player generation
- *      city commands (buying and selling, rent)
- *      dungeon commands (combat, melee movement)
- *      game commands (non-melee movement, logout, talk)
+ *    All commands are processed through this function.  The 'quit' 
+ *    command which is always available is handled directly.  All
+ *    other commands are passed off to the context handler which
+ *    will call the appropriate command handler based on the current
+ *    command sets.
  *
  *  PARAMETERS:
  *    ctx   Player context
@@ -270,70 +299,16 @@ struct {
  *  SIDE EFFECTS:
  */
 int dr1Controller_handleCommand( dr1Context *ctx, int argc, char **argv) {
-    int status = 0;
-    if (!strcasecmp( argv[0], "quit")) {
-	status = 1;
-    } else if (ctx->state == LOGIN) {
-	if (!strcasecmp( argv[0], "iam")) {
-	    status = dr1Controller_handleLogin( ctx, argc, argv);
-	    if (!status) {
-	        /* loaded ok */
-		if (ctx->map->town) {
-		    ctx->state = TOWN;
-		} else {
-		    ctx->state = DUNGEON;
-		}
-	    }
-	} else if (!strcasecmp( argv[0], "newplayer")) {
-	    int exists;
-	    exists = ! setLoginPassword( ctx, argv[1], argv[2]);
-	    if (exists) {
-		psendMessage( &ctx->ios, DR1MSG_580, argv[2]);
-	    } else {
-		status = dr1Controller_handleNewPlayer( ctx, argc, argv);
-		ctx->dialog = ACTIVE;
-		ctx->state = NEWPLAYER;
-	    }
-	} else {
-	    psendMessage( &ctx->ios, DR1MSG_530, argv[0], "LOGIN");
-	}
-    } else if (ctx->state == NEWPLAYER) {
-	status = dr1Controller_handleNewPlayer( ctx, argc, argv);
-	if (!status && ctx->dialog == DIALOG_DONE) {
-	    /* loaded ok */
-	    if (ctx->map->town) {
-		ctx->state = TOWN;
-	    } else {
-		ctx->state = DUNGEON;
-	    }
-	} else if (ctx->dialog == CANCEL) {
-	    ctx->state = LOGIN;
-	}
-    } else {
-	/* In game */
 
-	/* global commands (dead or alive) */
-	if (!strcasecmp( argv[0], "talk")) {
-/*	    status = dotalk( ctx, argc, argv); */
-	} else if (ctx->player.hp < -10) {
-	    /* player is dead */
-/*	    dr1Dead_cmd( ctx, argc, argv); */
-	    status = 0;
+    int status = 0;
+    if (argc == 0) {
+	psendMessage( &ctx->ios, DR1MSG_101);
+    } else {
+	if (!strcasecmp( argv[0], "quit")) {
+	    status = 1;
 	} else {
-	    /* player is alive */
-	    /* global commands */
-	    if (!strcasecmp( argv[0], "move")) {
-		status = domove( ctx, argc, argv);
-	    } else if (ctx->state == TOWN) {
-		/* player in town map */
-/*		dr1Town_cmd( ctx, argc, argv); */
-	    } else if (ctx->state == DUNGEON) {
-	        /* player in dungeon map */
-/*		dr1Dungeon_cmd( ctx, argc, argv); */
-	    } else {
-		/* not a valid state */
-		psendMessage( &ctx->ios, DR1MSG_540);
-		status = -1;
+	    if (dr1Context_handle( ctx, argc, argv)) {
+		psendMessage( &ctx->ios, DR1MSG_530, argv[0], ctx->loggedin?"loggedin":"ident");
 	    }
 	}
     }

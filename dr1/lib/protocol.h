@@ -9,6 +9,7 @@
 /* Message Types */
 #define DR1MSG_IDENT "DR1/1.0"
 #define DR1MSG_100 "100 LOGIN OK"
+#define DR1MSG_101 "101 PONG"
 #define DR1MSG_105 "105 CHARACTER CREATION DIALOG"
 #define DR1MSG_110 "110 MAP GLYPHS"
 #define DR1MSG_120 "120 MAP DATA"
@@ -31,6 +32,7 @@
 
 #define DR1MSG_310 "310 FAILED (%d) %s"
 #define DR1MSG_320 "320 DEAD %s"
+
 
 #define DR1MSG_500 "500 BAD USER/PASSWORD"
 #define DR1MSG_510 "510 PROTOCOL ERROR"
@@ -71,6 +73,7 @@
 #define DR1ENONAME 1
 #define DR1ENOCLASS 2
 #define DR1ENOSTATS 3
+#define DR1EATTR 4
 
 /* return TRUE if the message in the buffer matches the first 3 chars of 
    the message type 'msg'
