@@ -15,10 +15,11 @@
 %token <s> VARNAME STRNAME 
 %token <type> BOOL INT STRING 
 
-%type <s> _stype
-%type <se> _struct_decl _struct_defn _strents
+%type <s> _stype _enumitem
+%type <se> _strents
 %type <type> _type
 %type <ne> _strent
+%type <el> _etype _enum _enumref _enumlist
 
 %start _file
 
@@ -39,33 +40,31 @@ _struct_decl :
 	    struct StructEntry *se;
 	    se = StructEntry_create();
 	    se->name = $2;
-	    NameTable_add( &globalNameTable, se);
-	    $$ = se;
+	    NameTable_addStruct( &globalNameTable, se);
 	}
 
 _struct_defn : 
 	STRUCT STRNAME '{' _strents '}'
 	{
-	    struct StructEntry *tmp;
+	    struct StructEntry *se;
 	    
-	    tmp = NameTable_find( &globalNameTable, $2);
-	    if (tmp) {
+	    se = NameTable_findStruct( &globalNameTable, $2);
+	    if (se) {
 		/* blank declaration now completed */
-	        if (tmp->entry_size != 0) {
+		if (se->entry_size != 0) {
 		    fprintf(stderr, "Duplicate structure definition '%s'\n",
-		        $2);
+			$2);
 		    exit( 1);
 		}
 		/* reparent struct entries */
-	        *tmp = *$4;
+		*se = *$4;
 		/* shallow free */
 		free( $4);  
 	    } else {
-	        tmp = $4;
 		$4->name = $2;
-		NameTable_add( &globalNameTable, $4);
+
+		NameTable_addStruct( &globalNameTable, $4);
 	    }
-	    $$ = tmp;
 	}
 
 _strents :
@@ -94,7 +93,7 @@ _strent :
 	{
 	    struct StructEntry *se;
 	    struct NameEntry *ne;
-	    se = NameTable_find( &globalNameTable, $1);
+	    se = NameTable_findStruct( &globalNameTable, $1);
 	    if (se == NULL) {
 		fprintf( stderr, "Undefined structure '%s'\n", $1);
 		exit(1);
@@ -110,7 +109,7 @@ _strent :
 	{
 	    struct StructEntry *se;
 	    struct NameEntry *ne;
-	    se = NameTable_find( &globalNameTable, $1);
+	    se = NameTable_findStruct( &globalNameTable, $1);
 	    if (se == NULL) {
 		fprintf( stderr, "Undefined structure '%s'\n", $1);
 		exit(1);
@@ -123,7 +122,7 @@ _strent :
 	{
 	    struct StructEntry *se;
 	    struct NameEntry *ne;
-	    se = NameTable_find( &globalNameTable, $3);
+	    se = NameTable_findStruct( &globalNameTable, $3);
 	    if (se == NULL) {
 		fprintf( stderr, "Undefined structure '%s'\n", $3);
 		exit(1);
@@ -136,7 +135,7 @@ _strent :
 	{
 	    struct StructEntry *se;
 	    struct NameEntry *ne;
-	    se = NameTable_find( &globalNameTable, $3);
+	    se = NameTable_findStruct( &globalNameTable, $3);
 	    if (se == NULL) {
 		fprintf( stderr, "Undefined structure '%s'\n", $3);
 		exit(1);
@@ -166,18 +165,33 @@ _stype :
 _etype :
 	_enumref
 	| _enum
+	{
+	    $$ = $1;
+	}
 
 _enumref :
 	ENUM STRNAME
 	{
-	    struct EnumList *el = NameTable_find( &globalNameSpace, $2);
+	    struct EnumList *el = NameTable_findEnum( &globalNameTable, $2);
+	    if (el == NULL) {
+		fprintf(stderr, "Undefined enum '%s'\n", $2);
+		exit(1);
+	    }
 	    $$ = el;
 	}
 
 _enum :
 	ENUM STRNAME '{' _enumlist '}'
 	{
+	    struct NameEntry *ne;
+	    ne = NameTable_find( &globalNameTable, $2);
+	    if (ne) {
+		fprintf(stderr, "Duplicate enum definition '%s'\n", $2);
+		exit(1);
+	    } 
 	    $4->name = $2;
+	    NameTable_addEnum( &globalNameTable, $4);
+
 	    $$ = $4;
 	}
 
@@ -188,9 +202,9 @@ _enumlist :
 	    EnumList_add( el, $1);
 	    $$ = el;
 	}
-	| _enumlist _enumitem
+	| _enumlist ',' _enumitem
 	{
-	    EnumList_add( $1, $2);
+	    EnumList_add( $1, $3);
 	    $$ = $1;
 	}
 

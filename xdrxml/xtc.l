@@ -16,6 +16,7 @@ int	{ return INT; }
 bool	{ return BOOL; }
 string	{ return STRING; }
 array	{ return ARRAY; }
+enum	{ return ENUM; }
 
 {ws}	  ;
 {nl}      { lineno++; }

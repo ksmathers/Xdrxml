@@ -21,6 +21,14 @@ char *strupr( char *src) {
     return src;
 }
 
+char *strlwr( char *src) {
+    char *cpos;
+    for (cpos = src; *cpos != 0; cpos++) {
+	*cpos = tolower(*cpos);
+    }
+    return src;
+}
+
 char *strdup2( char* lpos, char *rpos) {
     char *buf = malloc(rpos - lpos + 2);
     memcpy(buf, lpos, rpos-lpos+1);
@@ -94,6 +102,11 @@ int hentry( struct NameEntry *ne) {
 	case T_STRUCT:
 	    emit(1, "struct %s %s;", 
 		 ne->complextype->name,
+		 ne->name);
+	    break;
+	case T_ENUM:
+	    emit(1, "enum %s %s;", 
+		 ne->enumtype->name,
 		 ne->name);
 	    break;
 	case T_POINTER:
@@ -177,16 +190,56 @@ int hstructptrarray( struct  StructEntry *se) {
     return 0;
 }
 
+int henum( struct EnumList *el) {
+    int i;
+    char *uctype;
+    char *ucvalue;
+    uctype = strupr(strdup( el->name));
+
+    emit(0, "enum %s {", el->name);
+    for (i=0; i<el->value_size; i++) {
+	ucvalue = strupr(strdup( el->value[i]));
+
+	emit(1, "%s_%s,", uctype, ucvalue );
+
+	free(ucvalue);
+    }
+    emit(1, "%s_UNDEFINED", uctype);
+    emit(0, "};");
+
+    emit(0, "bool_t xdr_%s( XDR* xdrs, char *node, enum %s* e);", el->name, el->name);
+
+    free(uctype);
+    return 0;
+}
+
 int htable( struct NameTable *nt) {
+    struct NameEntry *ne;
     int i;
     for (i=0; i<nt->name_size; i++) {
-	hstructref( nt->name[i]);
+        ne = nt->name[i];
+        if (ne->type == T_STRUCT) {
+	    hstructref( ne->complextype);
+	}
     }
     for (i=0; i<nt->name_size; i++) {
-	hstruct( nt->name[i]);
-	hstructptr( nt->name[i]);
-	hstructarray( nt->name[i]);
-	hstructptrarray( nt->name[i]);
+        ne = nt->name[i];
+	switch (ne->type) {
+	    case T_STRUCT:
+		hstruct( ne->complextype);
+		hstructptr( ne->complextype);
+		hstructarray( ne->complextype);
+		hstructptrarray( ne->complextype);
+		break;
+
+	    case T_ENUM:
+	        henum( ne->enumtype);
+		break;
+
+	    default:
+		fprintf(stderr, "Unhandled top level type %d\n", ne->type);
+	} 
+
     }
     return 0;
 }
@@ -253,6 +306,7 @@ int cstruct( struct StructEntry *se) {
     emit(0, "}");
     return 0;
 }
+
 
 int cstructptr( struct StructEntry *se) {
     if (!se->pointer) return 0;
@@ -337,17 +391,81 @@ int cstructptrarray( struct StructEntry *se) {
     return 0;
 }
 
+int cenum( struct EnumList *el) {
+    int i;
+    char *uctype;
+    char *ucvalue;
+    char *lcvalue;
+    uctype = strupr(strdup( el->name));
+
+    emit(0, "bool_t xdr_%s( XDR* xdrs, char *node, enum %s* e)", el->name, el->name);
+    emit(0, "{");
+    emit(1, "bool_t xval;");
+    emit(1, "xdrxml_group( xdrs, node);");
+    emit(1, "if (xdrs->x_op == XDR_DECODE) {");
+    for (i=0; i<el->value_size; i++) {
+        lcvalue = strlwr(strdup( el->value[i]));
+	ucvalue = strupr(strdup( el->value[i]));
+
+	emit(2, "%sif (xdrxml_bool( xdrs, \"%s\", &xval) && xval==1) {", 
+		i==0?"":"} else ", lcvalue);
+	emit(3, "*e=%s_%s;", uctype, ucvalue);
+
+	free(lcvalue); free(ucvalue);
+    }
+    emit(2, "} else {");
+    emit(3, "return FALSE;");
+    emit(2, "}");
+    emit(1, "} else {");
+    emit(2, "xval=TRUE;");
+    emit(2, "switch (e) {");
+    
+    for (i=0; i<el->value_size; i++) {
+        lcvalue = strlwr(strdup( el->value[i]));
+	ucvalue = strupr(strdup( el->value[i]));
+
+        emit(3, "case %s_%s:", uctype, ucvalue);
+	emit(4, "if (!xdrxml_bool( xdrs, \"%s\", &xval)) return FALSE;", lcvalue);
+	emit(4, "break;");
+
+	free(lcvalue); free(ucvalue);
+    }
+    emit(3, "default:");
+    emit(4, "return FALSE;");
+    emit(2, "} /* switch */");
+    emit(1, "} /* if */");
+    emit(1, "xdrxml_endgroup( xdrs);");
+    emit(1, "return TRUE;");
+    emit(0, "}");
+
+    free(uctype);
+    return 0;
+}
+
 int ctable( struct NameTable *nt) {
     int i;
     struct StructEntry *se;
+    struct NameEntry *ne;
     for (i=0; i<nt->name_size; i++) {
-        se = nt->name[i];
-	if (se->entry_size) {
-	    /* not a blank definition */
-	    cstruct( nt->name[i]);
-	    cstructptr( nt->name[i]);
-	    cstructarray( nt->name[i]);
-	    cstructptrarray( nt->name[i]);
+        ne = nt->name[i];
+	switch (ne->type) {
+	    case T_STRUCT:
+	        se=ne->complextype;
+		if (se->entry_size) {
+		    /* not a blank definition */
+		    cstruct( se);
+		    cstructptr( se);
+		    cstructarray( se);
+		    cstructptrarray( se);
+		}
+		break;
+	    case T_ENUM:
+	        cenum( ne->enumtype);
+		break;
+
+	    default:
+	    	fprintf(stderr, "! Unhandled top level type %d.\n", ne->type);
+		break;
 	}
     }
     return 0;
@@ -358,6 +476,7 @@ int main( int argc, char **argv) {
     char *fnameb;
     char *FNAMEB;
     char ofile[MAXPATHLEN];
+    yydebug=1; /**/
     if (argc != 2) {
 	fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
 	exit(1);
