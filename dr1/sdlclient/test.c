@@ -24,6 +24,21 @@ SDL_Surface *dr1_objects2;
 #define NOLIGHT 0
 int lightsource = TORCH;
 
+struct border_t {
+    int top;
+    int left;
+    int right;
+    int bottom;
+    SDL_Surface *nw;
+    SDL_Surface *ne;
+    SDL_Surface *se;
+    SDL_Surface *sw;
+    SDL_Surface *n;
+    SDL_Surface *e;
+    SDL_Surface *s;
+    SDL_Surface *w;
+} dr1_border;
+
 SDL_Surface *LoadBMP(char *file, SDL_Surface *screen)
 {
     SDL_Surface *image;
@@ -94,6 +109,78 @@ opendoor( dr1Map *map, int xpos, int ypos) {
 }
 
 
+int loadBorder( SDL_Surface *screen) {
+    struct border_t *b = &dr1_border;
+    b->n = LoadBMP( GFXDIR "/bdrop1-n.bmp", screen);
+    assert(b->n);
+    b->e = LoadBMP( GFXDIR "/bdrop1-e.bmp", screen);
+    assert(b->e);
+    b->s = LoadBMP( GFXDIR "/bdrop1-s.bmp", screen);
+    assert(b->s);
+    b->w = LoadBMP( GFXDIR "/bdrop1-w.bmp", screen);
+    assert(b->w);
+    b->nw = LoadBMP( GFXDIR "/bdrop1-nw.bmp", screen);
+    assert(b->nw);
+    b->sw = LoadBMP( GFXDIR "/bdrop1-sw.bmp", screen);
+    assert(b->sw);
+    b->ne = LoadBMP( GFXDIR "/bdrop1-ne.bmp", screen);
+    assert(b->ne);
+    b->se = LoadBMP( GFXDIR "/bdrop1-se.bmp", screen);
+    assert(b->se);
+    return 0;
+}
+
+int showBorder( SDL_Surface *screen) {
+    struct border_t *b = &dr1_border;
+    SDL_Rect dest;
+    int x, x1, x2;
+    int y, y1, y2;
+    x1 = b->nw->w;
+    x2 = screen->w - b->se->w;
+    y1 = b->nw->h;
+    y2 = screen->h - b->se->h;
+
+    /* nw */
+    dest.x = 0; dest.y = 0; dest.w = b->nw->w; dest.h = b->nw->h;
+    SDL_BlitSurface(b->nw, NULL, screen, &dest);
+
+    /* ne */
+    dest.x = x2; dest.y = 0; dest.w = b->ne->w; dest.h = b->ne->h;
+    SDL_BlitSurface(b->ne, NULL, screen, &dest);
+
+    /* sw */
+    dest.x = 0; dest.y = y2; dest.w = b->sw->w; dest.h = b->sw->h;
+    SDL_BlitSurface(b->sw, NULL, screen, &dest);
+
+    /* se */
+    dest.x = x2; dest.y = y2; dest.w = b->se->w; dest.h = b->se->h;
+    SDL_BlitSurface(b->se, NULL, screen, &dest);
+
+    /* n/s */
+    for (x = x1; x < x2; x += b->n->w) {
+        /* n */
+	dest.x = x; dest.y = 0; dest.w = b->n->w; dest.h = b->n->h;
+	SDL_BlitSurface(b->n, NULL, screen, &dest);
+
+        /* s */
+	dest.x = x; dest.y = screen->h - b->s->h; 
+	dest.w = b->s->w; dest.h = b->s->h;
+	SDL_BlitSurface(b->s, NULL, screen, &dest);
+    }
+
+    /* e/w */
+    for (y = y1; y < y2; y += b->w->h) {
+        /* w */
+	dest.x = 0; dest.y = y; dest.w = b->w->w; dest.h = b->w->h;
+	SDL_BlitSurface(b->w, NULL, screen, &dest);
+
+        /* e */
+	dest.x = screen->w - b->e->w; dest.y = y;
+	dest.w = b->e->w; dest.h = b->e->h;
+	SDL_BlitSurface(b->e, NULL, screen, &dest);
+    }
+}
+
 int main( int argc, char **argv) {
     char buf[80];
     int xpos = 0;
@@ -122,15 +209,16 @@ int main( int argc, char **argv) {
 	    exit(1);
 	}
 
-	dr1_npcs1 = LoadBMP( GFXDIR "/db-npcs-1.bmp", screen);
-	dr1_npcs2 = LoadBMP( GFXDIR "/db-npcs-2.bmp", screen);
-	dr1_npcs3 = LoadBMP( GFXDIR "/db-npcs-3.bmp", screen);
-	dr1_dung1 = LoadBMP( GFXDIR "/db-indoor-dungeon-1.bmp", screen);
-	dr1_dung2 = LoadBMP( GFXDIR "/db-indoor-dungeon-2.bmp", screen);
-	dr1_dung3 = LoadBMP( GFXDIR "/db-indoor-dungeon-3.bmp", screen);
-	dr1_castle1 = LoadBMP( GFXDIR "/db-indoor-castle-1.bmp", screen);
-	dr1_objects1 = LoadBMP( GFXDIR "/db-objects-1.bmp", screen);
-	dr1_objects2 = LoadBMP( GFXDIR "/db-objects-2.bmp", screen);
+	dr1_npcs1 = LoadBMP( GFXDIR "/24x35/db-npcs-1.bmp", screen);
+	dr1_npcs2 = LoadBMP( GFXDIR "/24x35/db-npcs-2.bmp", screen);
+	dr1_npcs3 = LoadBMP( GFXDIR "/24x35/db-npcs-3.bmp", screen);
+	dr1_dung1 = LoadBMP( GFXDIR "/24x35/db-indoor-dungeon-1.bmp", screen);
+	dr1_dung2 = LoadBMP( GFXDIR "/24x35/db-indoor-dungeon-2.bmp", screen);
+	dr1_dung3 = LoadBMP( GFXDIR "/24x35/db-indoor-dungeon-3.bmp", screen);
+	dr1_castle1 = LoadBMP( GFXDIR "/24x35/db-indoor-castle-1.bmp", screen);
+	dr1_objects1 = LoadBMP( GFXDIR "/24x35/db-objects-1.bmp", screen);
+	dr1_objects2 = LoadBMP( GFXDIR "/24x35/db-objects-2.bmp", screen);
+	loadBorder( screen);
 
         map = readmap( "map.txt");
 	xpos = map.startcol;
@@ -225,6 +313,7 @@ int main( int argc, char **argv) {
 			}
 		    }
 		}
+		showBorder( screen);
 		SDL_Flip( screen);
 		usleep( 100000L);
 		while ( SDL_PollEvent(&event) ) {

@@ -1,4 +1,4 @@
-GFXDIR="../gfx/24x35"
+GFXDIR="../gfx"
 
 test: test.o map.o util.o
 	gcc -g test.o map.o util.o -o test `sdl-config --libs` 
