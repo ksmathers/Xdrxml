@@ -1,9 +1,5 @@
 <player>
-    <name>
-        <long value="0x5"/>
-        <bytes>Durin</bytes>
-        <bytes>=00=00=00</bytes>
-    </name>
+    <name>Durin=a7=06=08=10</name>
     <xp value="0x19b"/>
     <level value="0x1"/>
     <hp value="0x8"/>
@@ -36,7 +32,7 @@
     <pack>
         <len value="0x1"/>
         <item>
-            <size value="0x38"/>
+            <tcode value="0x1"/>
             <code value="0x1"/>
             <value value="0xbb8"/>
             <name>
@@ -62,7 +58,7 @@
         </item>
     </pack>
     <weapon>
-        <size value="0x38"/>
+        <tcode value="0x1"/>
         <code value="0x1"/>
         <value value="0x2ee0"/>
         <name>
@@ -87,10 +83,10 @@
         <dtype value="0x0"/>
     </weapon>
     <gauche>
-        <size value="0x0"/>
+        <tcode value="0xffffffff"/>
     </gauche>
     <armor>
-        <size value="0x2c"/>
+        <tcode value="0x2001"/>
         <code value="0x2001"/>
         <value value="0x3e80"/>
         <name>

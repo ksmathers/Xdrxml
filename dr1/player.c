@@ -202,9 +202,8 @@ int dr1Player_nattacks() {
  * xdr_dr1Player( xdrs, dr1Player*)
  */
 bool_t xdr_dr1Player( XDR *xdrs, dr1Player* p) {
-   xdr_push_note( xdrs, "name");
-   if (!xdr_wrapstring( xdrs, &p->name)) return FALSE;
-   xdr_pop_note( xdrs);
+   xdr_attr( xdrs, "name");
+   if (!xdrxml_wrapstring( xdrs, &p->name)) return FALSE;
 
    xdr_attr( xdrs, "xp");
    if (!xdr_long( xdrs, &p->xp)) return FALSE;

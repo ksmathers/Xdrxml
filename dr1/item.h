@@ -108,6 +108,22 @@ dr1Item* dr1Item_dup( dr1Item *i);
 int dr1Item_isArmor( dr1Item *i);
 
 /*-------------------------------------------------------------------
+ * dr1Item_tcode_size
+ *
+ *    The method finds the size of the real item 'i' including
+ *    any extensions that may be in the derived subclass that
+ *    the real object is.
+ *
+ *  PARAMETERS:
+ *    tcode     The item to get the size of 
+ *
+ *  RETURNS:
+ *    Size of the item in bytes
+ *
+ */
+long dr1Item_tcode_size( int tcode);
+
+/*-------------------------------------------------------------------
  * dr1Item_size
  *
  *    The method finds the size of the real item 'i' including

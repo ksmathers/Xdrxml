@@ -55,7 +55,9 @@ dr1Item_destroy( dr1Item *i) {
 long dr1Item_tcode_size( int tcode) {
     dr1Item i; 
     i.type = dr1Registry_lookup( &dr1itemReg, tcode);
-    return dr1Item_size( &i);
+    if (i.type) return dr1Item_size( &i);
+    printf("Invalid typecode %x\n", tcode);
+    return 0;
 }
 
 /*-------------------------------------------------------------------

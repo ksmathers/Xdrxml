@@ -70,7 +70,7 @@ static xmlNodePtr bfs1( xmlNodePtr node, const char *name) {
     while (cur != NULL && strcasecmp( cur->name, name) != 0) {
     	cur = cur->next;
     }
-/*    printf("%s %s\n", cur?"found":"lost", name); /**/
+    printf("%s %s\n", cur?"found":"lost", name); /**/
     return cur;
 }
 
@@ -113,9 +113,114 @@ int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop) {
     return 0;
 }
 
-bool_t xdr_dr1String( XDR *xdrs, const char *s) 
-{
+bool_t xdrxml_getstring( XDR *xdrs, int prealloc_len, char **s) {
+    /* get some bytes from " */
+    xmlNodePtr cur = XDRXML_DATA(xdrs)->cur;
+    xmlDocPtr doc = XDRXML_DATA(xdrs)->doc;
+    char *attr = XDRXML_DATA(xdrs)->attr;
+    char *value, *cpos, *err;
+    int c;
+    int i;
+    int len;
+
+    if (!attr) attr="string";
+
+    cur = bfs1( cur, attr);
+    if (!cur) return FALSE;
+    mark(cur);
+    value = xmlNodeListGetString(doc, cur->children, 1);
+    if (!value) return FALSE;
+
+    /* get the final string size */
+    for (len=0, cpos=value; *cpos; cpos++) {
+        len++;
+	if (cpos[0] == '=' && cpos[1] != 0 && cpos[2] != 0) cpos += 2;
+    }
+
+    if (prealloc_len > 0 && len >= prealloc_len) {
+	/* not enough space preallocated in the incoming string buffer */
+	fprintf(stderr, "Truncated string %s to %d characters\n", value, prealloc_len);
+	len = prealloc_len-1;
+    } else {
+	/* allocate the string */
+	*s = malloc(len+1);
+    }
+
+    /* copy from stream to string */
+    cpos = value;
+    for (i=0; i<len; i++) {
+	c = *cpos++;
+	if (c != '=') {
+	    (*s)[i] = c;
+	} else {
+	    char buf[3];
+	    buf[0] = *cpos++;
+	    buf[1] = *cpos++;
+	    buf[2] = 0;
+	    c = strtol(buf, &err, 16);
+	    if (*err != 0) {
+	        printf( "Invalid escaped hex value '=%s' in string '%s'\n", 
+			buf, value);
+		return FALSE;
+	    }
+	    (*s)[i] = c;
+	}
+    }
+    XDRXML_DATA(xdrs)->attr = 0;
+    return TRUE;
+}
+
+bool_t xdrxml_putstring( XDR *xdrs, char *s) {
+    /* put some bytes to " */
+    FILE *fp;
+    int i;
+    unsigned char c;
+    int len;
+    char *attr = XDRXML_DATA(xdrs)->attr;
+    int ni = nchar( XDRXML_DATA(xdrs)->path, '/');
+
+    fp = XDRXML_DATA(xdrs)->fp;
+    if (!fp) fp = stdout;
+    if (!attr) attr = "string";
     
+    while (ni--) fprintf(fp, "    ");
+    fprintf(fp, "<%s>", attr);
+    len = strlen( s);
+    for (i=0; i<len; i++) {
+	c = s[ i];
+	if (c >=' ' && c <='~' && c != '=' && c != '&' && c != '<') {
+	    putc( c, fp);
+	} else {
+	    fprintf(fp, "=%02x", c);
+	}
+    } /* for */
+    fprintf(fp, "</%s>\n", attr);
+
+    XDRXML_DATA(xdrs)->attr = 0;
+    return TRUE;
+}
+
+bool_t xdrxml_wrapstring( XDR *xdrs, char **s) 
+{
+    bool_t res;
+    /* send or read a string from the stream */
+    if (xdrs->x_handy & XDR_ANNOTATE) {
+	/* xml stream */
+	if (xdrs->x_op == XDR_ENCODE) {
+	    res = xdrxml_putstring( xdrs, *s);
+	} else if (xdrs->x_op == XDR_DECODE) {
+	    res = xdrxml_getstring( xdrs, 0, s);
+	} else if (xdrs->x_op == XDR_FREE) {
+	    if (*s) {
+		free(*s);
+		*s = NULL;
+		res = TRUE;
+	    }
+	} else res=FALSE;
+    } else {
+        res = xdr_wrapstring( xdrs, s);
+    }
+    return res;
 }
 
 bool_t xdr_push_note( XDR *xdrs, const char *s)

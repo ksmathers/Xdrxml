@@ -40,6 +40,9 @@ extern XDR xdrxml;
 int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop);
     /* open an XML xdr stream */
 
+bool_t xdrxml_wrapstring( XDR *xdrs, char **s) ;
+    /* read/write strings as strings (instead of int+bytes+bytes) */
+
 bool_t xdrxml_getlong( XDR *__xdrs, long *__lp);
     /* get a long from underlying stream */
 

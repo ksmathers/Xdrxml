@@ -108,6 +108,7 @@ bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
     xdr_attr( xdrs, "tcode");
     if (xdr_long( xdrs, &tcode)) {
 	/* tcode */
+	printf("got tcode %ld\n", tcode);
 	if (tcode == -1) siz = 0;
 	else siz = dr1Item_tcode_size( tcode);
     } else {
