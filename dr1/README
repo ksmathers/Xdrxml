@@ -1,6 +1,25 @@
-To build:
+Prerequisites:
 
-make depend && make
+   libxml2
+   ======= 
 
-The result is the program 'dr1' which is a test driver for the game
-libraries.
+   Get and install libxml2 from http://www.xmlsoft.org.  This library
+   is a very good, fast, and small C implementation of DOM, XPath,
+   and XPointer.
+   
+   The 'libhistory' and 'libreadline' libraries are also used by libxml,
+   but will probably already be on your system.  Redhat 7 includes more
+   recent versions of these two libraries than the RPMs on ftp.gnome.org,
+   so if you are using Redhat 7 you'll probably be best off compiling 
+   'libxml2' from source.
+
+To Build:
+
+    dr1
+    ===
+
+    $ make depend && make
+
+    The result is the program 'dr1' which is a test driver for the game
+    libraries.
+
