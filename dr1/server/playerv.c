@@ -164,7 +164,7 @@ int dr1Playerv_class( dr1Context *ctx, int c, char **v)
     int res;
 
     if (c != 2) {
-	dr1Stream_printf( &ctx->ios, DR1MSG_190, "(mu,fighter,cleric,thief)");
+	psendMessage( &ctx->ios, DR1MSG_190, "(mu,fighter,cleric,thief)");
 	return -1;
     }
 
@@ -177,7 +177,7 @@ int dr1Playerv_class( dr1Context *ctx, int c, char **v)
     } else if (!strcasecmp( v[1], "thief")) {
 	ccode = DR1C_THIEF;
     } else {
-	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[1]);
+	psendMessage( &ctx->ios, DR1MSG_590, v[1]);
 	return -2;
     }
     
@@ -285,7 +285,7 @@ int dr1Playerv_swap( dr1Context *ctx, int c, char **v) {
     dr1Player *p = &ctx->player;
 
     if (c != 3) {
-	dr1Stream_printf( &ctx->ios, DR1MSG_190, "(str, int, wis, dex, con, cha)");
+	psendMessage( &ctx->ios, DR1MSG_190, "(str, int, wis, dex, con, cha)");
 	return -1;
     }
 
@@ -293,11 +293,11 @@ int dr1Playerv_swap( dr1Context *ctx, int c, char **v) {
     a = dr1Attr_statptr( &p->base_attr, v[1]);
     b = dr1Attr_statptr( &p->base_attr, v[2]);
     if (a == NULL) {
-	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[1]);
+	psendMessage( &ctx->ios, DR1MSG_590, v[1]);
 	return -2;
     }
     if (b == NULL) {
-	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[2]);
+	psendMessage( &ctx->ios, DR1MSG_590, v[2]);
 	return -3;
     }
 
@@ -321,7 +321,7 @@ int dr1Playerv_improve( dr1Context *ctx, int c, char **v) {
     int *a, *b;
 
     if (c != 3) {
-	dr1Stream_printf( &ctx->ios, DR1MSG_190, "(str, int, wis, dex, con, cha)");
+	psendMessage( &ctx->ios, DR1MSG_190, "(str, int, wis, dex, con, cha)");
 	return -1;
     }
 
@@ -329,11 +329,11 @@ int dr1Playerv_improve( dr1Context *ctx, int c, char **v) {
     a = dr1Attr_statptr( &ctx->player.base_attr, v[1]);
     b = dr1Attr_statptr( &ctx->player.base_attr, v[2]);
     if (a == NULL) {
-	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[1]);
+	psendMessage( &ctx->ios, DR1MSG_590, v[1]);
 	return -2;
     }
     if (b == NULL) {
-	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[2]);
+	psendMessage( &ctx->ios, DR1MSG_590, v[2]);
 	return -3;
     }
 
@@ -342,13 +342,13 @@ int dr1Playerv_improve( dr1Context *ctx, int c, char **v) {
     if (*a < 5) { 
 	/* can't decrease a stat to less than 3 */
 	apply_racesex( &ctx->player);
-	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[1]);
+	psendMessage( &ctx->ios, DR1MSG_590, v[1]);
 	return -4;
     }
     if (*b > 17) { 
 	/* can't improve a stat to more than 18 */
 	apply_racesex( &ctx->player);
-	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[2]);
+	psendMessage( &ctx->ios, DR1MSG_590, v[2]);
 	return -5;
     }
 
@@ -415,13 +415,13 @@ int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
 	res=dr1Playerv_sex( ctx, c, v);
     } else if ( !strcasecmp(v[0], "done")) {
 	if ( !strcmp(p->name, "Unnamed")) {
-	    dr1Stream_printf( &ctx->ios, DR1MSG_310, DR1ENONAME, "Your character needs a name.");
+	    psendMessage( &ctx->ios, DR1MSG_310, DR1ENONAME, "Your character needs a name.");
 	    return 0;
 	} else if ( p->class == DR1C_INVALID) {
-	    dr1Stream_printf( &ctx->ios, DR1MSG_310, DR1ENOCLASS, "Your character has no class.");
+	    psendMessage( &ctx->ios, DR1MSG_310, DR1ENOCLASS, "Your character has no class.");
 	    return 0;
 	} else if ( p->base_attr._str < 3) {
-	    dr1Stream_printf( &ctx->ios, DR1MSG_310, DR1ENOSTATS, "Your character has no stats.  Roll stats first.\n");
+	    psendMessage( &ctx->ios, DR1MSG_310, DR1ENOSTATS, "Your character has no stats.  Roll stats first.\n");
 	    return 0;
 	} else {
 	    /* ok */
@@ -430,12 +430,12 @@ int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
 	    return 0;
 	}
     } else {
-	dr1Stream_printf( &ctx->ios, DR1MSG_530, v[0], "dr1Playerv_cmd");
+	psendMessage( &ctx->ios, DR1MSG_530, v[0], "dr1Playerv_cmd");
 	return 0;
     }
 
     if (res) {
-	dr1Stream_printf( &ctx->ios, DR1MSG_560, res);
+	psendMessage( &ctx->ios, DR1MSG_560, res);
 	return 0;
     } 
 

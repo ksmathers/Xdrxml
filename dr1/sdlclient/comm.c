@@ -37,6 +37,12 @@ enum {
     M_INVENTORYDIALOG
 };
 
+static char *chop( char *buf) {
+    int len = strlen(buf);
+    if (buf[len-1] == '\n') buf[len-1] = 0;
+    return buf;
+}
+
 int handleMessage(char *buf) {
     static int mode = M_IDENT;
     static dr1StringBuffer *sb = NULL;
@@ -45,7 +51,7 @@ int handleMessage(char *buf) {
     }
     switch (mode) {
 	case M_IDENT:		/* waiting for IDENT */
-	    if (!strcmp( buf, DR1MSG_IDENT)) {
+	    if ( !strcmp( chop(buf), DR1MSG_IDENT)) {
 /*		showDialog( DLG_LOGIN); */
                 if (common.login) {
 		    psendMessage( &common.ios, DR1CMD_LOGIN, common.name, common.password);
@@ -60,15 +66,15 @@ int handleMessage(char *buf) {
 	    break;
 
         case M_CHARACTERCREATEDIALOG:
-	    if (!strncmp( buf, DR1MSG_105, 3)) {
+	    if (pisMessage( buf, DR1MSG_105)) {
 		GtkWidget *wgenerate = glade_xml_get_widget( common.glade, "wgenerate");
 		common.dialog = WGENERATE;
 	        gtk_widget_show( wgenerate);
-	    } else if (!strncmp( buf, DR1MSG_120, 3)) {
+	    } else if (pisMessage( buf, DR1MSG_120)) {
 	        mode = M_CCMAPDATA;
-	    } else if (!strncmp( buf, DR1MSG_170, 3)) {
+	    } else if (pisMessage( buf, DR1MSG_170)) {
 	        mode = M_CCPLAYERDATA;
-	    } else if (!strncmp( buf, DR1MSG_100, 3)) {
+	    } else if (pisMessage( buf, DR1MSG_100)) {
 		GtkWidget *wgenerate = glade_xml_get_widget( common.glade, "wgenerate");
 	        gtk_widget_hide( wgenerate);
 		common.dialog = NONE;
@@ -77,19 +83,19 @@ int handleMessage(char *buf) {
 	    break;
 
 	case M_LOGIN:
-	    if (!strncmp( buf, DR1MSG_100, 3)) {
+	    if (pisMessage( buf, DR1MSG_100)) {
 /*		closeDialog( DLG_LOGIN); */
 		mode = M_READY;
-	    } else if (!strncmp( buf, DR1MSG_105, 3)) {
+	    } else if (pisMessage( buf, DR1MSG_105)) {
 /*		openDialog( DLG_CHARACTERCREATE); */
 	        mode = M_CHARACTERCREATEDIALOG;
-	    } else if (!strncmp( buf, DR1MSG_500, 3)) {
+	    } else if (pisMessage( buf, DR1MSG_500)) {
 		printf("Name/password error\n");
 #if 0
 	        resetDialog( DLG_LOGIN);
 		showStatus( "Name/password error"); 
 #endif
-	    } else if (!strncmp( buf, DR1MSG_550, 3)) {
+	    } else if (pisMessage( buf, DR1MSG_550)) {
 		printf("Connection denied. Blacklisted.\n");
 #if 0
 		showStatus( "Connection denied.  You are blacklisted.");
@@ -102,11 +108,11 @@ int handleMessage(char *buf) {
 	    break;
 
 	case M_READY:	/* ready for next message */
-	    if (!strncmp( buf, DR1MSG_120, 3)) {
+	    if (pisMessage( buf, DR1MSG_120)) {
 		mode = M_MAPDATA;
-	    } else if (!strncmp( buf, DR1MSG_170, 3)) {
+	    } else if (pisMessage( buf, DR1MSG_170)) {
 		mode = M_PLAYERDATA;
-	    } else if (!strncmp( buf, DR1MSG_175, 3)) {
+	    } else if (pisMessage( buf, DR1MSG_175)) {
                 dr1Location l;
                 int n;
                 n = precvMessage( buf, DR1MSG_175, &l.mapname, &l.x, &l.y);
@@ -117,7 +123,7 @@ int handleMessage(char *buf) {
 		}
 	    } 
 #if 0
-	    else if (!strncmp( bud, DR1MSG_195, 3)) {
+	    else if (pisMessage( bud, DR1MSG_195)) {
 /*		openDialog( DLG_INVENTORYDIALOG); */
 	        mode = M_INVENTORYDIALOG;
 	    }
@@ -257,6 +263,10 @@ int sendCommand(char key) {
         case 's':
         case 'w':
 	    psendMessage( &common.ios, DR1CMD_MOVE, key);
+	    break;
+	case 'o':
+	    psendMessage( &common.ios, DR1CMD_OPEN);
+	    break;
     } /* switch key */
 
     if (dr1Stream_oqlen( &common.ios)>0) {

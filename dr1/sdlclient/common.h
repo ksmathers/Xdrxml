@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 #include <glade/glade.h>
+#include "dr1.h"
 #include "player.h"
 
 /*-------------------------------------------------------------------

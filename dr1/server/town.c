@@ -253,14 +253,14 @@ int dr1Town_showDialog( dr1Context *ctx) {
     switch ( autos->state) {
 	case PROMPT:
 	    if ( strlen( ctx->error)) {
-		dr1Stream_printf( &ctx->ios, DR1MSG_310, 0, ctx->error);
+		psendMessage( &ctx->ios, DR1MSG_310, 0, ctx->error);
 		*ctx->error = 0;
 	    }
 	    if ( autos->r) {
-		dr1Stream_printf( &ctx->ios, DR1MSG_310, autos->r, "Last command returned error");
+		psendMessage( &ctx->ios, DR1MSG_310, autos->r, "Last command returned error");
 	    }
 
-	    dr1Stream_printf( &ctx->ios, DR1MSG_190, "(buy, equip, sell, rest, hunt, save, quit)\n");
+	    psendMessage( &ctx->ios, DR1MSG_190, "(buy, equip, sell, rest, hunt, save, quit)\n");
 	    autos->state = GETCMD;
 	    return 0;
 

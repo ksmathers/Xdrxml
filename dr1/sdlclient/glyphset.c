@@ -71,7 +71,6 @@ SDL_Surface *LoadBMP(char *file, SDL_Surface *screen)
 {
     SDL_Surface *image;
     SDL_Surface *display_image;
-    SDL_Rect dest;
     char pathname[MAXPATHLEN];
     SDL_PixelFormat *fmt = screen->format;
     Uint32 key = SDL_MapRGB( fmt, 255, 0, 255);
@@ -82,7 +81,7 @@ SDL_Surface *LoadBMP(char *file, SDL_Surface *screen)
     image = SDL_LoadBMP(pathname);
     if ( image == NULL ) {
 	fprintf(stderr, "Couldn't load %s: %s\n", file, SDL_GetError());
-	return;
+	return NULL;
     }
     display_image = SDL_DisplayFormat( image);
     SDL_SetColorKey( display_image, SDL_SRCCOLORKEY, key);

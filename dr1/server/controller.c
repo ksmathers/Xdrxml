@@ -27,7 +27,7 @@ void sendmap( dr1Context* ctx) {
 
     buf = xdrxmlsb_getbuf( &xdrxmlsb); 
 
-    dr1Stream_printf( &ctx->ios, DR1MSG_120, 
+    psendMessage( &ctx->ios, DR1MSG_120, 
 	    0, 0, ctx->map->xsize, ctx->map->ysize);
     res = dr1Stream_printf( &ctx->ios, buf);
     if (res < 0) { perror( "sendmap.c: printf"); }
@@ -51,7 +51,7 @@ void sendplayer( dr1Context* ctx) {
 
     buf = xdrxmlsb_getbuf( &xdrxmlsb); 
 
-    dr1Stream_printf( &ctx->ios, "%s\n", DR1MSG_170);
+    psendMessage( &ctx->ios, DR1MSG_170);
     res = dr1Stream_printf( &ctx->ios, buf);
     if (res < 0) perror("controller.c:sendplayer");
     res = dr1Stream_printf( &ctx->ios, SEPARATOR);
@@ -150,16 +150,16 @@ int dr1Controller_handleLogin( dr1Context *ctx, int argc, char **argv) {
         /* player data file is found */
 	loadOk = dr1Context_load( ctx, ctx->fname);
 	if (!loadOk) {
-	    dr1Stream_printf(&ctx->ios, DR1MSG_520, ctx->fname);
+	    psendMessage(&ctx->ios, DR1MSG_520, ctx->fname);
 	    return 1;
 	}
-	dr1Stream_printf(&ctx->ios, DR1MSG_100);
+	psendMessage(&ctx->ios, DR1MSG_100);
 	sendplayer( ctx);
 	sendmap( ctx); 
 	return 0;
     } else {
         /* invalid login */
-	dr1Stream_printf(&ctx->ios, DR1MSG_500);
+	psendMessage(&ctx->ios, DR1MSG_500);
 	return 1;
     }
     return 0;
@@ -175,14 +175,14 @@ dr1Controller_handleNewPlayer( dr1Context *ctx, int argc, char **argv) {
     } else if (!strcasecmp( argv[0], "newplayer")) {
 	exists = ! setLoginPassword( ctx, argv[1], argv[2]);
 	if (exists) {
-	    dr1Stream_printf( &ctx->ios, DR1MSG_580, argv[2]);
+	    psendMessage( &ctx->ios, DR1MSG_580, argv[2]);
 	} else {
 	    status = dr1Playerv_cmd( ctx, argc, argv);
 	}
     } else {
         status = dr1Playerv_cmd( ctx, argc, argv);
 	if (ctx->dialog == DIALOG_DONE) {
-	    dr1Stream_printf(&ctx->ios, DR1MSG_100);
+	    psendMessage(&ctx->ios, DR1MSG_100);
 	    ctx->map = dr1Map_readmap( MAPDIR "/town.map");
             if (! ctx->map) {
    		status = 1;
@@ -216,7 +216,7 @@ int domove( dr1Context *ctx, int argc, char **argv) {
     } else if (!strcasecmp( argv[1], "w")) {
 	xpos--;
     } else {
-	dr1Stream_printf( &ctx->ios, DR1MSG_310, 0, "domove: bad direction");
+	psendMessage( &ctx->ios, DR1MSG_310, 0, "domove: bad direction");
     }
     gr = &ctx->map->grid[ ypos*ctx->map->xsize + xpos];
     if ( !gr->graphic || 
@@ -288,14 +288,14 @@ int dr1Controller_handleCommand( dr1Context *ctx, int argc, char **argv) {
 	    int exists;
 	    exists = ! setLoginPassword( ctx, argv[1], argv[2]);
 	    if (exists) {
-		dr1Stream_printf( &ctx->ios, DR1MSG_580, argv[2]);
+		psendMessage( &ctx->ios, DR1MSG_580, argv[2]);
 	    } else {
 		status = dr1Controller_handleNewPlayer( ctx, argc, argv);
 		ctx->dialog = ACTIVE;
 		ctx->state = NEWPLAYER;
 	    }
 	} else {
-	    dr1Stream_printf( &ctx->ios, DR1MSG_530, argv[0], "LOGIN");
+	    psendMessage( &ctx->ios, DR1MSG_530, argv[0], "LOGIN");
 	}
     } else if (ctx->state == NEWPLAYER) {
 	status = dr1Controller_handleNewPlayer( ctx, argc, argv);
@@ -332,7 +332,7 @@ int dr1Controller_handleCommand( dr1Context *ctx, int argc, char **argv) {
 /*		dr1Dungeon_cmd( ctx, argc, argv); */
 	    } else {
 		/* not a valid state */
-		dr1Stream_printf( &ctx->ios, DR1MSG_540);
+		psendMessage( &ctx->ios, DR1MSG_540);
 		status = -1;
 	    }
 	}

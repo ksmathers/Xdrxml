@@ -21,6 +21,7 @@
 #include "text.h"
 #include "comm.h"
 #include "common.h"
+#include "cgenerate.h"
 
 #include "player.h"
 
@@ -383,7 +384,6 @@ int on_loginok_clicked( GtkButton *gbutton, gpointer userdata) {
 }
 
 int main( int argc, char **argv) {
-    char buf[80];
     char *server;
 
 #if 0

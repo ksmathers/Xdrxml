@@ -30,5 +30,5 @@ test2: showfont.o
 	gcc showfont.o -o test2 `sdl-config --libs` -lSDL_ttf -lttf
 
 .c.o:
-	gcc -Wall -g -c -DGFXDIR='${GFXDIR}' ${CFLAGS} $<
+	gcc -Wall -Wno-comment -Wno-multichar -g -c -DGFXDIR='${GFXDIR}' ${CFLAGS} $<
 

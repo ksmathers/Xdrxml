@@ -4,6 +4,11 @@
 #include "strbuf.h"
 #include "stream.h"
 
+int pisMessage( char *buf, char *msg) {
+    int differ = strncmp( buf, msg, 3);
+    return !differ;
+}
+
 static void 
 psendUrlEncodedChar( dr1StringBuffer *sb, char c) {
     if (c == ' ') {
@@ -86,6 +91,7 @@ psendMessage( dr1Stream* os, char *msg, ...) {
         }
         cpos++;
     } /* while */
+    sbputc( sb, '\n');
     dr1Stream_flush( os);
     va_end( va);
 }

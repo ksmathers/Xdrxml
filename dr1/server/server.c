@@ -52,7 +52,7 @@ void pc_init( int cs) {
     dr1Stream_create( &ctx[cs]->ios, cs);
 
     /* announce ourselves on the new player connection */
-    dr1Stream_printf( &ctx[cs]->ios, DR1MSG_IDENT);
+    psendMessage( &ctx[cs]->ios, DR1MSG_IDENT);
 }
 
 int pc_runcmd( int cs, enum runstate_t state) {
