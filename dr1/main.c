@@ -8,6 +8,8 @@
 #include "playerv.h"
 #include "apothecary.h"
 #include "smithy.h"
+#include "tanner.h"
+#include "wright.h"
 #include "money.h"
 #include "barter.h"
 #include "dice.h"
@@ -33,7 +35,7 @@ int buy( dr1Player *p, int c, char **v) {
     int i;
 
     if (c == 1) {
-	printf("(fnord, gandor)\n");
+	printf("(fnord, gandor, frommer, wright)\n");
 	printf("From whom:");
 	gets( _who);
 	v[1]= _who;
@@ -43,8 +45,15 @@ int buy( dr1Player *p, int c, char **v) {
     who = v[1];
     if ( !strcasecmp( who, "Fnord")) merc = &dr1apothecary;
     else if ( !strcasecmp( who, "Gandor")) merc = &dr1smithy;
+    else if ( !strcasecmp( who, "Frommer")) merc = &dr1tanner;
+    else if ( !strcasecmp( who, "Wright")) merc = &dr1wright;
     else return -1;
 
+    
+    printf("Welcome to '%s'\n", merc->store);
+    if (merc->mood > 10) {
+	printf("%s looks a bit peeved today.\n", merc->name);
+    }
     if (c == 2) {
 	putchar('(');
         for (i=0; i<merc->itemStore.len; i++) {
@@ -171,6 +180,8 @@ int main( int argc, char** argv) {
     bzero( &player, sizeof(player));
     dr1Dice_seed();
     dr1Apothecary_init( &dr1apothecary);
+    dr1Tanner_init();
+    dr1Wright_init();
     dr1Smithy_init();
 
     /* restore player from disk */

@@ -15,7 +15,8 @@
 #endif
 
 enum {
-    DR1W_BASICWEAPON = DR1WEAPONS
+    DR1W_BASICWEAPON = DR1WEAPONS,
+    DR1W_BOW
 };
 /*-------------------------------------------------------------------
  * dr1
@@ -24,6 +25,7 @@ enum {
  */
 
 extern dr1ItemType dr1Weapon_type;
+extern dr1ItemType dr1Weapon_bowType;
 
 typedef struct {
     dr1Item super;
@@ -35,6 +37,7 @@ typedef struct {
 
 extern dr1Weapon dr1Weapon_halfspear;
 extern dr1Weapon dr1Weapon_longsword;
+extern dr1Weapon dr1Weapon_longbow;
 
 
 #endif /* __DR1WEAPON__H */

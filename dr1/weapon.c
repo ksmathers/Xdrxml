@@ -20,6 +20,17 @@ dr1ItemType dr1Weapon_type = {
     xdr_dr1Weapon,		/* xdr */
 };
 
+dr1ItemType dr1Weapon_bowType = {
+    sizeof( dr1Weapon),		/* size */
+    (int)DR1W_BOW,		/* code */
+    (void *)0,	 		/* use */
+    (void *)0, 			/* drop */
+    (void *)0, 			/* take */
+    (void *)0,			/* init */
+    (void *)0,                  /* copy */
+    xdr_dr1Weapon,		/* xdr */
+};
+
 dr1Weapon dr1Weapon_halfspear = {
     /* super */ {
     	/* value       */ GP(1),
@@ -54,6 +65,24 @@ dr1Weapon dr1Weapon_longsword = {
     /* ranged   */ FALSE,
     /* speed    */ 6,
     /* dtype    */ DR1SLASHING
+};
+
+dr1Weapon dr1Weapon_longbow = {
+    /* super */ {
+    	/* value       */ GP(60),
+	/* name        */ "Longbow",
+	/* encumbrance */ 100,
+	/* unique      */ FALSE,
+	/* inuse       */ FALSE,
+	/* weapon      */ TRUE,
+	/* identified  */ TRUE,
+	/* uses        */ 0,
+	/* type        */ &dr1Weapon_type
+    },
+    /* damage   */ "d6",
+    /* ranged   */ TRUE,
+    /* speed    */ 6,
+    /* dtype    */ DR1PIERCING
 };
 
 /*-------------------------------------------------------------------

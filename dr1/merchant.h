@@ -13,6 +13,8 @@
 
 typedef struct dr1Merchant
 {
+    char *name;		/* name of the proprietor */
+    char *store;        /* name of the store */
     int mood;  		/* 0 - cheerful, 10 - annoyed, 20 - angry */
     float bargainpoint; /* starting offer (times intrinsic value) */
     float bestoffer;	/* about 1.0 (times intrinsic value) */

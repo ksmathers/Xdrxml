@@ -27,7 +27,11 @@ enum {
  */
 enum {
     DR1A_LEATHER,
-    DR1A_CHAINMAIL
+    DR1A_CHAINMAIL,
+    DR1A_STUDDEDLEATHER,
+    DR1A_SPLINTMAIL,
+    DR1A_PLATEMAIL,
+    DR1A_SCALEMAIL
 };
 
 /*-------------------------------------------------------------------
@@ -52,6 +56,10 @@ typedef struct {
 
 extern dr1Armor dr1Armor_leather;
 extern dr1Armor dr1Armor_chainmail;
+extern dr1Armor dr1Armor_studdedleather;
+extern dr1Armor dr1Armor_platemail;
+extern dr1Armor dr1Armor_scalemail;
+extern dr1Armor dr1Armor_splintmail;
 
 /*-------------------------------------------------------------------
  * dr1Armor_copy

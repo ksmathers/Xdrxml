@@ -37,15 +37,44 @@ static dr1ArmorType leather = {
     /* base_ac */ 8
 };
 
+static dr1ArmorType studdedleather = {
+    /* code    */ DR1A_STUDDEDLEATHER,
+    /* damage  */ "3d12+20",
+    /* base_ac */ 7
+};
+
+static dr1ArmorType scalemail = {
+    /* code    */ DR1A_SCALEMAIL,
+    /* damage  */ "5d12+20",
+    /* base_ac */ 6
+};
+
 static dr1ArmorType chainmail = {
     /* code    */ DR1A_CHAINMAIL,
     /* damage  */ "5d20+20",
     /* base_ac */ 5
 };
 
+static dr1ArmorType splintmail = {
+    /* code    */ DR1A_SPLINTMAIL,
+    /* damage  */ "5d12+20",
+    /* base_ac */ 4
+};
+
+static dr1ArmorType platemail = {
+    /* code    */ DR1A_PLATEMAIL,
+    /* damage  */ "5d10+20",
+    /* base_ac */ 3
+};
 static dr1RegistryEntry entries[] = {
     { DR1A_LEATHER, &leather },
+    { DR1A_STUDDEDLEATHER, &studdedleather },
+
+    { DR1A_SCALEMAIL, &scalemail },
     { DR1A_CHAINMAIL, &chainmail },
+    { DR1A_SPLINTMAIL, &splintmail },
+    { DR1A_PLATEMAIL, &platemail },
+
     { -1, NULL }
 };
 
@@ -78,11 +107,11 @@ dr1Armor dr1Armor_leather = {
     /* damage   */ 0
 };
 
-dr1Armor dr1Armor_chainmail = {
+dr1Armor dr1Armor_studdedleather = {
     /* super */ {
-    	/* value       */ GP(150),
-	/* name        */ "Chainmail",
-	/* encumbrance */ 400,
+    	/* value       */ GP(15),
+	/* name        */ "Studded-leather",
+	/* encumbrance */ 200,
 	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ FALSE,
@@ -91,6 +120,70 @@ dr1Armor dr1Armor_chainmail = {
 	/* type        */ &dr1Armor_type
     },
     /* type     */ &chainmail,
+    /* damage   */ 0
+};
+
+dr1Armor dr1Armor_scalemail = {
+    /* super */ {
+    	/* value       */ GP(45),
+	/* name        */ "Scalemail",
+	/* encumbrance */ 400,
+	/* unique      */ FALSE,
+	/* inuse       */ FALSE,
+	/* weapon      */ FALSE,
+	/* identified  */ TRUE,
+	/* uses        */ 0,
+	/* type        */ &dr1Armor_type
+    },
+    /* type     */ &scalemail,
+    /* damage   */ 0
+};
+
+dr1Armor dr1Armor_chainmail = {
+    /* super */ {
+    	/* value       */ GP(75),
+	/* name        */ "Chainmail",
+	/* encumbrance */ 300,
+	/* unique      */ FALSE,
+	/* inuse       */ FALSE,
+	/* weapon      */ FALSE,
+	/* identified  */ TRUE,
+	/* uses        */ 0,
+	/* type        */ &dr1Armor_type
+    },
+    /* type     */ &chainmail,
+    /* damage   */ 0
+};
+
+dr1Armor dr1Armor_splintmail = {
+    /* super */ {
+    	/* value       */ GP(80),
+	/* name        */ "Splintmail",
+	/* encumbrance */ 400,
+	/* unique      */ FALSE,
+	/* inuse       */ FALSE,
+	/* weapon      */ FALSE,
+	/* identified  */ TRUE,
+	/* uses        */ 0,
+	/* type        */ &dr1Armor_type
+    },
+    /* type     */ &splintmail,
+    /* damage   */ 0
+};
+
+dr1Armor dr1Armor_platemail = {
+    /* super */ {
+    	/* value       */ GP(400),
+	/* name        */ "Platemail",
+	/* encumbrance */ 450,
+	/* unique      */ FALSE,
+	/* inuse       */ FALSE,
+	/* weapon      */ FALSE,
+	/* identified  */ TRUE,
+	/* uses        */ 0,
+	/* type        */ &dr1Armor_type
+    },
+    /* type     */ &platemail,
     /* damage   */ 0
 };
 

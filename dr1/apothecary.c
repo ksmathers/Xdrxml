@@ -10,6 +10,8 @@ void
 dr1Apothecary_init() 
 {
     dr1pHeal *i;
+    dr1apothecary.name="Fnord";
+    dr1apothecary.store="Fnord's Apothecary";
     dr1apothecary.mood=dr1Dice_roll( "d20");
     dr1apothecary.bargainpoint = 1.4;
     dr1apothecary.bestoffer = 0.85;

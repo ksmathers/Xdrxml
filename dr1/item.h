@@ -12,6 +12,7 @@
  */
 
 struct dr1Player;
+struct dr1Monster;
 struct dr1ItemType;
 typedef struct {
     long value;			/* in copper */
@@ -43,6 +44,27 @@ typedef void (* dr1Item_copy_fnp) ( dr1Item* copy, dr1Item* orig);
 
 typedef void (* dr1Item_init_fnp) ( dr1Item* buf);
    /* default constructor */
+
+typedef void (* dr1Item_attack_fnp) ( dr1Item *i, struct dr1Player *p, struct dr1Monster *m);
+   /* action to perform on using a weapon for attack */
+
+enum {
+    DR1EQUIP_WEAPON,		/* Weapon hand */
+    DR1EQUIP_GAUCHE,		/* Off hand */
+    DR1EQUIP_ARMOR,		/* Body armor slot */
+    DR1EQUIP_BACKPACK,		/* Return to backpack */
+
+    DR1EQUIP_GAUNTLETS,		/* Gauntlets slot */
+    DR1EQUIP_GIRDLE,		/* Girdle slot */
+    DR1EQUIP_BRACERS,		/* Bracers slot */
+    DR1EQUIP_LEFTRING,		/* Left hand ring slot */
+    DR1EQUIP_RIGHTRING,		/* Right hand ring slot */
+    DR1EQUIP_NECKLACE,		/* Necklace slot */
+    DR1EQUIP_BELTHOOK		/* Belthook/pocket slot */
+};
+
+typedef void (* dr1Item_equip_fnp) ( dr1Item *i, struct dr1Player *p, int equip);
+   /* action to perform on equipping a weapon or armor */
 
 typedef struct dr1ItemType {
     long size;
