@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "attr.h"
 #include "dice.h"
+#include "xdrasc.h"
 
 /*-------------------------------------------------------------------
  * dr1Attr_gen_mode4
@@ -112,13 +113,23 @@ dr1Attr dr1Attr_create_mode4( void) {
  * xdr_dr1Attr( xdrs, dr1Attr*)
  */
 bool_t xdr_dr1Attr( XDR *xdrs, dr1Attr *a) {
-    bool_t res;
-    res = xdr_int( xdrs, &a->_str);
-    res |= xdr_int( xdrs, &a->_int);
-    res |= xdr_int( xdrs, &a->_wis);
-    res |= xdr_int( xdrs, &a->_dex);
-    res |= xdr_int( xdrs, &a->_con);
-    res |= xdr_int( xdrs, &a->_cha);
-    return res;
+    xdr_attr( xdrs, "_str");
+    if (!xdr_int( xdrs, &a->_str)) return FALSE;
+
+    xdr_attr( xdrs, "_int");
+    if (!xdr_int( xdrs, &a->_int)) return FALSE;
+
+    xdr_attr( xdrs, "_wis");
+    if (!xdr_int( xdrs, &a->_wis)) return FALSE;
+
+    xdr_attr( xdrs, "_dex");
+    if (!xdr_int( xdrs, &a->_dex)) return FALSE;
+
+    xdr_attr( xdrs, "_con");
+    if (!xdr_int( xdrs, &a->_con)) return FALSE;
+
+    xdr_attr( xdrs, "_cha");
+    if (!xdr_int( xdrs, &a->_cha)) return FALSE;
+    return TRUE;
 }
 

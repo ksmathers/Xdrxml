@@ -38,6 +38,7 @@ typedef struct dr1Player {
     dr1ItemSet pack;		/* Backpack equipment */
 } dr1Player;
 
+
 /*-------------------------------------------------------------------
  * dr1Player_load
  *
@@ -79,7 +80,8 @@ int dr1Player_encumbrance();
 
 
 /*-------------------------------------------------------------------
- * xdr_dr1Player( xdrs, dr1Player*)
+ * bool_t xdr_dr1Player( xdrs, dr1Player*)
+ *   Returns TRUE on success
  */
 bool_t xdr_dr1Player( XDR *xdrs, dr1Player*);
 

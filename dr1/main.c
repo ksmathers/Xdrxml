@@ -2,12 +2,14 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 
 #include "player.h"
 #include "apothecary.h"
 #include "money.h"
 #include "barter.h"
 #include "dice.h"
+#include "xdrasc.h"
 
 int main( int argc, char** argv) {
     FILE *fp;
@@ -22,6 +24,7 @@ int main( int argc, char** argv) {
     long sell, buy;
     struct stat pdat;
     int pdatf;
+    dr1Player *loadOk;
     
     /* initialize globals */
     bzero( &player, sizeof(player));
@@ -32,7 +35,8 @@ int main( int argc, char** argv) {
     pdatf = stat( "player.dat", &pdat);
 
     if (!pdatf && S_ISREG(pdat.st_mode)) {
-	dr1Player_load( &player, "player.dat");
+	loadOk = dr1Player_load( &player, "player.dat");
+	assert(loadOk);
     } else {
 	player.name = "Byron";
 	player.purse.gp = dr1Dice_roll("3d4") * 10;
@@ -68,6 +72,12 @@ int main( int argc, char** argv) {
     }
     free(b);
   
+    /* dump player */
+    printf("Player\n");
+    xdr_push_note( &xdrasc, "player");
+    xdr_dr1Player( &xdrasc, &player);
+    xdr_pop_note( &xdrasc);
+
     /* save player with new item */
     fp = fopen("player.dat", "w");
     xdrstdio_create( &xdrs, fp, XDR_ENCODE);

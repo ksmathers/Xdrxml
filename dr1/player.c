@@ -1,8 +1,36 @@
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include "player.h"
+#include "xdrasc.h"
 
+#if 0
+struct dr1Player_state {
+    int state; 
+    char *select;
+    dr1Player_select_fp doSelect;
+    int nextstate;
+}
+
+enum { PC1_START, PC1_STATS, PC1_RACE, PC1_SEX, PC1_CLASS, PC1_ALIGN, PC1_NAME };
+struct dr1Player_state[] dr1Player_create_method1 = {
+	{ PC1_START, "roll", dr1Player_roll_method1, PC1_STATS },
+	{ PC1_START, "cancel", dr1Player_cancel, -1 },
+	{ PC1_STATS, "swap", dr1Player_swap, PC1_STATS },
+        { PC1_STATS, "trade", dr1Player_trade, PC1_STATS },
+	{ PC1_STATS, "done", dr1Player_done, PC1_RACE },
+	{ PC1_STATS, "cancel", dr1Player_cancel, -1 }
+    };
+
+struct dr1Player_stat[] dr1Player_create_cont = {
+	{ PC1_RACE, "race", dr1Player_race, PC1_SEX },
+	{ PC1_SEX, "sex", dr1Player_sex, PC1_CLASS },
+	{ PC1_CLASS, "class", dr1Player_class, PC1_ALIGN },
+	{ PC1_ALIGN, "align", dr1Player_align, PC1_NAME },
+	{ PC1_NAME, "name", dr1Player_align, -1 }
+    };
+#endif
 
 /*-------------------------------------------------------------------
  * dr1Player_load
@@ -18,7 +46,7 @@
  */
 dr1Player *dr1Player_load( dr1Player *buf, char* fname) {
     FILE *fp;
-    bool_t fail;
+    bool_t ok;
     dr1Player *p;
     XDR xdrs;
 
@@ -33,11 +61,11 @@ dr1Player *dr1Player_load( dr1Player *buf, char* fname) {
     }
 
     xdrstdio_create( &xdrs, fp, XDR_DECODE);
-    fail = xdr_dr1Player( &xdrs, p);
+    ok = xdr_dr1Player( &xdrs, p);
     xdr_destroy( &xdrs);
     fclose( fp);
       
-    if (fail) {
+    if (!ok) {
 	dr1Player_destroy( p);
 	p = NULL;
     }
@@ -50,8 +78,7 @@ dr1Player *dr1Player_load( dr1Player *buf, char* fname) {
  *    Destroy a malloc'd dr1Player structure.
  */
 void dr1Player_destroy( dr1Player *p) {
-    free( p->name);
-/*    dr1ItemSet_destroy( &p->pack); /**/
+    xdr_free( (xdrproc_t)xdr_dr1Player, (void*)p);
 }
 
 /*-------------------------------------------------------------------
@@ -70,15 +97,34 @@ int dr1Player_encumbrance( dr1Player *p) {
  * xdr_dr1Player( xdrs, dr1Player*)
  */
 bool_t xdr_dr1Player( XDR *xdrs, dr1Player* p) {
-   bool_t res;
-   res = xdr_string( xdrs, &p->name, MAXNAMELEN );
-   res |= xdr_long( xdrs, &p->xp);
-   res |= xdr_int( xdrs, &p->hp);
-   res |= xdr_int( xdrs, &p->full_hp);
-   res |= xdr_dr1Attr( xdrs, &p->base_attr);
-   res |= xdr_dr1Attr( xdrs, &p->curr_attr);
-   res |= xdr_dr1Money( xdrs, &p->purse);
-   res |= xdr_dr1ItemSet( xdrs, &p->pack);
-   return res;
+   xdr_attr( xdrs, "name");
+   if (!xdr_wrapstring( xdrs, &p->name)) return FALSE;
+
+   xdr_attr( xdrs, "xp");
+   if (!xdr_long( xdrs, &p->xp)) return FALSE;
+
+   xdr_attr( xdrs, "hp");
+   if (!xdr_int( xdrs, &p->hp)) return FALSE;
+
+   xdr_attr( xdrs, "full_hp");
+   if (!xdr_int( xdrs, &p->full_hp)) return FALSE;
+
+   xdr_push_note( xdrs, "base_attr");
+   if (!xdr_dr1Attr( xdrs, &p->base_attr)) return FALSE;
+   xdr_pop_note( xdrs);
+
+   xdr_push_note( xdrs, "curr_attr");
+   if (!xdr_dr1Attr( xdrs, &p->curr_attr)) return FALSE;
+   xdr_pop_note( xdrs);
+
+   xdr_push_note( xdrs, "purse");
+   if (!xdr_dr1Money( xdrs, &p->purse)) return FALSE;
+   xdr_pop_note( xdrs);
+
+   xdr_push_note( xdrs, "pack");
+   if (!xdr_dr1ItemSet( xdrs, &p->pack)) return FALSE;
+   xdr_pop_note( xdrs);
+
+   return TRUE;
 }
 

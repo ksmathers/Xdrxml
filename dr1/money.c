@@ -2,6 +2,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "money.h"
+#include "xdrasc.h"
 
 /*-------------------------------------------------------------------
  * dr1Money_encumbrance
@@ -385,13 +386,22 @@ dr1Money dr1Money_normalizex( dr1Money *purse, double charge, int ep) {
  * xdr_dr1Money( xdrs, dr1Money*)
  */
 bool_t xdr_dr1Money( XDR *xdrs, dr1Money* p) {
-    bool_t res;
-    res = xdr_int( xdrs, &p->pp);
-    res |= xdr_int( xdrs, &p->gp);
-    res |= xdr_int( xdrs, &p->ep);
-    res |= xdr_int( xdrs, &p->sp);
-    res |= xdr_int( xdrs, &p->cp);
-    return res;
+
+    xdr_attr( xdrs, "pp");
+    if (!xdr_int( xdrs, &p->pp)) return FALSE;
+
+    xdr_attr( xdrs, "gp");
+    if (!xdr_int( xdrs, &p->gp)) return FALSE;
+
+    xdr_attr( xdrs, "ep");
+    if (!xdr_int( xdrs, &p->ep)) return FALSE;
+
+    xdr_attr( xdrs, "sp");
+    if (!xdr_int( xdrs, &p->sp)) return FALSE;
+
+    xdr_attr( xdrs, "cp");
+    if (!xdr_int( xdrs, &p->cp)) return FALSE;
+    return TRUE;
 }
 
 /*-------------------------------------------------------------------

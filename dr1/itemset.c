@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "itemset.h"
+#include "xdrasc.h"
 
 /*-------------------------------------------------------------------
  * dr1ItemSetAdd
@@ -25,7 +26,7 @@ void dr1ItemSet_add( dr1ItemSet *set, dr1Item *i) {
 
 
 /*-------------------------------------------------------------------
- * dr1ItemSetDelete
+ * dr1ItemSet_remove
  *
  *    The method removes an item from the set.
  *
@@ -36,7 +37,7 @@ void dr1ItemSet_add( dr1ItemSet *set, dr1Item *i) {
  *    The pointer is removed from the array.  The caller is responsible
  *    for freeing the pointer.
  */
-void dr1ItemSet_delete( dr1ItemSet* set, dr1Item *i) {
+void dr1ItemSet_remove( dr1ItemSet* set, dr1Item *i) {
     int j;
     for (j=0; j<set->len; j++) {
 	if (set->items[j] == i) {
@@ -66,30 +67,39 @@ int dr1ItemSet_encumbrance( dr1ItemSet* set) {
     return enc;
 }
 
-
 /*-------------------------------------------------------------------
  * xdr_dr1ItemSet( xdrs, dr1ItemSet*)
  */
 bool_t xdr_dr1ItemSet( XDR *xdrs, dr1ItemSet* set) {
-    bool_t res = 0;
     int i;
     long siz;
 
-    res |= xdr_int( xdrs, &set->len);
+    xdr_attr( xdrs, "len");
+    if (!xdr_int( xdrs, &set->len)) return FALSE;
+
     if (xdrs->x_op == XDR_DECODE) {
 	set->size = set->len;
 	set->items = malloc(sizeof(dr1Item*) * set->len);
     }
     for ( i=0; i<set->len; i++) {
+        xdr_push_note( xdrs, "item-%d", i);
 	if (xdrs->x_op == XDR_ENCODE) {
 	    siz = dr1Item_size( set->items[i]);
 	}
-	res |= xdr_long( xdrs, &siz);
+	xdr_attr( xdrs, "size");
+	if (!xdr_long( xdrs, &siz)) return FALSE;
 	if (xdrs->x_op == XDR_DECODE) {
 	    set->items[i] = calloc( 1, siz);
 	}
-	res |= xdr_dr1Item( xdrs, set->items[i]);
+	if (!xdr_dr1Item( xdrs, set->items[i])) return FALSE;
+	if (xdrs->x_op == XDR_FREE) {
+	    free(set->items[i]);
+	}
+	xdr_pop_note( xdrs);
     }
-    return res;
+    if (xdrs->x_op == XDR_FREE) {
+	free( set->items);
+    }
+    return TRUE;
 }
 

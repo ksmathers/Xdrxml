@@ -39,7 +39,7 @@ typedef struct {
 void dr1ItemSet_add( dr1ItemSet* set, dr1Item *i);
 
 /*-------------------------------------------------------------------
- * dr1ItemSetDelete
+ * dr1ItemSet_remove
  *
  *    The method removes an item from the set.
  *
@@ -50,7 +50,7 @@ void dr1ItemSet_add( dr1ItemSet* set, dr1Item *i);
  *    The pointer is removed from the array.  The caller is responsible
  *    for freeing the pointer.
  */
-void dr1ItemSet_delete( dr1ItemSet* set, dr1Item *i);
+void dr1ItemSet_remove( dr1ItemSet* set, dr1Item *i);
 
 /*-------------------------------------------------------------------
  * dr1ItemSet_encumbrance

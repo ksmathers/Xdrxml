@@ -5,6 +5,21 @@
 #include "money.h"
 #include "item.h"
 #include "itemreg.h"
+#include "xdrasc.h"
+
+/*-------------------------------------------------------------------
+ * dr1Item_destroy
+ *
+ *    Remove any storage attached to the Item .  The caller is still
+ *    responsible for freeing the dr1Item itself if needed.
+ *
+ *  PARAMETERS:
+ *    i     The item to destroy
+ */
+
+void
+dr1Item_destroy( dr1Item *i) {
+}
 
 /*-------------------------------------------------------------------
  * dr1
@@ -27,24 +42,40 @@ long dr1Item_size( dr1Item *i) {
  */
 bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
     int code;
-    bool_t res;
+    char *s = 0;
+    
+    if (xdrs->x_handy & XDR_ANNOTATE) {
+	s = (char *)xdrs->x_private;
+	s += strlen( s);
+    }
 
     if (xdrs->x_op == XDR_ENCODE) {
         code = i->type->code;
     }
-    res |= xdr_int( xdrs, &code);
+    xdr_attr( xdrs, "code");
+    if (!xdr_int( xdrs, &code)) return FALSE;
     if (xdrs->x_op == XDR_DECODE) {
         i->type = dr1Registry_lookup( &dr1itemReg, code);
     }
 
-    res |= xdr_long( xdrs, &i->value);
-    res |= xdr_wrapstring( xdrs, &i->name);
-    res |= xdr_int( xdrs, &i->encumbrance);
-    res |= xdr_int( xdrs, &i->unique);
-    res |= xdr_int( xdrs, &i->uses);
+    xdr_attr( xdrs, "value");
+    if (!xdr_long( xdrs, &i->value)) return FALSE;
+   
+    xdr_attr( xdrs, "name");
+    if (!xdr_wrapstring( xdrs, &i->name)) return FALSE;
+   
+    xdr_attr( xdrs, "encumbrance");
+    if (!xdr_int( xdrs, &i->encumbrance)) return FALSE;
+   
+    xdr_attr( xdrs, "unique");
+    if (!xdr_int( xdrs, &i->unique)) return FALSE;
+
+    xdr_attr( xdrs, "uses");
+    if (!xdr_int( xdrs, &i->uses)) return FALSE;
+
     if (i->type->xdr) {
-	res |= i->type->xdr( xdrs, i);
+	if (!i->type->xdr( xdrs, i)) return FALSE;
     }
-    return res;
+    return TRUE;
 }
 

@@ -5,6 +5,7 @@
 #   include <rpc/xdr.h>
 #endif
 #include "item.h"
+#include "dice.h"
 #include "player.h"
 
 /*-------------------------------------------------------------------
@@ -23,7 +24,6 @@ typedef struct {
     dr1Item super;
     dr1Dice effect;
 } dr1pHeal;
-
 
 /*-------------------------------------------------------------------
  * dr1pHeal_quaff
@@ -46,8 +46,8 @@ void dr1pHeal_quaff( dr1Player *p, dr1Item *i, int fn);
 
 
 /*-------------------------------------------------------------------
- * xdr_dr1pHeal( xdrs, dr1pHeal*)
+ * xdr_dr1pHeal( xdrs, dr1Item*)
  */
-bool_t xdr_dr1pHeal( XDR *xdrs, dr1pHeal*);
+bool_t xdr_dr1pHeal( XDR *xdrs, dr1Item*);
 
 #endif /* __DR1PHEAL__H */

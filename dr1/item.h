@@ -35,9 +35,8 @@ typedef struct dr1ItemType {
     dr1Item_xdr_fnp xdr;
 } dr1ItemType;
 
-
 /*-------------------------------------------------------------------
- * dr1
+ * dr1Item_size
  *
  *    The method ...
  *

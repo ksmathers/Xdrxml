@@ -1,5 +1,3 @@
-figure out the destructors 
-add destructor for ItemSet and Item
 add character gen routines to player
 equipment class
 add XDR routines
@@ -17,6 +15,7 @@ barter --
 item --
 itemset --
 merchant --
+
 
 
 
