@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <SDL.h>
+#include <assert.h>
 
 #include "map.h"
 #include "util.h"
-#define LIGHTDIST 10
+#define TORCHLIGHTDIST 1
+#define AMBIENTLIGHTDIST 10
 
 SDL_Surface *dr1_npcs1;
 SDL_Surface *dr1_npcs2;
@@ -70,6 +72,21 @@ void blit24x35(
 #define MAPCOLS (XSIZE/24)
 #define MAPROWS (YSIZE/35)
 
+opendoor( dr1Map *map, int xpos, int ypos) {
+    int x,y;
+    for (x = xpos-1; x<=xpos+1; x++) {
+	for (y= ypos-1; y<=ypos+1; y++) {
+	    dr1MapGrid *gr = &map->grid[ y*map->xsize + x];
+	    if (!gr->graphic) continue;
+	    if (gr->graphic->glyph[0].door) {
+		gr->open ^= 1;
+		gr->invisible ^= 1;
+	    }
+	}
+    }
+}
+
+
 int main( int argc, char **argv) {
     char buf[80];
     int xpos = 0;
@@ -117,13 +134,14 @@ int main( int argc, char **argv) {
 	{
 	    SDL_Event event;
 	    int r,c,g;
+	    int ambientlight = 0;
 	    SDL_Surface *img = dr1_npcs1;
 
 	    for (;;) {
-	        if (alt==0) alt = 1;
-		else alt=0;
+	        alt ^= 1;
 	        printf("."); fflush(stdout);
 	        SDL_FillRect( screen, NULL, 0);
+		ambientlight = map.grid[ ypos*map.xsize + xpos].graphic->light;
 		for (r=ypos-MAPROWS/2; r<map.ysize; r++) {
 		    if (r<0) continue;
 		    if ((r-ypos) > MAPROWS) break;
@@ -136,20 +154,26 @@ int main( int argc, char **argv) {
 			/* reject if there is no graphic in this part of map */
 			if (!gr->graphic) break;
 
-			/* reject if beyond light distance */
                         if (!gr->seen) {
-			    int dx, dy, d;
-			    
-			    dx = xpos - c;
-			    if (dx < 0) dx = -dx;
-			    dy = (ypos - r) * 3 / 2;
-			    if (dy < 0) dy = -dy;
-			    if (dx>dy) { 
-				d = dx + (dy>>1);
-			    } else { 
-				d = dy + (dx>>1);
+			    /* reject if beyond light distance */
+			    if (!gr->graphic->light) {
+				int dx, dy, d;
+				
+				dx = xpos - c;
+				if (dx < 0) dx = -dx;
+				dy = (ypos - r) * 3 / 2;
+				if (dy < 0) dy = -dy;
+				if (dx>dy) { 
+				    d = dx + (dy>>1);
+				} else { 
+				    d = dy + (dx>>1);
+				}
+				if (ambientlight) {
+				    if (d>AMBIENTLIGHTDIST) continue;
+				} else {
+				    if (d>TORCHLIGHTDIST) continue;
+				}
 			    }
-			    if (d>LIGHTDIST) continue;
 
 			    /* reject if not in view */
 			    if (!dr1_los(ypos,xpos, r, c, &map)) continue;
@@ -157,8 +181,8 @@ int main( int argc, char **argv) {
 			
 			/* else draw all of the glyphs in the graphic */
 			gr->seen = 1;
-		        for (g=gr->graphic->nglyphs-1; g>=0; g--) {
-			    if (gr->graphic->glyph[g].invisible) continue;
+			assert(gr->graphic->nglyphs>0);
+		        for (g=gr->graphic->nglyphs-1; g >= (gr->invisible?1:0); g--) {
 			    blit24x35( gr->graphic->glyph[g].src, 
 			            gr->graphic->glyph[g].r, 
 				    gr->graphic->glyph[g].c + 
@@ -207,13 +231,19 @@ int main( int argc, char **argv) {
 				case SDLK_l:
 				    xpos++;
 				    break;
+				case SDLK_o:
+				    opendoor( &map, xpos, ypos);
+				    break;
 				case SDLK_q:
 				    exit(3);
 			    }
 			    {
 				dr1MapGrid *gr = &map.grid[ ypos*map.xsize + xpos];
-				if (!gr->graphic || 
-				    gr->graphic->glyph[0].wall) 
+				if ( !gr->graphic || 
+				     gr->graphic->glyph[0].wall ||
+				     ( gr->graphic->glyph[0].door && 
+				       !gr->open) 
+				   )
 				{
 				    xpos = oxpos;
 				    ypos = oypos;

@@ -14,7 +14,8 @@ struct dr1Glyph {
     int c;
     int anim:1;
     int wall:1;
-    int invisible:1;
+    int door:1;
+    int startinvisible:1;
 };
 
 typedef struct dr1MapGraphic dr1MapGraphic;
@@ -23,6 +24,7 @@ struct dr1MapGraphic {
     int nglyphs;
     dr1Glyph *glyph; 
     int start:1;
+    int light:1;	/* ambient light */
 };
 
 
@@ -30,6 +32,8 @@ typedef struct dr1MapGrid dr1MapGrid;
 struct dr1MapGrid {
     dr1MapGraphic *graphic;
     int seen:1;
+    int invisible:1;		/* top glyph is invisible */
+    int open:1;			/* top glyph is open */
 };
 
 typedef struct dr1Map dr1Map;

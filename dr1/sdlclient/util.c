@@ -35,7 +35,12 @@ int isfloor( dr1Map *map, int row, int col) {
     int g;
     if (!gr) return FALSE;
     for (g = 0; g<gr->nglyphs; g++) {
-	if (gr->glyph[g].wall && !gr->glyph[g].invisible) return FALSE;
+	if ( gr->glyph[g].wall || 
+	     ( gr->glyph[g].door && !map->grid[row *map->xsize + col].open)
+	   )
+	{
+	    return FALSE;
+	}
     }
     return TRUE;
 }

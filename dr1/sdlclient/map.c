@@ -90,6 +90,7 @@ dr1Map readmap( char *fname) {
 	map.graphics[ngraph].glyph = realloc(
 	    map.graphics[ngraph].glyph,
 	    sizeof( dr1Glyph) * (glyph + 1));
+	bzero( &map.graphics[ngraph].glyph[glyph], sizeof(dr1Glyph));
 	if (!strcmp( file, "db-indoor-dungeon-1")) {
 	    map.graphics[ngraph].glyph[glyph].src = dr1_dung1;
 	} else if (!strcmp( file, "db-indoor-dungeon-3")) {
@@ -116,8 +117,11 @@ dr1Map readmap( char *fname) {
 	/* get flags */
 	while (*cpos && *cpos != '#') {
 	    switch (*cpos) {
+		case 'd':
+		    map.graphics[ngraph].glyph[glyph].door = 1;
+		    break;
 		case 'v':
-		    map.graphics[ngraph].glyph[glyph].invisible = 1;
+		    map.graphics[ngraph].glyph[glyph].startinvisible = 1;
 		    break;
 		case 'a':
 		    map.graphics[ngraph].glyph[glyph].anim = 1;
@@ -127,6 +131,9 @@ dr1Map readmap( char *fname) {
 		    break;
 		case 's':
 		    map.graphics[ngraph].start = 1;
+		    break;
+		case 'l':
+		    map.graphics[ngraph].light = 1;
 		    break;
 	    }
 	    cpos++;
@@ -162,6 +169,9 @@ dr1Map readmap( char *fname) {
 	    if (g->start) {
 		map.startrow = row;
 		map.startcol = col;
+	    }
+	    if (g->glyph[0].startinvisible) {
+		map.grid[ row*map.xsize + col].invisible = 1;
 	    }
 	    map.grid[ row*map.xsize + col].graphic = g;
 	    col++;
