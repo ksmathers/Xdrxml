@@ -11,6 +11,7 @@
 #include "class.h"
 #include "context.h"
 #include "qio.h"
+#include "lib/protocol.h"
 
 
 /* struct representing arguments to the playerv command calls */
@@ -447,12 +448,12 @@ int dr1Playerv_swapv( dr1Context *ctx) {
     return -1;
 }
 
-/* trade: Trade points in one stat for points in another */
-int dr1Playerv_tradev( dr1Context *ctx);
-int dr1Playerv_trade( dr1Context *ctx, int c, char **v, int *estr) {
+/* improve: Improve points in one stat at the cost of points in another */
+int dr1Playerv_improvev( dr1Context *ctx);
+int dr1Playerv_improve( dr1Context *ctx, int c, char **v, int *estr) {
     
     struct dr1Playerv_args_t *args = dr1Context_pushcallv( 
-	    ctx, dr1Playerv_tradev, "dr1Playerv_args_t", sizeof(*args)
+	    ctx, dr1Playerv_improvev, "dr1Playerv_args_t", sizeof(*args)
 	);
     if (!args) return -1;
     args->c = c;
@@ -461,7 +462,7 @@ int dr1Playerv_trade( dr1Context *ctx, int c, char **v, int *estr) {
     return 0;
 }
 
-int dr1Playerv_tradev( dr1Context *ctx) {
+int dr1Playerv_improvev( dr1Context *ctx) {
     int *a, *b;
     struct dr1Playerv_args_t *args = dr1Context_args( ctx, "dr1Playerv_args_t");
     struct {
@@ -511,7 +512,7 @@ int dr1Playerv_tradev( dr1Context *ctx) {
 	    }
 
 	    if (*a < 5 || *b > 17) { 
-		/* can't trade for more than 18, or less than 3 */
+		/* can't improve for more than 18, or less than 3 */
 		dr1Context_popcall( ctx, -3); return 0; 
 	    }
 
@@ -547,8 +548,6 @@ int dr1Playerv_init( dr1Player *p) {
 
 int dr1Playerv_showDialog( dr1Context *ctx) {
     char buf[80];
-    dr1AttrAdjust *race;
-    dr1ClassType *class;
     int i;
     int *res = &ctx->cstack[ ctx->stackptr-1].result;
     dr1Player *p = &ctx->player;
@@ -578,30 +577,10 @@ int dr1Playerv_showDialog( dr1Context *ctx) {
 	    fixestr(p, &autos->estr);
 
 	    dr1Money_format( &p->purse, buf);
-	    race = dr1Registry_lookup( &dr1race, p->race);
-	    class = dr1Registry_lookup( &dr1class, p->class);
-	    qprintf( ctx, "---------------------------------------------------------\n");
-	    if (p->name) qprintf( ctx, "Name: %s\n", p->name);
-	    if (race) qprintf( ctx, "Race: %s\n", race->type);
-	    if (class) qprintf( ctx, "Class: %s\n", class->class);
-	    qprintf( ctx, "Sex: %s\n", p->sex==DR1R_FEMALE?"Female":"Male");
-	    qprintf( ctx, "Purse: %s\n", buf);
-	    qprintf( ctx, "Hits: %d\n", HITPOINTS(p));
-	    qprintf( ctx, "Str: %2d", p->base_attr._str);
-	    if (p->base_attr.estr) {
-		qprintf( ctx, "/%02d\n", p->base_attr.estr > 99 ? 0 : p->base_attr.estr);
-	    } else {
-		qprintf( ctx, "\n");
-	    }
-	    qprintf( ctx, "Int: %2d\n", p->base_attr._int);
-	    qprintf( ctx, "Wis: %2d\n", p->base_attr._wis);
-	    qprintf( ctx, "Dex: %2d\n", p->base_attr._dex);
-	    qprintf( ctx, "Con: %2d\n", p->base_attr._con);
-	    qprintf( ctx, "Cha: %2d\n\n", p->base_attr._cha);
+	    sendplayer( ctx);
 
-	    qprintf( ctx, "(roll, swap, trade, race, sex, class, name, done)\n");
 	case CMDPROMPT:
-	    qprintf( ctx, "Command: ");
+	    qprintf( ctx, DR1MSG_190, "(roll, swap, improve, race, sex, class, name, accept)");
 	    autos->state = GETCMD;
 	    return 0;
 
@@ -616,14 +595,14 @@ int dr1Playerv_showDialog( dr1Context *ctx) {
 
 	    /* interpret command */
 	    *res = 0;
-	    if ( !strcmp(autos->cmds[0], "roll")) {
+	    if ( !strcasecmp(autos->cmds[0], "roll")) {
 		*res=dr1Playerv_roll( ctx, autos->nargs, autos->cmds, 
 			autos->hits, autos->gold, &autos->estr);
 	    } else if ( !strcasecmp(autos->cmds[0], "swap")) {
 		*res=dr1Playerv_swap( ctx, autos->nargs, autos->cmds, 
 			&autos->estr);
-	    } else if ( !strcasecmp(autos->cmds[0], "trade")) {
-		*res=dr1Playerv_trade( ctx, autos->nargs, autos->cmds, 
+	    } else if ( !strcasecmp(autos->cmds[0], "improve")) {
+		*res=dr1Playerv_improve( ctx, autos->nargs, autos->cmds, 
 			&autos->estr);
 	    } else if ( !strcasecmp(autos->cmds[0], "race")) {
 		*res=dr1Playerv_race( ctx, autos->nargs, autos->cmds, 

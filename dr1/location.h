@@ -1,5 +1,5 @@
-#ifndef __DR1__H
-#define __DR1__H
+#ifndef __DR1LOCATION__H
+#define __DR1LOCATION__H
 
 #ifndef _RPC_XDR_H
 #   include <rpc/xdr.h>
@@ -56,4 +56,4 @@ dr1Location dr1Location_moveTo( dr1Location *_from, dr1Location *_to, int dist);
  */
 bool_t xdr_dr1Location( XDR *xdrs, dr1Location*);
 
-#endif /* __DR1__H */
+#endif /* __DR1LOCATION__H */

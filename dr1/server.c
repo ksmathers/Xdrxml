@@ -23,6 +23,7 @@
 #include "context.h"
 #include "qio.h"
 #include "lib/xdrxml.h"
+#include "lib/protocol.h"
 
 /* merchants */
 #include "apothecary.h"
@@ -50,7 +51,6 @@ enum runstate {
 };
 
 static dr1Context* ctx[FD_SETSIZE];
-static char *separator="7608bdb04fee4d6cf23289314582203c"; /* md5sum dr1 */
 
 /*
  * sendmap 
@@ -65,8 +65,27 @@ void sendmap( dr1Context* ctx) {
 
     buf = xdrxmlsb_getbuf( &xdrxmlsb); 
 
+    qprintf( ctx, "%s %d %d %d %d\n", DR1MSG_120, 0, 0, ctx->map->xsize, ctx->map->ysize);
     qprintf( ctx, buf);
-    qprintf( ctx, "%s\n", separator);
+    qprintf( ctx, "%s\n", SEPARATOR);
+}
+
+/*
+ * sendplayer 
+ *
+ */
+void sendplayer( dr1Context* ctx) {
+    char *buf;
+    xdrxmlsb_reset( &xdrxmlsb);
+    if (xdr_dr1Player( &xdrxmlsb, &ctx->player) != TRUE) {
+	printf("Error serializing player.\n");
+    }
+
+    buf = xdrxmlsb_getbuf( &xdrxmlsb); 
+
+    qprintf( ctx, "%s\n", DR1MSG_170);
+    qprintf( ctx, buf);
+    qprintf( ctx, "%s\n", SEPARATOR);
 }
 
 /*--------------------------------------------------------------------------
@@ -102,10 +121,12 @@ int loginplayer( dr1Context *ctx) {
     int pdatf;
     int loadOk;
     char *cpos;
-    char password[12];
+    char *tok;
+    char buf[80];
     struct {
         int state;
-	char login[12];
+	char *login;
+	char *password;
     } *autos = dr1Context_auto( ctx, sizeof(*autos));
     enum { INIT, LOGIN, PASSWORD, NEWPLAYER };
 
@@ -113,34 +134,37 @@ int loginplayer( dr1Context *ctx) {
 
     switch (autos->state) {
 	case INIT:
-	    qprintf( ctx, "Login: ");
+	    qprintf( ctx, "DR1/1.0\n");
 	    autos->state = LOGIN;
 	    return 0;
 
         case LOGIN:
 	    if (!ctx->inputready) { errno=EWOULDBLOCK; return 1; }
-	    qgets( autos->login, sizeof(autos->login), ctx);
+	    qgets( buf, sizeof(buf), ctx);
 
+	    tok = strtok( buf, " ");
+	    if (!strcmp( tok, "IAM")) {
+	        /* login request */
+		autos->login = strdup( strtok( NULL, " "));
+		autos->password = strdup( strtok( NULL, " "));
+		autos->state = PASSWORD;
+		return 0;
+	    }
+	    qprintf( ctx, DR1MSG_510);
+	    return 0;
+
+	case PASSWORD:
 	    for (cpos = autos->login; *cpos != 0; cpos++) {
 		if (!isalnum(*cpos)) *cpos = '_';
 	    }
 
-	    if (!strcmp(autos->login, "down")) exit(1);
-
-	    qprintf( ctx, "Password: ");
-	    autos->state = PASSWORD;
-	    return 0;
-
-	case PASSWORD:
-	    if (!ctx->inputready) return 1;
-	    qgets( password, sizeof(password), ctx);
-	    for (cpos = password; *cpos != 0; cpos++) {
+	    for (cpos = autos->password; *cpos != 0; cpos++) {
 		if (!isalnum(*cpos)) *cpos = '_';
 	    }
 
 	    strncpy( ctx->fname, autos->login, sizeof(ctx->fname)-4);
 	    strncat( ctx->fname, "-", sizeof(ctx->fname)-4);
-	    strncat( ctx->fname, password, sizeof(ctx->fname)-4);
+	    strncat( ctx->fname, autos->password, sizeof(ctx->fname)-4);
 	    strcat( ctx->fname, ".xml");
 	    ctx->fname[ sizeof(ctx->fname)-1] = 0;
 
@@ -148,9 +172,11 @@ int loginplayer( dr1Context *ctx) {
 	    if (!pdatf && S_ISREG(pdat.st_mode)) {
 		loadOk = dr1Context_load( ctx, ctx->fname);
 		if (!loadOk) {
-		    qprintf(ctx, "Error loading %s\n", ctx->fname);
+		    qprintf(ctx, DR1MSG_520, ctx->fname);
 		    return 1;
 		}
+		qprintf(ctx, DR1MSG_100);
+		sendplayer( ctx);
 		sendmap( ctx);
 		dr1Context_popcall( ctx, 0);
 	    } else {
@@ -160,15 +186,17 @@ int loginplayer( dr1Context *ctx) {
 	    return 0;
 	
 	case NEWPLAYER:
-	    qprintf( ctx, "Welcome to Dragon's Reach, traveller!\n");
+	    qprintf(ctx, DR1MSG_100);
 	    ctx->map = dr1Map_readmap( "lib/maps/town.map");
 	    ctx->player.location.x = ctx->map->startx;
 	    ctx->player.location.y = ctx->map->starty;
+	    sendplayer( ctx);
 	    sendmap( ctx);
 	    dr1Context_popcall( ctx, ctx->cstack[ctx->stackptr-1].result);
 	    return 0;
 
 	default:
+	    qprintf(ctx, DR1MSG_570, "Invalid state");
 	    printf( "%d: Invalid state.\n", fileno(ctx->fp));
 	    errno = EINVAL;
 	    return 1;

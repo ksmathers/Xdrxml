@@ -237,15 +237,21 @@ bool_t xdr_dr1Player( XDR *xdrs, dr1Player* p) {
    xdr_pop_note( xdrs);
 
    xdr_push_note( xdrs, "weapon");
-   if (!xdr_dr1ItemPtr( xdrs, (dr1Item **)&p->weapon)) return FALSE;
+       xdr_push_note( xdrs, "name");
+       if (!xdr_dr1ItemPtr( xdrs, (dr1Item **)&p->weapon)) return FALSE;
+       xdr_pop_note( xdrs);
    xdr_pop_note( xdrs);
 
    xdr_push_note( xdrs, "gauche");
-   if (!xdr_dr1ItemPtr( xdrs, &p->gauche)) return FALSE;
+       xdr_push_note( xdrs, "name");
+       if (!xdr_dr1ItemPtr( xdrs, &p->gauche)) return FALSE;
+       xdr_pop_note( xdrs);
    xdr_pop_note( xdrs);
 
    xdr_push_note( xdrs, "armor");
-   if (!xdr_dr1ItemPtr( xdrs, (dr1Item **)&p->armor)) return FALSE;
+       xdr_push_note( xdrs, "name");
+       if (!xdr_dr1ItemPtr( xdrs, (dr1Item **)&p->armor)) return FALSE;
+       xdr_pop_note( xdrs);
    xdr_pop_note( xdrs);
 
    xdr_attr( xdrs, "race");

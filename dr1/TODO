@@ -1,3 +1,6 @@
+Add public/private flags to xdr translation (or perhaps a modality)
+   so that private data isn't shipped to the client (like the real weapon
+   type, etc.)
 Add projectiles / fix ranged weapons
 Add a joiner?  Change the wheelwright to a joiner?
 check attribute bonuses against DMG

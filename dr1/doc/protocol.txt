@@ -5,6 +5,8 @@ clnt> IAM user password
 
 svr> 100 LOGIN OK
 svr> 500 BAD USER/PASSWORD
+svr> 510 PROTOCOL ERROR
+svr> 520 FILE/DATA ERROR LOADING %s
 svr> 550 BLACKLISTED
 
 svr> 110 MAP GLYPHS <n> 
@@ -17,19 +19,23 @@ svr> 7608bdb04fee4d6cf23289314582203c
 
 svr> 130 MOBILE <r1> <c1> <glyph>
 svr> 135 PROJECTILE <r1> <c1> <r2> <c2> <glyph> <end-glyph>
-svr> 140 ATK <attackdata>
-svr> 150 DEF <defenddata>
+svr> 140 ATK <roll> <damage> <msg>
+svr> 150 DEF <roll> <damage> <msg> <xmsg>
 svr> 160 INVENTORY <inventory-data>
-svr> 170 PLAYER <player-data>
+
+svr> 170 PLAYER 
+svr> <player-data>
+svr> 7608bdb04fee4d6cf23289314582203c
+
 svr> 180 TREASURE <treasure-data>
-svr> 190 
+svr> 190 CMDLIST (<cmds>)
 
 svr> 570 FATAL ERROR <string>
 
 clnt> MOVE <0-9>
 svr> 200 OK
-svr> 310 FAILED <code>
-clnt> CMD <n> <cmds>
+svr> 310 FAILED <msg>
+clnt> SAY <msg>
 svr> 200 OK
 svr> 310 FAILED <code>
 clnt> MESG <whom> <string>

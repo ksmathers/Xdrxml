@@ -229,12 +229,18 @@ struct dr1Point {
     int y;
 };
 
+#ifndef NDEBUG
+extern int EF_ALLOW_MALLOC_0;
+#endif
+
 int main( int argc, char **argv) {
     char buf[80];
     int xpos = 0;
     int ypos = 0;
     int oxpos, oypos;
     char *server;
+
+    EF_ALLOW_MALLOC_0 = 1;
      
     if (argc != 2) { 
          printf("Usage: ./dr1 <server>\n");
