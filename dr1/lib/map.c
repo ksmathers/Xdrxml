@@ -489,6 +489,19 @@ xdr_dr1MapSquare( XDR *xdrs, dr1MapSquare *square, dr1Map *map) {
  *
  *  SIDE EFFECTS:
  */
+
+#define XDRXML_DATA(xdrs) ((struct xdrxml_st *)xdrs->x_private)
+static int countNodes( xmlNodePtr n, xmlElementType e) {
+    xmlNodePtr c;
+    int count = 0;
+    for (c=n->children; c != NULL; c = n->next) {
+        printf("c.type = %d, e = %d\n", c->type, e);
+	sleep(1);
+        if (c->type == e) count++;
+    }
+    return count;
+}
+
 bool_t
 xdr_dr1Map( XDR *xdrs, dr1Map *map) {
     int i;
@@ -515,18 +528,31 @@ xdr_dr1Map( XDR *xdrs, dr1Map *map) {
 	free(map->graphics);
     }
 
+#if 0
     xdr_attr( xdrs, "xsize");
     if (!xdr_int( xdrs, &map->xsize)) return FALSE;
 
     xdr_attr( xdrs, "ysize");
     if (!xdr_int( xdrs, &map->ysize)) return FALSE;
+#endif
 
     /* grid */
+
+    xdr_push_note( xdrs, "grid");
+    
     if (xdrs->x_op == XDR_DECODE) {
+#if 1
+        xmlNodePtr n = XDRXML_DATA(xdrs)->cur;
+	map->ysize = countNodes( n, XML_ELEMENT_NODE);
+	printf("ysize %d\n", map->ysize);
+
+	n=xdrxml_bfs1(n, "x");
+	map->xsize = countNodes( n, XML_TEXT_NODE);
+	printf("xsize %d\n", map->xsize);
+#endif
 	map->grid = calloc( map->xsize * map->ysize, sizeof(dr1MapSquare));
     }
 
-    xdr_push_note( xdrs, "grid");
     for (y=0; y<map->ysize; y++) {
         xdr_push_note( xdrs, "y");
 	for (x=0; x<map->xsize; x++) {

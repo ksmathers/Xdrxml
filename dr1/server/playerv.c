@@ -165,7 +165,6 @@ static int apply_class( dr1Context *ctx, int ccode)
 /* class: Choose a class for the player */
 int dr1Playerv_class( dr1Context *ctx, int c, char **v) 
 {
-    dr1Player *p = &ctx->player;
     int ccode;
     int res;
 
