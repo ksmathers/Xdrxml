@@ -49,6 +49,7 @@ enum runstate {
 };
 
 static dr1Context* ctx[FD_SETSIZE];
+static char *separator="7608bdb04fee4d6cf23289314582203c"; /* md5sum dr1 */
 
 /*--------------------------------------------------------------------------
  * loginplayer

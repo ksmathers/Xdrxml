@@ -2,9 +2,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
-#include <libxml/xpointer.h>
 
 #include "xdrxml.h"
 
@@ -28,23 +25,24 @@ struct xdr_ops xdrxml_ops = {
 	&xdrxml_putint32
     };
 
-struct xdrxml_st {
-        char path[1024];
-	char *attr;
-	FILE *fp;		/* output stream */
-	xmlDocPtr doc;		/* input stream */
-	xmlNodePtr cur;		/* input cursor */
-	xmlNodePtr last;	/* last node used */
-	int error;		/* error reading or writing stream */
+struct xdr_ops_ext xdrxml_extops = {
+	&xdrxml_getbit,
+	&xdrxml_putbit,
+        &xdrxml_getstring,
+	&xdrxml_putstring
     };
+
 
 struct xdrxml_st xdrxml_data = {
     "",
     NULL,
+    0,
     NULL,
     NULL,
     NULL,
-    NULL
+    NULL,
+    NULL,
+    &xdrxml_extops
 };
 
 #define XDRXML_DATA(xdrs) ((struct xdrxml_st *)xdrs->x_private)
@@ -61,21 +59,21 @@ XDR xdrxml = {
 /*
  * utility functions 
  */
-static void mark( xmlNodePtr node) {
+void xdrxml_mark( xmlNodePtr node) {
 /*    printf("mark %s\n", node->name); /**/
     ((char *)node->name)[0] = 0;
 }
 
-static xmlNodePtr bfs1( xmlNodePtr node, const char *name) {
+xmlNodePtr xdrxml_bfs1( xmlNodePtr node, const char *name) {
     xmlNodePtr cur = node->children;
     while (cur != NULL && strcasecmp( cur->name, name) != 0) {
     	cur = cur->next;
     }
-    printf("%s %s\n", cur?"found":"lost", name); /**/
+/*    printf("%s %s\n", cur?"found":"lost", name); /**/
     return cur;
 }
 
-static int nchar( char *path, int c) {
+int xdrxml_nchar( char *path, int c) {
     int i=0;
     while (*path) if (*path++ == c) i++;
     return i;
@@ -89,9 +87,9 @@ int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop) {
 	/*
 	 * build an XML tree from a the file;
 	 */
-	printf("Parsing %s\n", fname);
+/*	printf("Parsing file %s\n", fname); /**/
 	xdrd->doc = xmlParseFile( fname);
-	printf("done\n");
+/*	printf("done\n"); /**/
 	assert(xdrd->doc);
 	if (xdrd->doc == NULL) return -1;
 	xdrd->cur = xmlDocGetRootElement(xdrd->doc);
@@ -119,9 +117,9 @@ int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop) {
 int xdrxml_error( XDR *xdrs) {
     /* get some bytes from " */
     if (xdrs->x_handy & XDR_ANNOTATE) {
-	/* xml stream */
-	struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
-	return xdrd->error;
+       /* xml stream */
+       struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+       return xdrd->error;
     }
     return -1;
 }
@@ -129,9 +127,9 @@ int xdrxml_error( XDR *xdrs) {
 void xdrxml_clearerr( XDR *xdrs) {
     /* get some bytes from " */
     if (xdrs->x_handy & XDR_ANNOTATE) {
-	/* xml stream */
-	struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
-	xdrd->error = DR1_ENOERROR;
+       /* xml stream */
+       struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+       xdrd->error = DR1_ENOERROR;
     }
 }
 
@@ -272,10 +270,11 @@ bool_t xdrxml_bool( XDR *xdrs, bool_t *bool) {
     bool_t res;
     if (xdrs->x_handy & XDR_ANNOTATE) {
 	/* xml stream */
+	struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
         if (xdrs->x_op == XDR_DECODE) {
-	    res = xdrxml_getbit( xdrs, bool);
+	    res = xdrd->ext->x_getbit( xdrs, bool);
 	} else if (xdrs->x_op == XDR_ENCODE) {
-	    res = xdrxml_putbit( xdrs, *bool);
+	    res = xdrd->ext->x_putbit( xdrs, *bool);
 	}
     } else {
 	res = xdr_bool( xdrs, bool);
@@ -289,10 +288,11 @@ bool_t xdrxml_wrapstring( XDR *xdrs, char **s)
     /* send or read a string from the stream */
     if (xdrs->x_handy & XDR_ANNOTATE) {
 	/* xml stream */
+	struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
 	if (xdrs->x_op == XDR_ENCODE) {
-	    res = xdrxml_putstring( xdrs, *s);
+	    res = xdrd->ext->x_putstring( xdrs, *s);
 	} else if (xdrs->x_op == XDR_DECODE) {
-	    res = xdrxml_getstring( xdrs, 0, s);
+	    res = xdrd->ext->x_getstring( xdrs, 0, s);
 	} else if (xdrs->x_op == XDR_FREE) {
 	    if (*s) {
 		free(*s);
@@ -389,8 +389,8 @@ bool_t xdrxml_getlong( XDR *__xdrs, long *__lp)
     if (!cur) {
 	printf("No node %s/%s: Using value 0\n", xdrd->path, attr);
 	*__lp = 0;
-	xdrd->error = DR1_ENODEMISSING;
-	return FALSE;
+        xdrd->error = DR1_ENODEMISSING;
+        return FALSE;
     }
 
     value = xmlGetProp(cur, "value");

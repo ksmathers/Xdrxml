@@ -1,4 +1,8 @@
 #include <rpc/xdr.h>
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+#include <libxml/xpointer.h>
+#include "strbuf.h"
 
 enum {
     DR1_ENOERROR,
@@ -27,11 +31,52 @@ enum {
 * 
 */
 
+struct xdr_ops_ext {
+	bool_t (*x_getbit)( XDR *xdrs, bool_t *bit);
+	bool_t (*x_putbit)( XDR *xdrs, bool_t bit);
+	bool_t (*x_getstring)( XDR *xdrs, int prealloc_len, char **str);
+	bool_t (*x_putstring)( XDR *xdrs, char *str);
+    };
+
+struct xdrxml_st {
+        char path[1024];
+	char *attr;
+	int error;
+
+	/* file output */
+	FILE *fp;		/* output stream */
+
+	/* file input */
+	xmlDocPtr doc;		/* input stream */
+	xmlNodePtr cur;		/* input cursor */
+	xmlNodePtr last;	/* last node used */
+
+        /* input/output to string buffer */
+	dr1StringBuffer *sb;
+
+	/* extended ops */
+	struct xdr_ops_ext *ext;
+    };
+
 enum { XDR_ANNOTATE = 0x1 };
 
 bool_t xdr_push_note( XDR *xdrs, const char *ann);
 bool_t xdr_pop_note( XDR *xdrs);
 void xdr_attr( XDR *xdrs, const char *ann);
+
+/*
+ * Utility functions
+ */
+
+#define mark(n) xdrxml_mark(n)
+void xdrxml_mark( xmlNodePtr node);
+
+#define bfs1(n,nm) xdrxml_bfs1(n,nm)
+xmlNodePtr xdrxml_bfs1( xmlNodePtr node, const char *name); 
+
+#define nchar(p,c) xdrxml_nchar(p,c)
+int xdrxml_nchar( char *path, int c); 
+
 
 /*
  * The XDR handle.
@@ -46,6 +91,9 @@ int xdrxml_error( XDR* xdrs);
 void xdrxml_clearerr( XDR* xdrs);
 
 int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop);
+    /* open an XML xdr stream */
+
+int xdrxml_mem_create( XDR* xdrs, char *buf, int bufsize, enum xdr_op xop);
     /* open an XML xdr stream */
 
 bool_t xdrxml_bool( XDR *xdrs, int *bool) ;
@@ -86,3 +134,29 @@ bool_t xdrxml_getint32( XDR *__xdrs, int32_t *__ip);
 bool_t xdrxml_putint32( XDR *__xdrs, __const int32_t *__ip);
     /* put a int to " */
 
+/* Extended functions */
+
+bool_t xdrxml_getstring( XDR *xdrs, int prealloc_len, char **s); 
+    /* get a string from the underlying stream */
+
+bool_t xdrxml_putstring( XDR *xdrs, char *s); 
+    /* put a string to the underlying stream */
+
+bool_t xdrxml_getbit( XDR *xdrs, bool_t *bit); 
+    /* get a bit from the underlying stream */
+
+bool_t xdrxml_putbit( XDR *xdrs, bool_t bit); 
+    /* put a bit to the underlying stream */
+
+/* String Buffer functions */
+
+bool_t xdrxmlsb_putstring( XDR *xdrs, char *s);
+
+bool_t xdrxmlsb_putbit( XDR *xdrs, bool_t bit);
+
+bool_t xdrxmlsb_putlong( XDR *__xdrs, __const long *__lp);
+
+bool_t xdrxmlsb_putbytes( XDR *__xdrs, __const char *__addr,
+			     u_int __len);
+
+bool_t xdrxmlsb_putint32( XDR *__xdrs, __const int32_t *__ip);
