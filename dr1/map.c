@@ -104,6 +104,7 @@ dr1Map* dr1Map_readmap( char *fname) {
     dr1Map *map = calloc( 1, sizeof(dr1Map));
     dr1MapGraphic *g;
 
+    map->name = strdup( fname);
     dr1MapMobile_create( &map->moblayer);
 
     /* First Pass: Size of the arrays */

@@ -71,7 +71,7 @@ void dr1Set_add( dr1Set* set, void *i);
  *    Pointer to the named item, or NULL.
  *
  */
-void* dr1Set_findName( dr1Set* set, void *key);
+void* dr1Set_find( dr1Set* set, void *key);
 
 /*-------------------------------------------------------------------
  * dr1Set_remove

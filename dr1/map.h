@@ -86,6 +86,7 @@ typedef struct {
 
 typedef struct dr1Map dr1Map;
 struct dr1Map {
+    char *name;
     int ngraphics;
     dr1MapGraphic *graphics;
     int xsize; 
@@ -94,6 +95,7 @@ struct dr1Map {
     int startx;
     int starty;
     dr1MapMobile moblayer;
+    int select;
 };
 
 /*-------------------------------------------------------------------
