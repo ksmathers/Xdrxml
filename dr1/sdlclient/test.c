@@ -2,6 +2,8 @@
 #include <SDL.h>
 
 #include "map.h"
+#include "util.h"
+#define LIGHTDIST 10
 
 SDL_Surface *dr1_npcs1;
 SDL_Surface *dr1_npcs2;
@@ -122,17 +124,45 @@ int main( int argc, char **argv) {
 		else alt=0;
 	        printf("."); fflush(stdout);
 	        SDL_FillRect( screen, NULL, 0);
-		for (r=ypos-MAPROWS/2; r<map.grid.ysize; r++) {
+		for (r=ypos-MAPROWS/2; r<map.ysize; r++) {
 		    if (r<0) continue;
 		    if ((r-ypos) > MAPROWS) break;
-		    for (c=xpos-MAPCOLS/2; c<map.grid.xsize; c++) {	    
-		        dr1MapGraphic *gr = map.grid.graphic[ r*map.grid.xsize +c];
+		    for (c=xpos-MAPCOLS/2; c<map.xsize; c++) {	    
+		        dr1MapGrid *gr = &map.grid[ r*map.xsize +c];
+			/* reject if off of the map */
 		        if (c<0) continue;
 			if ((c-xpos) > MAPCOLS) break;
-			if (!gr) break;
-		        for (g=gr->nglyphs-1; g>=0; g--) {
-			    blit24x35( gr->glyph[g].src, gr->glyph[g].r, 
-				    gr->glyph[g].c + (gr->glyph[g].anim?alt:0), 
+
+			/* reject if there is no graphic in this part of map */
+			if (!gr->graphic) break;
+
+			/* reject if beyond light distance */
+                        if (!gr->seen) {
+			    int dx, dy, d;
+			    
+			    dx = xpos - c;
+			    if (dx < 0) dx = -dx;
+			    dy = (ypos - r) * 3 / 2;
+			    if (dy < 0) dy = -dy;
+			    if (dx>dy) { 
+				d = dx + (dy>>1);
+			    } else { 
+				d = dy + (dx>>1);
+			    }
+			    if (d>LIGHTDIST) continue;
+
+			    /* reject if not in view */
+			    if (!dr1_los(ypos,xpos, r, c, &map)) continue;
+			}
+			
+			/* else draw all of the glyphs in the graphic */
+			gr->seen = 1;
+		        for (g=gr->graphic->nglyphs-1; g>=0; g--) {
+			    if (gr->graphic->glyph[g].invisible) continue;
+			    blit24x35( gr->graphic->glyph[g].src, 
+			            gr->graphic->glyph[g].r, 
+				    gr->graphic->glyph[g].c + 
+				      (gr->graphic->glyph[g].anim?alt:0), 
 				    screen, 
 				    (c - xpos + MAPCOLS/2) * 24, 
 				    (r - ypos + MAPROWS/2) * 35);
@@ -181,8 +211,10 @@ int main( int argc, char **argv) {
 				    exit(3);
 			    }
 			    {
-				dr1MapGraphic *gr = map.grid.graphic[ ypos*map.grid.xsize + xpos];
-				if (gr->glyph[0].wall) {
+				dr1MapGrid *gr = &map.grid[ ypos*map.xsize + xpos];
+				if (!gr->graphic || 
+				    gr->graphic->glyph[0].wall) 
+				{
 				    xpos = oxpos;
 				    ypos = oypos;
 				}

@@ -48,11 +48,11 @@ dr1Map readmap( char *fname) {
 	    if (i > xsize) xsize = i;
 	}
     } while (!feof(fp));
-    map.grid.xsize = xsize / 2;
-    map.grid.ysize = line - sep - 1;
-    printf("size %d x %d\n", map.grid.xsize, map.grid.ysize);
-    map.grid.graphic = calloc( map.grid.xsize * map.grid.ysize,
-			       sizeof(dr1MapGraphic *) );
+    map.xsize = xsize / 2;
+    map.ysize = line - sep - 1;
+    printf("size %d x %d\n", map.xsize, map.ysize);
+    map.grid = calloc( map.xsize * map.ysize,
+		       sizeof(dr1MapGrid) );
 
     /* Second pass */
     rewind(fp);
@@ -116,6 +116,9 @@ dr1Map readmap( char *fname) {
 	/* get flags */
 	while (*cpos && *cpos != '#') {
 	    switch (*cpos) {
+		case 'v':
+		    map.graphics[ngraph].glyph[glyph].invisible = 1;
+		    break;
 		case 'a':
 		    map.graphics[ngraph].glyph[glyph].anim = 1;
 		    break;
@@ -160,7 +163,7 @@ dr1Map readmap( char *fname) {
 		map.startrow = row;
 		map.startcol = col;
 	    }
-	    map.grid.graphic[ row*map.grid.xsize + col] = g;
+	    map.grid[ row*map.xsize + col].graphic = g;
 	    col++;
 	}
 	row++;

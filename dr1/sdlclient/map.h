@@ -14,28 +14,31 @@ struct dr1Glyph {
     int c;
     int anim:1;
     int wall:1;
+    int invisible:1;
 };
 
 typedef struct dr1MapGraphic dr1MapGraphic;
 struct dr1MapGraphic {
     int code;
     int nglyphs;
-    int start:1;
     dr1Glyph *glyph; 
+    int start:1;
 };
+
 
 typedef struct dr1MapGrid dr1MapGrid;
 struct dr1MapGrid {
-    int xsize;
-    int ysize;
-    dr1MapGraphic **graphic;
+    dr1MapGraphic *graphic;
+    int seen:1;
 };
 
 typedef struct dr1Map dr1Map;
 struct dr1Map {
     int ngraphics;
     dr1MapGraphic *graphics;
-    dr1MapGrid grid;
+    int xsize; 
+    int ysize;
+    dr1MapGrid *grid;
     int startrow;
     int startcol;
 };
