@@ -6,6 +6,9 @@ LIBS=   `sdl-config --libs` -L/usr/local/lib -lSDL_ttf \
 	`freetype-config --libs` \
 	-lxml2 ../lib/libdr1.a
 
+dr1: dr1.o util.o glyphset.o text.o
+	gcc -g dr1.o util.o glyphset.o text.o -o dr1 ${LIBS}
+
 test: test.o util.o glyphset.o text.o
 	gcc -g test.o util.o glyphset.o text.o -o test ${LIBS}
 
@@ -13,5 +16,5 @@ test2: showfont.o
 	gcc showfont.o -o test2 `sdl-config --libs` -lSDL_ttf -lttf
 
 .c.o:
-	gcc -g -c -DGFXDIR='${GFXDIR}' ${CFLAGS} $<
+	gcc -Wall -g -c -DGFXDIR='${GFXDIR}' ${CFLAGS} $<
 

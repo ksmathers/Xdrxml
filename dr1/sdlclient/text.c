@@ -1,13 +1,8 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <assert.h>
-
-typedef struct dr1Text dr1Text;
-struct dr1Text {
-    char text[80];
-    SDL_Surface *textbuf;
-    SDL_Rect dstrect;
-};
+#include <pthread.h>
+#include "text.h"
 
 static struct {
     dr1Text dragons;
@@ -35,18 +30,6 @@ static struct {
 } _text;
 
 static char* _msgattr[] = { "Str:", "Int:", "Wis:", "Dex:", "Con:", "Cha:" };
-
-enum Position {
-    ANCHOR_TOPLEFT,
-    ANCHOR_CTRLEFT,
-    ANCHOR_BOTLEFT,
-    ANCHOR_TOPCENTER,
-    ANCHOR_CENTER,
-    ANCHOR_BOTCENTER,
-    ANCHOR_TOPRIGHT,
-    ANCHOR_CTRRIGHT,
-    ANCHOR_BOTRIGHT
-};
 
 #define TITLE_PTSIZE 28
 #define NAME_PTSIZE 24
@@ -140,16 +123,26 @@ int dr1Text_setInfo( dr1Text *buf, char *string, int ptsize, int x, int y, enum 
 
 void
 dr1Text_infoMessage( char *s, SDL_Surface *screen) {
+    static pthread_mutex_t infoMessageMutex = PTHREAD_MUTEX_INITIALIZER;
     int i;
+
+    pthread_mutex_lock( &infoMessageMutex);
     for (i = 0; i < 3; i++) {
 	_text._scrollmsg[i].textbuf = _text._scrollmsg[i+1].textbuf;
     }
-    setInfo( &_text._scrollmsg[ i], s, 18, 140, mpos(i<<1), ANCHOR_TOPLEFT);
+    dr1Text_setInfo( &_text._scrollmsg[ i], s, 18, 140, mpos(i<<1), ANCHOR_TOPLEFT);
+    pthread_mutex_unlock( &infoMessageMutex);
 }
 
 int dr1Text_showInfo( SDL_Surface *screen, dr1Text *txt) {
     SDL_BlitSurface(txt->textbuf, NULL, screen, &txt->dstrect);
 }
+
+#if 0
+int dr1Text_setPlayer( dr1Player *p) {
+    int i;
+}
+#endif
 
 int dr1Text_init( SDL_Surface *screen) {
     int i;

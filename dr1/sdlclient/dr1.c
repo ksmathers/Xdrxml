@@ -2,6 +2,13 @@
 #include <assert.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <pthread.h>
+#include <errno.h>
+#include <unistd.h>
 
 #include "lib/map.h"
 #include "lib/glyphset.h"
@@ -12,6 +19,12 @@
 enum { NOLIGHT, TORCHLIGHT, LANTERNLIGHT };
 #define AMBIENTLIGHTDIST 10
 int darkdist[] = { 0, 1, 3 };
+
+struct {
+    char *server;
+    SDL_Surface *screen;
+    int sd;
+} ctx;
 
 dr1GlyphTable *dr1_npcs1;
 
@@ -37,6 +50,7 @@ struct border_t {
 #define MAPCOLS (XSIZE/24)
 #define MAPROWS (YSIZE/35)
 
+void
 opendoor( dr1Map *map, int xpos, int ypos) {
     int x,y;
     for (x = xpos-1; x<=xpos+1; x++) {
@@ -122,6 +136,7 @@ int showBorder( SDL_Surface *screen) {
 	dest.w = b->e->w; dest.h = b->e->h;
 	SDL_BlitSurface(b->e, NULL, screen, &dest);
     }
+    return 0;
 }
 
 int showMap( SDL_Surface* screen, dr1Map *map, int xpos, int ypos) {
@@ -198,6 +213,7 @@ int showMap( SDL_Surface* screen, dr1Map *map, int xpos, int ypos) {
 	    }
 	} /* for c */
     } /* for r */
+    return 0;
 }
 
 typedef struct dr1Point dr1Point;
@@ -206,110 +222,73 @@ struct dr1Point {
     int y;
 };
 
-#define DEFAULT_PTSIZE	18
-int setInfo( dr1Text *buf, char *string, int ptsize, int x, int y, enum Position pos) 
-{
-    static int init = 0;
-    static TTF_Font *font;
-    static SDL_Surface *temp;
-    static SDL_Color white = { 0xFF, 0xFF, 0xFF, 0 };
-    static SDL_Color black = { 0, 0, 0, 0 };
-    if (ptsize <= 0) ptsize = DEFAULT_PTSIZE;
+int doConnect( char *server, int port) {
+    struct sockaddr_in addr;
+    struct hostent *svr_addr;
+    svr_addr = gethostbyname( server);
+    assert(svr_addr);
+    addr.sin_family = AF_INET;
+    addr.sin_addr = *(struct in_addr *)svr_addr->h_addr;
+    addr.sin_port = htons( port);
+    ctx.sd = socket( PF_INET, SOCK_STREAM, 0);
 
-    /* Open the font file with the requested point size */
-    /* font = TTF_OpenFont("../font/Wizard__.ttf", ptsize); /**/
-    /* font = TTF_OpenFont("../font/American.ttf", ptsize); /**/
-    font = TTF_OpenFont("../font/MORPHEUS.TTF", ptsize);
-    if (!font) {
-	    fprintf(stderr, "Couldn't load %d pt font from %s: %s\n",
-				    ptsize, "Wizard__.ttf", SDL_GetError());
-	    exit(2);
+    if (connect( ctx.sd, &addr, sizeof(struct sockaddr_in))) {
+	perror("connect");
+	exit(1);
     }
-    assert(font);
-    TTF_SetFontStyle(font, TTF_STYLE_NORMAL);
-
-    /* Render the text */
-    buf->textbuf = TTF_RenderText_Shaded(font, string, black, white);
-    assert(buf->textbuf);
-    switch (pos) {
-	case ANCHOR_CTRLEFT:
-	case ANCHOR_TOPLEFT:
-	case ANCHOR_BOTLEFT:
-	    buf->dstrect.x = x;
-	    break;
-	case ANCHOR_CENTER:
-	case ANCHOR_TOPCENTER:
-	case ANCHOR_BOTCENTER:
-	    buf->dstrect.x = x - buf->textbuf->w/2;
-	    break;
-	case ANCHOR_CTRRIGHT:
-	case ANCHOR_TOPRIGHT:
-	case ANCHOR_BOTRIGHT:
-	    buf->dstrect.x = x - buf->textbuf->w;
-	    break;
-    }
-    switch (pos) {
-	case ANCHOR_CTRLEFT:
-	case ANCHOR_CENTER:
-	case ANCHOR_CTRRIGHT:
-	    buf->dstrect.y = y - buf->textbuf->h / 2;
-	    break;
-	
-	case ANCHOR_TOPLEFT:
-	case ANCHOR_TOPCENTER:
-	case ANCHOR_TOPRIGHT:
-	    buf->dstrect.y = y;
-	    break;
-
-	case ANCHOR_BOTLEFT:
-	case ANCHOR_BOTCENTER:
-	case ANCHOR_BOTRIGHT:
-	    buf->dstrect.y = y - buf->textbuf->h;
-	    break;
-    }
-    buf->dstrect.w = buf->textbuf->w;
-    buf->dstrect.h = buf->textbuf->h;
-    
-    printf("Font is generally %d big, and string is %hd big\n",
-	    TTF_FontHeight(font), buf->textbuf->h);
-
-    /* Set the text colorkey and convert to display format */
-    if ( SDL_SetColorKey(buf->textbuf, SDL_SRCCOLORKEY|SDL_RLEACCEL, 0) < 0 ) {
-	fprintf(stderr, "Warning: Couldn't set text colorkey: %s\n",
-		SDL_GetError());
-    }
-    temp = SDL_DisplayFormat(buf->textbuf);
-    if ( temp != NULL ) {
-	    SDL_FreeSurface(buf->textbuf);
-	    buf->textbuf = temp;
-    }
-    TTF_CloseFont(font);
+    return 0;
 }
 
-int showInfo( SDL_Surface *screen, dr1Text *txt) {
-    SDL_BlitSurface(txt->textbuf, NULL, screen, &txt->dstrect);
-}
+void* comm_main( void* iparm) {
+    fd_set r_set, w_set, e_set;
+    fd_set tr_set, tw_set, te_set;
+    int maxsock;
+    int err;
+    char buf[80];
+    int size;
+    struct timeval ttv;
+    struct timeval short_wait = { 0, 100000 };
+    char *server = (char *)iparm;
+    FD_ZERO( &r_set);		/* socket is readable (READABLE) */
+    FD_ZERO( &w_set);		/* write queued data */
+    FD_ZERO( &e_set);		/* error on socket */
 
+    dr1Text_infoMessage( "Connecting to server...", ctx.screen);
+    doConnect( server, 2300);
+    dr1Text_infoMessage( "Connected.", ctx.screen);
+    FD_SET( ctx.sd, &r_set);
+    maxsock = ctx.sd;
+    for(;;) {
+	tr_set = r_set; tw_set = w_set; te_set = e_set;
+	ttv = short_wait;
+        
+        err = select( maxsock + 1, &tr_set, &tw_set, &te_set, &ttv);
+	printf("/"); fflush(stdout);
+	if (err == EINTR) continue;
+	if (err < 0) { perror("select"); abort(); }
+	if (FD_ISSET( ctx.sd, &tr_set)) {
+	    printf("R\n");
+	    /* data from server ready to read */
+	    size = read( ctx.sd, buf, sizeof(buf));
+	    if (size < 0) { perror("read"); continue; }
+	    buf[size] = 0;
+	    printf("buf %s\n",buf);
+	    dr1Text_infoMessage( buf, ctx.screen);
+	}
+    }
+}
 int main( int argc, char **argv) {
     char buf[80];
     int xpos = 0;
     int ypos = 0;
     int oxpos, oypos;
-    dr1Text dr1__name;
-    dr1Text dr1__class;
-    dr1Text _hits;
-    dr1Text _attr[6];
-    dr1Text _attrval[6];
-    char *msgattr[6] = { "Str:", "Int:", "Wis:", "Dex:", "Con:", "Cha:" };
-    dr1Text _scrollmsg[4];
-    char *mapfile;
-    int i;
+    char *server;
      
     if (argc != 2) { 
-         printf("Usage: ./test <map file>\n");
+         printf("Usage: ./dr1 <server>\n");
 	 exit (1);
     }
-    mapfile = argv[1];
+    server = argv[1];
      
     /* Initialize graphics */
     if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0 ) {
@@ -326,42 +305,47 @@ int main( int argc, char **argv) {
     atexit(TTF_Quit);
 
 
-    { SDL_Surface *screen;
-        dr1Map *map;
+    {   
+        dr1Map *map = NULL;
 
 #if 1
-	screen = SDL_SetVideoMode(XSIZE, YSIZE, 16, SDL_SWSURFACE);
+	ctx.screen = SDL_SetVideoMode(XSIZE, YSIZE, 16, SDL_SWSURFACE);
 #else
-	screen = SDL_SetVideoMode(XSIZE, YSIZE, 16, 
+	ctx.screen = SDL_SetVideoMode(XSIZE, YSIZE, 16, 
 	    SDL_HWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF);
 #endif
-	if ( screen == NULL ) {
+	if ( ctx.screen == NULL ) {
 	    fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
 	    exit(1);
 	}
 
-        dr1GlyphSet_init( screen);
-	dr1Text_init( screen);
+        /* Load graphics */
+        dr1GlyphSet_init( ctx.screen);
+	dr1Text_init( ctx.screen);
 	dr1_npcs1 = dr1GlyphSet_find( "db-npcs-1");
-	loadBorder( screen);
+	loadBorder( ctx.screen);
 
-        map = dr1Map_readmap( mapfile);
-	xpos = map->startx;
-	ypos = map->starty;
 
-	printf("Map loaded\n");
+	dr1Text_infoMessage("Welcome to Dragon's Reach, adventurer!", ctx.screen);
 
 	{
 	    SDL_Event event;
+	    pthread_t comm;
+
+	    pthread_create( &comm, NULL, comm_main, server);
 
 	    for (;;) {
 	        printf("."); fflush(stdout);
-	        SDL_FillRect( screen, NULL, 0);
-		showMap( screen, map, xpos, ypos);
-		showBorder( screen);
-		dr1Text_show( screen);
-		SDL_Flip( screen);
-		usleep( 100000L);
+
+		/* Draw the screen */
+	        SDL_FillRect( ctx.screen, NULL, 0);
+		if (map) showMap( ctx.screen, map, xpos, ypos);
+		showBorder( ctx.screen);
+		dr1Text_show( ctx.screen);
+		SDL_Flip( ctx.screen);
+
+		/* Get input */
+		usleep( 100000L); /**/
 		while ( SDL_PollEvent(&event) ) {
 		    switch (event.type) {
 		        case SDL_KEYDOWN:
@@ -370,7 +354,7 @@ int main( int argc, char **argv) {
 			    switch ( event.key.keysym.sym) {
 			        case SDLK_s:
 				    printf("screenshot");
-				    SDL_SaveBMP(screen, "screenshot.bmp");
+				    SDL_SaveBMP(ctx.screen, "screenshot.bmp");
 				    break;
 
 				case SDLK_h:
@@ -390,6 +374,7 @@ int main( int argc, char **argv) {
 				    break;
 				case SDLK_q:
 				    exit(3);
+				default:
 			    }
 			    {
 				dr1MapSquare *gr = &map->grid[ ypos*map->xsize + xpos];
