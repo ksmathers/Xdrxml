@@ -47,161 +47,146 @@ int dobuy( dr1Context *ctx) {
     char buf[ 100];
     int many;
     int i;
-    enum { SHOWWHO, GETWHO, SHOWWHAT, GETWHAT, SHOWMANY, GETMANY, BUY, BUY1,
-    PROMPTOFFER, GETOFFER, ABORT, DONE };
 
-    switch (autos->state) {
-	case SHOWWHO:
-	    if (args->c == 1) {
-	        qprintf( ctx, "Shops in Dragon's Reach:\n");
-		qprintf( ctx, " - Fnord the Apothecary\n");
-		qprintf( ctx, " - Gandor the Blacksmith\n");
-		qprintf( ctx, " - John Frommer's Leathers\n");
-		qprintf( ctx, " - John the Wheel Wright\n\n");
-		qprintf( ctx, "(fnord, gandor, frommer, wright)\n");
-		qprintf( ctx, "Buy from whom:");
-		autos->state = GETWHO;
-	    } else autos->state = SHOWWHAT;
-	    return 0;
+    /* jump table */
+#   define ENTRY(x) x: autos->state = x;
+    enum { INIT, GETWHO, GETWHAT, GETMANY, GETOFFER };
+    if (autos->state == INIT) goto INIT;
+    else if (autos->state == GETWHO) goto GETWHO;
+    else if (autos->state == GETWHAT) goto GETWHAT;
+    else if (autos->state == GETMANY) goto GETMANY;
+    else if (autos->state == GETOFFER) goto GETOFFER;
+    /* end jump table */
+    
+ENTRY(INIT)
+    if (args->c == 1) {
+	qprintf( ctx, "Shops in Dragon's Reach:\n");
+	qprintf( ctx, " - Fnord the Apothecary\n");
+	qprintf( ctx, " - Gandor the Blacksmith\n");
+	qprintf( ctx, " - John Frommer's Leathers\n");
+	qprintf( ctx, " - John the Wheel Wright\n\n");
+	qprintf( ctx, "(fnord, gandor, frommer, wright)\n");
+	qprintf( ctx, "Buy from whom:");
 
-	case GETWHO:
-	    if (qgets( autos->_who, sizeof(autos->_who), ctx)) return 1;
-	    args->v[1]= autos->_who;
-	    args->c = 2;
+ENTRY(GETWHO)
+	if (qgets( autos->_who, sizeof(autos->_who), ctx)) return 1;
+	args->v[1]= autos->_who;
+	args->c = 2;
+    } 
 
-	case SHOWWHAT:
-	    if ( !strcasecmp( args->v[1], "Fnord")) {
-		autos->merc = &dr1apothecary;
-	    } else if ( !strcasecmp( args->v[1], "Gandor")) {
-		autos->merc = &dr1smithy;
-	    } else if ( !strcasecmp( args->v[1], "Frommer")) {
-		autos->merc = &dr1tanner;
-	    } else if ( !strcasecmp( args->v[1], "Wright")) {
-		autos->merc = &dr1wright;
-	    } else {
-		dr1Context_popcall( ctx, -1);
-		return 0;
-	    }
+    if ( !strcasecmp( args->v[1], "Fnord")) {
+	autos->merc = &dr1apothecary;
+    } else if ( !strcasecmp( args->v[1], "Gandor")) {
+	autos->merc = &dr1smithy;
+    } else if ( !strcasecmp( args->v[1], "Frommer")) {
+	autos->merc = &dr1tanner;
+    } else if ( !strcasecmp( args->v[1], "Wright")) {
+	autos->merc = &dr1wright;
+    } else {
+	dr1Context_popcall( ctx, -1);
+	return 0;
+    }
 
-	    qprintf( ctx, "Welcome to '%s'\n", autos->merc->store);
-	    if (autos->merc->mood > 10) {
-		qprintf( ctx, "%s looks a bit peeved today.\n", 
-			autos->merc->name);
-	    }
-	    if (args->c == 2) {
-		qprintf( ctx, "(");
-		for (i=0; i<autos->merc->itemStore.len; i++) {
-		    qprintf( ctx, "%s%s", (i?",":""), 
-			    autos->merc->itemStore.items[i]->name);
-		}
-		qprintf( ctx, ")\nBuy what:");
-		autos->state = GETWHAT;
-	    } else {
-		autos->state = SHOWMANY;
-	    }
-	    return 0;
-	
-	case GETWHAT:
-	    if (qgets( autos->_what, sizeof(autos->_what), ctx)) return 1;
-	    args->v[2]= autos->_what;
-	    args->c = 3;
+    qprintf( ctx, "Welcome to '%s'\n", autos->merc->store);
+    if (autos->merc->mood > 10) {
+	qprintf( ctx, "%s looks a bit peeved today.\n", 
+		autos->merc->name);
+    }
+    if (args->c == 2) {
+	qprintf( ctx, "(");
+	for (i=0; i<autos->merc->itemStore.len; i++) {
+	    qprintf( ctx, "%s%s", (i?",":""), 
+		    autos->merc->itemStore.items[i]->name);
+	}
+	qprintf( ctx, ")\nBuy what:");
+ENTRY(GETWHAT)
+	if (qgets( autos->_what, sizeof(autos->_what), ctx)) return 1;
+	args->v[2]= autos->_what;
+	args->c = 3;
+    }
 
-        case SHOWMANY:
-	    autos->b = dr1Merchant_buy( autos->merc, args->v[2]);
-	    if (!autos->b) {
-		/* no such item */
-		dr1Context_popcall( ctx, -1);
-		return 0;
-	    }
+    autos->b = dr1Merchant_buy( autos->merc, args->v[2]);
+    if (!autos->b) {
+	/* no such item */
+	dr1Context_popcall( ctx, -1);
+	return 0;
+    }
 
-	    if (autos->b->item->type->stackable) {
-		if (args->c == 3) {
-		    qprintf( ctx, "How many would you like to buy?");
-		    autos->state = GETMANY;
-		} else if (args->c == 4) {
-		    autos->state = BUY;
-		} else {
-		    dr1Context_popcall( ctx, -1);
-		    return 0;
-		}
-	    } else {
-		if (args->c != 3) {
-		    dr1Context_popcall( ctx, -1);
-		    return 0;
-		} else {
-		    autos->state = BUY1;
-		}
-	    }
-	    return 0;
-
-	case GETMANY:
+    if (autos->b->item->type->stackable) {
+	if (args->c == 3) {
+	    qprintf( ctx, "How many would you like to buy?");
+ENTRY(GETMANY)
 	    if (qgets( autos->_many, sizeof(autos->_many), ctx)) return 1;
 	    args->v[4] = autos->_many;
-	    autos->state = BUY;
+	} else if (args->c == 4) {
+	} else {
+	    dr1Context_popcall( ctx, -1);
+	    return 0;
+	}
+	many = atoi( args->v[4]);
+	if (many < 0) {
+	    dr1Context_popcall( ctx, -3);
+	    return 0;
+	}
+	if (many > 1000) {
+	    dr1Context_popcall( ctx, -4);
+	    return 0;
+	}
 
-	case BUY:
-	    many = atoi( args->v[4]);
-	    if (many < 0) {
-		dr1Context_popcall( ctx, -3);
-		return 0;
-	    }
-	    if (many > 1000) {
-		dr1Context_popcall( ctx, -4);
-		return 0;
-	    }
+	dr1Money_compound( &autos->b->start, 
+		(float)many, autos->merc->ep);
+	dr1Money_compound( &autos->b->minsale, 
+		(float)many, autos->merc->ep);
+	autos->b->item->count = many;
+    } else {
+	if (args->c != 3) {
+	    dr1Context_popcall( ctx, -1);
+	    return 0;
+	}
+    }
 
-	    dr1Money_compound( &autos->b->start, 
-		    (float)many, autos->merc->ep);
-	    dr1Money_compound( &autos->b->minsale, 
-		    (float)many, autos->merc->ep);
-	    autos->b->item->count = many;
-	    autos->state = BUY1;
+    autos->offr = dr1Barter_startingOffer( autos->b);
+    dr1Money_format( &p->purse, mbuf);
+    qprintf( ctx, "You have %s\n", mbuf);
+    qprintf( ctx, "Buying %s\n", args->v[2]);
 
-	case BUY1:
-	    autos->offr = dr1Barter_startingOffer( autos->b);
-	    dr1Money_format( &p->purse, mbuf);
-	    qprintf( ctx, "You have %s\n", mbuf);
-	    qprintf( ctx, "Buying %s\n", args->v[2]);
-	    autos->state = PROMPTOFFER;
+    do {
+/*      printf("mood %d\n", autos->merc->mood); /**/
+	dr1Money_format( &autos->b->start, mbuf);
+	qprintf( ctx, "%s %s\n", autos->offr, mbuf);
+	qprintf( ctx, "You offer? ");
 
-	case PROMPTOFFER:
-/*            printf("mood %d\n", autos->merc->mood); /**/
-	    dr1Money_format( &autos->b->start, mbuf);
-	    qprintf( ctx, "%s %s\n", autos->offr, mbuf);
-	    qprintf( ctx, "You offer? ");
-	    autos->state = GETOFFER;
+ENTRY(GETOFFER)
+	if (qgets( buf, sizeof(buf), ctx)) return 1;
 
-	case GETOFFER:
-	    if (qgets( buf, sizeof(buf), ctx)) return 1;
+	{ 
+	    dr1Money val;
 	    dr1Money_parse( &val, buf);
 	    autos->offr = dr1Barter_offer( autos->b, val);
+	}
 
-	    buy = dr1Money_value( &val, autos->merc->ep);
-	    sell = dr1Money_value( &autos->b->start, autos->merc->ep);
-	    if (buy >= sell) autos->state = DONE;
-	    else if (buy == 0) autos->state = ABORT;
-	    else autos->state = PROMPTOFFER;
-	    return 0;
+	buy = dr1Money_value( &val, autos->merc->ep);
+	sell = dr1Money_value( &autos->b->start, autos->merc->ep);
+    } while (buy < sell && buy != 0);
 
-	case ABORT:
+    if (buy == 0) {
+	qprintf( ctx, "%s\n", (char *) autos->offr);
+	dr1Context_popcall( ctx, 0);
+	return 0;
+    } else {
+	if ( dr1Money_deduct( &p->purse, &autos->b->start)) {
+	    qprintf( ctx, "Sorry, you haven't that much in your purse.\n");
+	} else {
 	    qprintf( ctx, "%s\n", (char *) autos->offr);
-	    dr1Context_popcall( ctx, 0);
-	    return 0;
-
-	case DONE:
-	    if ( dr1Money_deduct( &p->purse, &autos->b->start)) {
-		qprintf( ctx, "Sorry, you haven't that much in your purse.\n");
-	    } else {
-		qprintf( ctx, "%s\n", (char *) autos->offr);
-		dr1Merchant_completeSale( autos->merc, autos->b);
-		dr1ItemSet_add( &p->pack, autos->b->item);
-	    }
-	    free(autos->b);
-	    autos->b = NULL;
-	    dr1Context_popcall( ctx, 0);
-	    return 0;
-    } /* switch */
-    return -1;
+	    dr1Merchant_completeSale( autos->merc, autos->b);
+	    dr1ItemSet_add( &p->pack, autos->b->item);
+	}
+	free(autos->b);
+	autos->b = NULL;
+	dr1Context_popcall( ctx, 0);
+	return 0;
+    }
+    return 0;
 }
 
 int equip( dr1Context *ctx, int c, char **v) {

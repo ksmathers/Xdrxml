@@ -54,6 +54,13 @@ int attack( dr1Context *ctx, int nmon, dr1Monster *m, int *surprise, int c, char
 	return -1;
     }
 
+    /* check attributes */
+    if (p->weapon->min_str > p->curr_attr._str) {
+	qprintf( ctx, "You aren't strong enough to wield a %s.\n", 
+		p->weapon->super.name);
+	return -5;
+    }
+
     /* check distance */
     dist = dr1Location_distance( &p->location, &target->location);
     if (p->weapon->range) {
