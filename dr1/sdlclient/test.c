@@ -11,6 +11,7 @@ SDL_Surface *dr1_dung2;
 SDL_Surface *dr1_dung3;
 SDL_Surface *dr1_castle1;
 SDL_Surface *dr1_objects1;
+SDL_Surface *dr1_objects2;
 
 SDL_Surface *LoadBMP(char *file, SDL_Surface *screen)
 {
@@ -42,6 +43,7 @@ void blit24x35(
     /* Blit onto the screen surface.
        The surfaces should not be locked at this point.
      */
+    if (!display_image) return;
      
     src.x = col * 27 + 2;
     src.y = row * 38 + 1;
@@ -61,8 +63,17 @@ void blit24x35(
 #endif
 }
 
+#define XSIZE 800
+#define YSIZE 600
+#define MAPCOLS (XSIZE/24)
+#define MAPROWS (YSIZE/35)
+
 int main( int argc, char **argv) {
     char buf[80];
+    int xpos = 0;
+    int ypos = 0;
+    int oxpos, oypos;
+    int alt = 0;
     
     /* Initialize graphics */
     if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0 ) {
@@ -75,13 +86,13 @@ int main( int argc, char **argv) {
         dr1Map map;
 
 #if 1
-	screen = SDL_SetVideoMode(640, 480, 16, SDL_SWSURFACE);
+	screen = SDL_SetVideoMode(XSIZE, YSIZE, 16, SDL_SWSURFACE);
 #else
-	screen = SDL_SetVideoMode(640, 480, 16, 
+	screen = SDL_SetVideoMode(XSIZE, YSIZE, 16, 
 	    SDL_HWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF);
 #endif
 	if ( screen == NULL ) {
-	    fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());
+	    fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
 	    exit(1);
 	}
 
@@ -93,8 +104,13 @@ int main( int argc, char **argv) {
 	dr1_dung3 = LoadBMP( GFXDIR "/db-indoor-dungeon-3.bmp", screen);
 	dr1_castle1 = LoadBMP( GFXDIR "/db-indoor-castle-1.bmp", screen);
 	dr1_objects1 = LoadBMP( GFXDIR "/db-objects-1.bmp", screen);
+	dr1_objects2 = LoadBMP( GFXDIR "/db-objects-2.bmp", screen);
 
         map = readmap( "map.txt");
+	xpos = map.startcol;
+	ypos = map.startrow;
+
+	printf("Map loaded\n");
 
 	{
 	    SDL_Event event;
@@ -102,31 +118,40 @@ int main( int argc, char **argv) {
 	    SDL_Surface *img = dr1_npcs1;
 
 	    for (;;) {
+	        if (alt==0) alt = 1;
+		else alt=0;
+	        printf("."); fflush(stdout);
 	        SDL_FillRect( screen, NULL, 0);
-		for (r=0; r<map.ysize; r++) {
-		    for (c=0; c<map.xsize; c++) {	    
-		        dr1MapGraphic *gr = &map.graphics[ r*map.xsize +c];
+		for (r=ypos-MAPROWS/2; r<map.grid.ysize; r++) {
+		    if (r<0) continue;
+		    if ((r-ypos) > MAPROWS) break;
+		    for (c=xpos-MAPCOLS/2; c<map.grid.xsize; c++) {	    
+		        dr1MapGraphic *gr = map.grid.graphic[ r*map.grid.xsize +c];
+		        if (c<0) continue;
+			if ((c-xpos) > MAPCOLS) break;
+			if (!gr) break;
 		        for (g=gr->nglyphs-1; g>=0; g--) {
 			    blit24x35( gr->glyph[g].src, gr->glyph[g].r, 
-				    gr->glyph[g].c, screen, c * 24, r * 35);
+				    gr->glyph[g].c + (gr->glyph[g].anim?alt:0), 
+				    screen, 
+				    (c - xpos + MAPCOLS/2) * 24, 
+				    (r - ypos + MAPROWS/2) * 35);
+			}
+
+			if (c==xpos && r==ypos) {
+			    blit24x35( dr1_npcs1, 0, 1, screen, 
+				(c - xpos + MAPCOLS/2) * 24, 
+				(r - ypos + MAPROWS/2) * 35 );
 			}
 		    }
 		}
 		SDL_Flip( screen);
-		usleep( 200000L);
-
-	        SDL_FillRect( screen, NULL, 0);
-		for (r=0; r<12; r++) {
-		    for (c=0; c<10; c++) {
-		        blit24x35( dr1_dung1, 0, 0, screen, c * 24, r * 35);
-			blit24x35( img, r, c*2+1, screen, c * 24, r * 35);
-		    }
-		}
-		SDL_Flip( screen);
-		usleep( 200000L);
+		usleep( 100000L);
 		while ( SDL_PollEvent(&event) ) {
 		    switch (event.type) {
 		        case SDL_KEYDOWN:
+			    oxpos = xpos;
+			    oypos = ypos;
 			    switch ( event.key.keysym.sym) {
 				case SDLK_1:
 				    img = dr1_npcs1;
@@ -140,14 +165,33 @@ int main( int argc, char **argv) {
 				case SDLK_d:
 				    img = dr1_dung1;
 				    break;
+				case SDLK_h:
+				    xpos--;
+				    break;
+				case SDLK_j:
+				    ypos++;
+				    break;
+				case SDLK_k:
+				    ypos--;
+				    break;
+				case SDLK_l:
+				    xpos++;
+				    break;
 				case SDLK_q:
 				    exit(3);
 			    }
+			    {
+				dr1MapGraphic *gr = map.grid.graphic[ ypos*map.grid.xsize + xpos];
+				if (gr->glyph[0].wall) {
+				    xpos = oxpos;
+				    ypos = oypos;
+				}
+			    }
 			    break;
 			case SDL_MOUSEMOTION:
-			    printf("Mouse moved by %d,%d to (%d,%d)\n", 
+/*			    printf("Mouse moved by %d,%d to (%d,%d)\n", 
 				   event.motion.xrel, event.motion.yrel,
-				   event.motion.x, event.motion.y);
+				   event.motion.x, event.motion.y); /**/
 			    break;
 			case SDL_MOUSEBUTTONDOWN:
 			    printf("Mouse button %d pressed at (%d,%d)\n",

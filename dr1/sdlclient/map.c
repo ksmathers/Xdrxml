@@ -22,7 +22,7 @@ dr1Map readmap( char *fname) {
     int row;
     int col;
     int sep=0;
-    int ngraph;
+    int ngraph = 0;
     int xsize = 0;
     int glyph = 0;
 
@@ -51,7 +51,7 @@ dr1Map readmap( char *fname) {
     map.grid.xsize = xsize / 2;
     map.grid.ysize = line - sep - 1;
     printf("size %d x %d\n", map.grid.xsize, map.grid.ysize);
-    map.grid.graphic = malloc( map.grid.xsize * map.grid.ysize *
+    map.grid.graphic = calloc( map.grid.xsize * map.grid.ysize,
 			       sizeof(dr1MapGraphic *) );
 
     /* Second pass */
@@ -73,7 +73,7 @@ dr1Map readmap( char *fname) {
             glyph=0; ngraph++;
 	    if (buf[0] == '\'' && buf[3] == '\'') {
 		code = (buf[1]<<8) + buf[2];
-		map.graphics[line-1].code = code;
+		map.graphics[ngraph].code = code;
 	    } else {
 		printf("Invalid input line %d\n", line);
 	    }
@@ -86,9 +86,10 @@ dr1Map readmap( char *fname) {
 	memcpy( file, cpos, i);
 	file[i] = 0;
 	cpos += i;
+	map.graphics[ngraph].nglyphs = glyph + 1;
 	map.graphics[ngraph].glyph = realloc(
 	    map.graphics[ngraph].glyph,
-	    sizeof( dr1Glyph *) * glyph);
+	    sizeof( dr1Glyph) * (glyph + 1));
 	if (!strcmp( file, "db-indoor-dungeon-1")) {
 	    map.graphics[ngraph].glyph[glyph].src = dr1_dung1;
 	} else if (!strcmp( file, "db-indoor-dungeon-3")) {
@@ -97,6 +98,8 @@ dr1Map readmap( char *fname) {
 	    map.graphics[ngraph].glyph[glyph].src = dr1_castle1;
 	} else if (!strcmp( file, "db-objects-1")) {
 	    map.graphics[ngraph].glyph[glyph].src = dr1_objects1;
+	} else if (!strcmp( file, "db-objects-2")) {
+	    map.graphics[ngraph].glyph[glyph].src = dr1_objects2;
 	} else if (!strcmp( file, "db-npcs-2")) {
 	    map.graphics[ngraph].glyph[glyph].src = dr1_npcs2;
 	} else {
@@ -105,9 +108,31 @@ dr1Map readmap( char *fname) {
 	}
 
 	/* get row and col */
-	sscanf(cpos, "%d %d", &row, &col);
+	sscanf(cpos, "%d %d%n", &row, &col, &i);
+	map.graphics[ngraph].glyph[glyph].r = row;
+	map.graphics[ngraph].glyph[glyph].c = col;
+	cpos += i;
 
-        printf("%d %s %d %d\n", code, file, row, col);
+	/* get flags */
+	while (*cpos && *cpos != '#') {
+	    switch (*cpos) {
+		case 'a':
+		    map.graphics[ngraph].glyph[glyph].anim = 1;
+		    break;
+		case 'w':
+		    map.graphics[ngraph].glyph[glyph].wall = 1;
+		    break;
+		case 's':
+		    map.graphics[ngraph].start = 1;
+		    break;
+	    }
+	    cpos++;
+	}
+
+/*        printf("graphics[%d].glyph[%d] = { code %d file %s (%p) row %d cold %d }\n", 
+	    ngraph, glyph, code, file, 
+	    map.graphics[ngraph].glyph[glyph].src,
+	    row, col); /**/
     } while (!feof(fp) && *buf != 0);
 
     /* Get map data */
@@ -128,17 +153,20 @@ dr1Map readmap( char *fname) {
 	    
 	    g = findgraphic( &map, code);
 	    if (!g) {
-		printf( "Unknown graphic '%c%c' on line %d\n", 
-			cpos[0], cpos[1], line);
-	    } else {
-		printf( "Found graphic '%c%c' on line %d\n", 
-			cpos[0], cpos[1], line);
+		printf( "Unknown graphic '%c%c' (%d) on line %d\n", 
+			cpos[0], cpos[1], code, line);
+	    }
+	    if (g->start) {
+		map.startrow = row;
+		map.startcol = col;
 	    }
 	    map.grid.graphic[ row*map.grid.xsize + col] = g;
 	    col++;
 	}
 	row++;
     } while (!feof(fp));
+
+    return map;
 
 }
 
