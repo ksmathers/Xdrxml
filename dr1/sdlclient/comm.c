@@ -16,7 +16,7 @@
 #include "protocol.h"
 #include "xdrxml.h"
 #include "lib/map.h"
-#include "../player.h"
+#include "player.h"
 
 static struct {
     int sd;

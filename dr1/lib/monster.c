@@ -1,6 +1,6 @@
 #include "dice.h"
 #include "monster.h"
-#include "lib/xdrxml.h"
+#include "dr1.h"
 /*-------------------------------------------------------------------
  * dr1monsters
  *

@@ -1,11 +1,17 @@
-CFLAGS=-I..
+CFLAGS=-I../lib
 
-libdr1.a: map.o xdrxml.o strbuf.o xdrxmlsb.o stream.o
-	ar rc libdr1.a map.o xdrxml.o strbuf.o xdrxmlsb.o stream.o
+OBJS=set.o map.o xdrxml.o strbuf.o xdrxmlsb.o stream.o \
+     player.o class.o armor.o weapon.o registry.o \
+     item.o attr.o itemset.o location.o dice.o \
+     money.o itemreg.o potions/heal.o monster.o race.o
+
+
+libdr1.a: ${OBJS}
+	ar rc libdr1.a ${OBJS}
 
 clean:
 	rm *.o 
 
 .c.o:
-	gcc -g -c ${CFLAGS} $<
+	gcc -g -c ${CFLAGS} $< -o $@
 

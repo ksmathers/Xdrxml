@@ -21,9 +21,7 @@
 #include "globals.h"
 #include "player.h"
 #include "context.h"
-#include "lib/stream.h"
-#include "lib/xdrxml.h"
-#include "lib/protocol.h"
+#include "dr1.h"
 
 /* merchants */
 #include "merchant.h"

@@ -10,7 +10,7 @@
 #include "dice.h"
 #include "class.h"
 #include "context.h"
-#include "lib/protocol.h"
+#include "dr1.h"
 
 
 /* struct representing arguments to the playerv command calls */

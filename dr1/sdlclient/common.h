@@ -1,7 +1,7 @@
 #ifndef __DR1COMMON__H
 #define __DR1COMMON__H
 
-#include "../player.h"
+#include "player.h"
 
 /*-------------------------------------------------------------------
  * dr1

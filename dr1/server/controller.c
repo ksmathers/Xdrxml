@@ -7,8 +7,7 @@
 #include "playerv.h"
 #include "town.h"
 
-#include "lib/protocol.h"
-#include "lib/xdrxml.h"
+#include "dr1.h"
 
 /*
  * sendmap 

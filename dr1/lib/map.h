@@ -4,7 +4,7 @@
 #ifndef _RPC_XDR_H
 #   include <rpc/xdr.h>
 #endif
-#include "lib/glyphset.h"
+#include "glyphset.h"
 
 /*-------------------------------------------------------------------
  * dr1Glyph
@@ -84,6 +84,7 @@ struct dr1Map {
     int startx;
     int starty;
     int outdoors:1;		/* in the great out of doors */
+    int town:1;			/* is a town */
 };
 
 /*-------------------------------------------------------------------

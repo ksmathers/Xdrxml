@@ -1,6 +1,6 @@
 #include "weapon.h"
 #include "money.h"
-#include "lib/xdrxml.h"
+#include "dr1.h"
 
 /*-------------------------------------------------------------------
  * dr1Weapon_type

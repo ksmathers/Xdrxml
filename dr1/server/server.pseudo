@@ -1,0 +1,72 @@
+main()
+
+open server socket
+listen
+while select() {
+    if socket = server {
+        newsocket=accept( socket);
+	newclient( newsocket);
+    } else {
+        clientread( socket);
+    }
+}
+
+--
+
+client()
+
+setup states
+write( cs, LOGIN);
+
+--
+
+clientread()
+
+cmd = getcommand();
+INIT:
+  write( cs, LOGIN);
+  state = LOGIN;
+
+LOGIN:
+  if (cmd = login) {
+    ok = doLogin(cmd);
+    if (ok) state=GAME;
+    else state = CREATE;
+  }
+
+CREATE:
+  write( cs, SHOWDIALOG_CREATE);
+  state = CREATE_ACTIVE;
+
+CREATE_ACTIVE:
+  if (cmd = swap) {
+     ok = doSwap();
+  } else if (cmd = done) {
+     if player.ok state=GAME;
+     else write( cs, ERROR);
+  } else {
+     write( cs, ERROR);
+  }
+
+GAME:
+  if (cmd = move) {
+     ok = doMove();
+  } else if (cmd = inventory) {
+     state = INVENTORY;
+  } else if (cmd = talk) {
+     if (near merchant) {
+	state=MERCHANT;
+     } else {
+        messageLog( cmd);
+     }
+  } else if (cmd = attack) {
+     if (near monster) {
+	state=ATTACK;
+     } else {
+        write( cs, ERROR);
+     }
+  }
+  
+  
+
+

@@ -3,7 +3,7 @@
 #include <time.h>
 #include <stdio.h>
 #include "dice.h"
-#include "lib/xdrxml.h"
+#include "xdrxml.h"
 
 double drand48();
 void dr1Dice_seed() {

@@ -1,6 +1,6 @@
 #include "registry.h"
 #include "armor.h"
-#include "lib/xdrxml.h"
+#include "dr1.h"
 #include "item.h"
 #include "money.h"
 

@@ -2,7 +2,7 @@
 #include "dice.h"
 #include "item.h"
 #include "potions/heal.h"
-#include "lib/xdrxml.h"
+#include "dr1.h"
 
 /*-------------------------------------------------------------------
  * xdr_dr1pHeal( xdrs, dr1Item*)

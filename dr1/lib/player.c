@@ -3,7 +3,7 @@
 #include <assert.h>
 
 #include "player.h"
-#include "lib/xdrxml.h"
+#include "xdrxml.h"
 #include "class.h"
 #include "armor.h"
 

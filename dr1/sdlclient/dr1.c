@@ -11,17 +11,13 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "lib/map.h"
-#include "lib/glyphset.h"
-#include "lib/strbuf.h"
-#include "lib/protocol.h"
-#include "lib/xdrxml.h"
+#include "dr1.h"
 #include "glyphset.h"
 #include "util.h"
 #include "text.h"
 #include "comm.h"
 
-#include "../player.h"
+#include "player.h"
 
 enum { NOLIGHT, TORCHLIGHT, LANTERNLIGHT };
 #define AMBIENTLIGHTDIST 10

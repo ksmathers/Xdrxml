@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include "context.h"
-#include "lib/xdrxml.h"
+#include "dr1.h"
 
 #define DEFAULT_MAP "town.map"
 

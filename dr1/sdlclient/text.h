@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <assert.h>
-#include "../player.h"
+#include "player.h"
 
 
 /*-------------------------------------------------------------------

@@ -461,6 +461,12 @@ xdr_dr1Map( XDR *xdrs, dr1Map *map) {
     if (!xdr_bool( xdrs, &flag)) return FALSE;
     map->outdoors = flag;
 
+    /* town */
+    xdr_attr( xdrs, "town");
+    flag = map->town;
+    if (!xdr_bool( xdrs, &flag)) return FALSE;
+    map->town = flag;
+
     return TRUE;
 }
 

@@ -3,10 +3,10 @@
 *
 */
 #include <assert.h>
+#include "dr1.h"
 #include "money.h"
 #include "item.h"
 #include "itemreg.h"
-#include "lib/xdrxml.h"
 #include "armor.h"
 
 /*-------------------------------------------------------------------

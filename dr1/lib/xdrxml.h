@@ -1,3 +1,5 @@
+#ifndef __XDRXML__H
+#define __XDRXML__H
 #include <rpc/xdr.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -168,3 +170,5 @@ bool_t xdrxmlsb_putbytes( XDR *__xdrs, __const char *__addr,
 			     u_int __len);
 
 bool_t xdrxmlsb_putint32( XDR *__xdrs, __const int32_t *__ip);
+
+#endif

@@ -5,7 +5,7 @@
 #   include <rpc/xdr.h>
 #endif
 #include <math.h>
-#include <map.h>
+#include "map.h"
 
 /*-------------------------------------------------------------------
  * dr1Location

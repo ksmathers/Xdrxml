@@ -4,7 +4,6 @@
 #ifndef _RPC_XDR_H
 #   include <rpc/xdr.h>
 #endif
-#include "item.h"
 
 /*-------------------------------------------------------------------
  * dr1Set

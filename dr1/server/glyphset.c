@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <string.h>
 #include <sys/param.h>
-#include "lib/glyphset.h"
+#include "dr1.h"
 
 /*-------------------------------------------------------------------
  * dr1GlyphTable
