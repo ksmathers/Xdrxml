@@ -1,4 +1,6 @@
 #include "location.h"
+#include "xdrasc.h"
+
 /*-------------------------------------------------------------------
  * dr1Location_distance
  *
@@ -57,7 +59,20 @@ dr1Location dr1Location_moveTo( dr1Location *_from, dr1Location *_to, int dist) 
     return res;
 }
 
+/*-------------------------------------------------------------------
+ * xdr_dr1Location( xdrs, dr1Location*)
+ */
+bool_t xdr_dr1Location( XDR *xdrs, dr1Location* l) {
+    xdr_attr( xdrs, "x");
+    if (!xdr_int( xdrs, &l->x)) return FALSE;
+    xdr_attr( xdrs, "y");
+    if (!xdr_int( xdrs, &l->y)) return FALSE;
+    return TRUE;
+}
 
+/*-------------------------------------------------------------------
+ * TEST MAIN
+ */
 #ifdef TEST
 #include <stdio.h>
 int main( int argc, char **argv) {

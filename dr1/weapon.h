@@ -30,7 +30,8 @@ extern dr1ItemType dr1Weapon_bowType;
 typedef struct {
     dr1Item super;
     dr1Dice damage;
-    int ranged;
+    int range;		/* in feet, for ranged weapons */
+    int rof;		/* rate of fire for ranged weapons */
     int speed;
     enum DR1DamageType dtype;
 } dr1Weapon;

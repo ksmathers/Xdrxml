@@ -19,69 +19,127 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
     int tohit, roll, crit;
     int mul=1;
     int i;
+    int dist;
+    int nattacks;
+    int tohit_penalty = 0;
     dr1Monster *target;
 
+    /* choose target */
     if (c == 1) {
+    	/* autoselect target */
 	target = m; i=0;
 	while (i < nmon && target->wounds >= target->hp) target++, i++;
     } else if (c == 2) {
-        target = m; i=0;
-	while ( i < nmon && 
-	        ( target->wounds >= target->hp ||
-	          strcasecmp(target->type->name, v[1])
-	      )) target++, i++;
+        i = atoi(v[1]);
+	if (i) { 
+	    /* user selected target */
+	    i--;
+	    target = &m[i]; 
+	} else {
+	    /* autoselect target by monster type */
+	    target = m; i=0;
+	    while ( i < nmon && 
+		    ( target->wounds >= target->hp ||
+		      strcasecmp(target->type->name, v[1])
+		  )) target++, i++;
+	}
     }
     if (i >= nmon) {
 	printf("Unknown monster\n");
 	return -1;
     }
 
+    /* check distance */
+    dist = dr1Location_distance( &p->location, &m->location);
+    if (p->weapon->range) {
+	/* ranged combat */
+        if (dist <= 10) {
+	    /* too close for ranged weapon */
+            tohit_penalty = 4; 
+	} else {
+	    /* FIXME */
+	    tohit_penalty = (4 * dist) / p->weapon->range;
+	}
+	nattacks = p->weapon->rof;
+    } else {
+	/* melee combat */
+	if (dist > 10) {
+	    /* too far away for melee */
+	    p->location = dr1Location_moveTo( &p->location, &m->location, 10);
+	    dist = dr1Location_distance( &p->location, &m->location);
+
+	    printf( "You charge the %s.  Now you are within %d feet.\n", 
+		    m->type->name, dist);
+	    return 0;
+	} 
+        nattacks = dr1Player_nattacks( p);
+    }
 
     /* Player swings */
-    crit = 0;
-    tohit = p_thac0 - target->type->ac;
-    roll = dr1Dice_roll("d20");
-    if ( roll == 1) {
-	/* critical miss */
-	printf("Critical Miss!\n");
-	*surprise = 1;
-    } else {
-	*surprise = 0;
-    }
-    if ( roll == 20) {
-	/* natural 20 gets a bonus */
-	if ( tohit>20) roll += 5;
-	else crit=dr1Dice_roll("d12");
-    }
+    *surprise = 0;
+    for (i=0; i<nattacks; i++) {
+	crit = 0;
+	tohit = p_thac0 - target->type->ac - tohit_penalty;
+	roll = dr1Dice_roll("d20");
 
-    switch (crit) {
-	case 7:
-	case 8:
-	case 9:
-	case 10:
-	case 11: 
-	    mul = 2;
+	if ( roll == 1) {
+	    /* critical miss */
+	    printf("Critical Miss!\n");
+	    *surprise = 1;
 	    break;
-	case 12: 
-	    mul = 3;
-	    break;
-    }
-
-    if (roll >= tohit) {
-	int dam;
-
-	if (p->weapon) {
-	    dam = dr1Dice_roll( p->weapon->damage) + 
-		dr1Attr_damage( &p->base_attr, p->weapon->ranged);
 	} else {
-	    dam = dr1Dice_roll( "d3") + 
-		dr1Attr_damage( &p->base_attr, FALSE);
+	    if ( roll == 20) {
+		/* natural 20 gets a bonus */
+		if ( tohit>20) roll += 5;
+		else crit=dr1Dice_roll("d12");
+	    } else {
+		printf("Attack dice rolled %d\n", roll);
+	    }
 	}
-	printf("Hit! %d Damage.\n", dam);
-	target->wounds += dam;
-    } else {
-	printf("Swish!\n");
-    }
+
+	switch (crit) {
+	    case 7:
+	    case 8:
+	    case 9:
+	    case 10:
+	    case 11: 
+		printf("Critical hit x2!\n");
+		mul = 2;
+		break;
+	    case 12: 
+		printf("Critical hit x3!\n");
+		mul = 3;
+		break;
+	}
+
+	if (roll >= tohit) {
+	    /* hit */
+	    int dam;
+
+	    if (p->weapon) {
+		dam = dr1Dice_roll( p->weapon->damage) + 
+		    dr1Attr_damage( &p->base_attr, p->weapon->range > 0);
+	    } else {
+		dam = dr1Dice_roll( "d3") + 
+		    dr1Attr_damage( &p->base_attr, FALSE);
+	    }
+	    if (p->weapon->range) {
+		printf("Thunk! %d Damage.\n", dam);
+	    } else {
+		printf("Slash! %d Damage.\n", dam);
+	    }
+	    target->wounds += dam;
+
+	} else {
+	    /* missed */
+
+	    if (p->weapon->range ) {
+		printf("Thwip!\n");
+	    } else {
+		printf("Swish!\n");
+	    }
+	}
+    } /* for */
     return 0;
 }
 
@@ -89,14 +147,40 @@ int defend( dr1Player *p, dr1Monster *m, int *surprise) {
     int m_thac0 = dr1Monster_thac0( m);
     int tohit, roll, crit;
     int mul=1;
+    int dist;
+    int tohit_penalty = 0;
     int i;
+
+    dist = dr1Location_distance( &p->location, &m->location);
+    /* FIXME: Monsters with both ranged and melee weapons */
+    if (m->type->damage[0]->range) {
+	/* ranged combat */
+        if (dist <= 10) {
+	    /* too close for ranged weapon */
+            tohit_penalty = 4; 
+	} else {
+	    /* FIXME */
+	    tohit_penalty = (4 * dist) / p->weapon->range;
+	}
+    } else {
+	/* melee combat */
+	if (dist > 10) {
+	    /* too far away for melee */
+	    m->location = dr1Location_moveTo( &m->location, &p->location, 10);
+	    dist = dr1Location_distance( &p->location, &m->location);
+
+	    printf( "%s charges you.  Now you are within %d feet.\n", 
+		    m->type->name, dist);
+	    return 0;
+	} 
+    }
+
     /* Monster swings */
     for (i=0; i < m->type->nattacks; i++) {
 	assert(m->type->damage[i]);
-	/* FIXME */
-	tohit = m_thac0 - dr1Player_ac( p, 
+	tohit = m_thac0 - tohit_penalty - dr1Player_ac( p, 
 		/* surprise/behind */ *surprise, 
-		m->type->damage[i]->ranged, 
+		m->type->damage[i]->range > 0, 
 		m->type->damage[i]->dtype
 	    );
 	roll = dr1Dice_roll("d20");
@@ -171,15 +255,21 @@ int use( dr1Player *p, int c, char **v) {
  */
 void dr1Combatv_showPage( dr1Player *p, int nmon, dr1Monster *m) {
     int alldead;
+    int dist;
     int surprise = 0;
     char cmd[80];
     char *cmds[10];
     do {
         int i;
         printf("-------------------------------------------------------\n");
-	printf("Player: %-20s    Hits: %d/%d\n", p->name, HITPOINTS(p), HITPOINTSMAX(p));
+	printf("Player: %-20s       Hits: %d/%d    Location: (%d,%d)\n", p->name, HITPOINTS(p), HITPOINTSMAX(p), p->location.x, p->location.y);
 	for (i=0; i < nmon; i++) {
-	    printf("Monster: %-20s   Damage: %d\n", m[i].type->name, m[i].wounds);
+	    dist = dr1Location_distance( &p->location, &m[i].location);
+	    if (m[i].wounds < m[i].hp) {
+		printf("%2d:Monster: %-20s   Damage: %-3d  Range: %d\" (%d,%d)\n", i+1, m[i].type->name, m[i].wounds, dist/10, m[i].location.x, m[i].location.y );
+	    } else {
+		printf("%2d:Monster: %-20s   Damage: dead Range: %d\" (%d,%d)\n", i+1, m[i].type->name, dist/10, m[i].location.x, m[i].location.y );
+	    }
 	}
         printf("(attack, equip, use, run)\n");
 	printf("Command: ");
@@ -203,7 +293,7 @@ void dr1Combatv_showPage( dr1Player *p, int nmon, dr1Monster *m) {
         for (i=0; i<nmon; i++) {
 	    if (m[i].wounds < m[i].hp) { 
 		alldead = 0; 
-		defend( p, m, &surprise); 
+		defend( p, &m[i], &surprise); 
 	    }
 	}
 

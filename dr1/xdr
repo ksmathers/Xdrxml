@@ -1,5 +1,14 @@
 /*-------------------------------------------------------------------
- * xdr_dr1Money( xdrs, dr1Money*)
+ * xdr_dr1Money
+ *
+ * PARAMETERS:
+ *    xdrs    XDR stream to write/read
+ *    o       Object buffer (already allocated on entry for read)
+ *
+ * RETURNS
+ *    TRUE    Success
+ *    FALSE   Some sort of read/write error
  */
-bool_t xdr_dr1Money( XDR *xdrs, dr1Money*);
+
+bool_t xdr_dr1Money( XDR *xdrs, dr1Money *o);
 

@@ -51,4 +51,9 @@ int dr1Location_distance( dr1Location *l1, dr1Location *l2);
 
 dr1Location dr1Location_moveTo( dr1Location *_from, dr1Location *_to, int dist);
 
+/*-------------------------------------------------------------------
+ * xdr_dr1Location( xdrs, dr1Location*)
+ */
+bool_t xdr_dr1Location( XDR *xdrs, dr1Location*);
+
 #endif /* __DR1__H */

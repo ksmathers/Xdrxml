@@ -146,8 +146,10 @@ int dr1Attr_hp( dr1Attr *a, int fighter) {
  *    Attribute value
  */
 
-int dr1Attr_ac( dr1Attr *a) {
+int dr1Attr_ac( dr1Attr *a, int surprise) {
     int dex, acadj;
+
+    if (surprise) return 0;
     dex = a->_dex;
 
     if (dex > 25) dex=25;

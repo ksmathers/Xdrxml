@@ -17,6 +17,9 @@
 #ifndef __DR1WEAPON__H
 #   include "weapon.h"
 #endif
+#ifndef __DR1LOCATION__H
+#   include "location.h"
+#endif
 
 
 /*-------------------------------------------------------------------
@@ -56,6 +59,7 @@ typedef struct {
     dr1MonsterType *type;
     int hp;
     int wounds;
+    dr1Location location;
 } dr1Monster;
 
 /*-------------------------------------------------------------------

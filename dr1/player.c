@@ -143,6 +143,18 @@ int dr1Player_encumbrance( dr1Player *p) {
 }
 
 /*-------------------------------------------------------------------
+ * dr1Player_nattacks
+ *
+ *    Returns the number of attacks per round the player gets based
+ *    on his level (melee weapons only).
+ */
+
+int dr1Player_nattacks() {
+    /* FIXME */
+    return 1;
+}
+
+/*-------------------------------------------------------------------
  * xdr_dr1Player( xdrs, dr1Player*)
  */
 bool_t xdr_dr1Player( XDR *xdrs, dr1Player* p) {
@@ -198,6 +210,10 @@ bool_t xdr_dr1Player( XDR *xdrs, dr1Player* p) {
 
    xdr_attr( xdrs, "class");
    if (!xdr_int( xdrs, &p->class)) return FALSE;
+
+   xdr_push_note( xdrs, "location");
+   if (!xdr_dr1Location( xdrs, &p->location)) return FALSE;
+   xdr_pop_note( xdrs);
 
    return TRUE;
 }

@@ -81,7 +81,7 @@ int dr1Dice_roll( char *ds) {
     val += offset;
     val *= multiple;
 
-    printf("Rolled %s for %d.\n", ds, val);
+/*    printf("Rolled %s for %d.\n", ds, val); /**/
 
     return val;
 }

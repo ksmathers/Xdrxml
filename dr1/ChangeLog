@@ -1,3 +1,7 @@
+Added location to player and monster
+Added ranged attacks (and location)
+Ranged weapon rate of fire
+
 Added surprise on critical miss
 Fixed multi-monster attacking
 Swap and trade undo sex and race effects before swapping now

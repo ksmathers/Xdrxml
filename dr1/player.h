@@ -20,6 +20,9 @@
 #ifndef __DR1ARMOR__H
 #   include "armor.h"
 #endif
+#ifndef __DR1LOCATION__H
+#   include "location.h"
+#endif
 
 #define MAXNAMELEN 1024
 
@@ -55,6 +58,8 @@ typedef struct dr1Player {
     int race;			/* Elf, Human, ... */
     int sex;			/* Male, Female */
     int class;			/* MU, Thief, Fighter, Cleric, ... */
+
+    dr1Location location;	/* Where am I? */
 } dr1Player;
 
 
@@ -96,6 +101,15 @@ void dr1Player_destroy( dr1Player *);
  */
 
 int dr1Player_encumbrance();
+
+/*-------------------------------------------------------------------
+ * dr1Player_nattacks
+ *
+ *    Returns the number of attacks per round the player gets based
+ *    on his level (melee weapons only).
+ */
+
+int dr1Player_nattacks();
 
 /*-------------------------------------------------------------------
  * dr1Player_thac0

@@ -72,6 +72,20 @@ int dr1Attr_damage( dr1Attr *a, int ranged);
 int dr1Attr_hp( dr1Attr *a, int fighter);
 
 /*-------------------------------------------------------------------
+ * dr1Attr_ac
+ *
+ *    Returns the attributes adjustment AC
+ *
+ * Parameters:
+ *    a       Attributes of the player being checked
+ *
+ * Returns:
+ *    Attribute value
+ */
+
+int dr1Attr_ac( dr1Attr *a, int surprise);
+
+/*-------------------------------------------------------------------
  * dr1Attr_estatptr
  *
  *    Get pointer to attribute structure element from the 
