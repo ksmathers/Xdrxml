@@ -1,0 +1,26 @@
+#!/bin/sh
+nname=`echo $1 | sed "s/ /-/g"`
+nname=`basename $nname .pcx`
+pcxtoppm <$1 >$nname.ppm
+
+row=0
+while [ $row -lt 12 ] ; do
+    col=0
+    while [ $col -lt 20 ] ; do
+	x=`expr $col '*' 27 + 2`
+	y=`expr $row '*' 38 + 2`
+	pnmcut $x $y 24 32 <$nname.ppm | 
+	    pnmpad -black -l4 -r4 \
+	>$nname-$row-$col.ppm
+	col=`expr $col + 1`
+    done
+    pnmcat -lr $nname-$row-*.ppm \
+	>$nname-$row.ppm
+    rm $nname-$row-*.ppm
+    row=`expr $row + 1`
+done
+pnmcat -tb $nname-*.ppm \
+    >${nname}32.ppm
+rm $nname-*.ppm
+
+
