@@ -41,7 +41,16 @@ int dr1Stream_write( dr1Stream *str, char *buf, int size) {
     /* unbuffered stream writer */
     int nwrite;
 
-    printf("clnt> '%s'\n", buf);
+    if (size > 70) {
+	int i;
+        printf("server> '");
+	for (i=0; i<20; i++) putchar( buf[i]);
+	printf("...%d bytes...", size - 40);
+	for (i=size-20; i<size; i++) putchar( buf[i]);
+	printf("'\n");
+    } else {
+	printf("server> '%s'\n", buf);
+    }
     nwrite = write( str->fd, buf, size);
     if (nwrite < 0) {
 	str->error = errno;
@@ -63,7 +72,7 @@ int dr1Stream_fgets( dr1Stream *str, char *buf, int size) {
     len = sbindex( &str->ibuf, '\n')+1;
     while (!len) {
         /* loop until buffer includes a complete line */
-	nread = dr1Stream_read( str, tbuf, 1, sizeof( tbuf));
+	nread = dr1Stream_read( str, tbuf, 0, sizeof( tbuf));
 /*	printf("stream: fgets %d bytes total\n", nread); */
 	if (nread == 0) {
 	    /* break if no more data available */

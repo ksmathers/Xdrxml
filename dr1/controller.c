@@ -1,5 +1,7 @@
-#include <ctype.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <ctype.h>
 
 #include "controller.h"
 #include "playerv.h"
@@ -27,9 +29,9 @@ void sendmap( dr1Context* ctx) {
     dr1Stream_printf( &ctx->ios, DR1MSG_120, 
 	    0, 0, ctx->map->xsize, ctx->map->ysize);
     res = dr1Stream_printf( &ctx->ios, buf);
-    if (res != strlen(buf)) perror("qprintf-1");
-    res = dr1Stream_printf( &ctx->ios, "%s\n", SEPARATOR);
-    if (res != strlen(SEPARATOR)) perror("qprintf-2");
+    if (res < 0) { perror( "sendmap.c: printf"); }
+    res = dr1Stream_printf( &ctx->ios, SEPARATOR);
+    if (res < 0) { perror( "sendmap.c: printf2"); }
 }
 
 /*
@@ -50,9 +52,9 @@ void sendplayer( dr1Context* ctx) {
 
     dr1Stream_printf( &ctx->ios, "%s\n", DR1MSG_170);
     res = dr1Stream_printf( &ctx->ios, buf);
-    if (res != strlen(buf)) perror("qprintf-3");
-    res = dr1Stream_printf( &ctx->ios, "%s\n", SEPARATOR);
-    if (res != strlen(SEPARATOR)) perror("qprintf-4");
+    if (res < 0) perror("controller.c:sendplayer");
+    res = dr1Stream_printf( &ctx->ios, SEPARATOR);
+    if (res < 0) perror("controller.c:sendplayer-2");
 }
 
 
@@ -132,7 +134,7 @@ int dr1Controller_handleLogin( dr1Context *ctx, int argc, char **argv) {
 
     printf("%d: handleLogin\n", ctx->ios.fd);
 
-    exists = setLoginPassword( ctx, argv[1], argv[2]);
+    exists = ! setLoginPassword( ctx, argv[1], argv[2]);
 
     if (exists) {
         /* player data file is found */
@@ -161,7 +163,7 @@ dr1Controller_handleNewPlayer( dr1Context *ctx, int argc, char **argv) {
     if (!strcasecmp( argv[0], "cancel")) {
 	ctx->dialog = CANCEL;
     } else if (!strcasecmp( argv[0], "newplayer")) {
-	exists = setLoginPassword( ctx, argv[1], argv[2]);
+	exists = ! setLoginPassword( ctx, argv[1], argv[2]);
 	if (exists) {
 	    dr1Stream_printf( &ctx->ios, DR1MSG_580, argv[2]);
 	} else {
@@ -268,7 +270,7 @@ int dr1Controller_handleCommand( dr1Context *ctx, int argc, char **argv) {
 	    }
 	} else if (!strcasecmp( argv[0], "newplayer")) {
 	    int exists;
-	    exists = setLoginPassword( ctx, argv[1], argv[2]);
+	    exists = ! setLoginPassword( ctx, argv[1], argv[2]);
 	    if (exists) {
 		dr1Stream_printf( &ctx->ios, DR1MSG_580, argv[2]);
 	    } else {

@@ -75,11 +75,12 @@ int pc_runcmd( int cs, enum runstate_t state) {
 
     if (state == READABLE) {
 	if ( dr1Stream_fgets( &c->ios, buf, sizeof(buf)) == 0 ) return 1;
+	printf("client> %s", buf);
 
 	/* tokenize the command */
 	i=0;
-	cmds[i++] = strtok( buf, " \t\n");
-	while ((cmds[i] = strtok( NULL, " \t\n")) != 0) {
+	cmds[i++] = strtok( buf, " \t\r\n");
+	while ((cmds[i] = strtok( NULL, " \t\r\n")) != 0) {
 	    if (++i == sizeof(cmds)/sizeof(*cmds)) break;
 	}
 	nargs = i;
@@ -109,6 +110,7 @@ int main( int argc, char **argv) {
     fd_set r_set, w_set, e_set, x_set;
     fd_set tr_set, tw_set, te_set;
     int err;
+    int reuse;
     struct timeval ttv;
     struct timeval tv_slow = { /* tv_sec */ 10, /* tv_usec */ 500000 };
     struct timeval tv_fast = { /* tv_sec */ 0,  /* tv_usec */ 0 };
@@ -127,6 +129,10 @@ int main( int argc, char **argv) {
 
     /* open server socket */
     ss = socket( PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    reuse = 1;
+    if (setsockopt( ss, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse))) {
+        perror("setsockopt"); abort();
+    }
     sin.sin_family = AF_INET;
     sin.sin_port = htons( PORT);
     sin.sin_addr.s_addr = INADDR_ANY;
@@ -160,10 +166,12 @@ int main( int argc, char **argv) {
 	}
         
         err = select( maxsock + 1, &tr_set, &tw_set, &te_set, &ttv);
+#if 0
 	if (err == EINTR) {
 	    /* caught a signal */
 	    continue;
 	}
+#endif
 	if (err < 0) { perror("select"); abort(); }
 	printf("select returned %d\n", err);
 

@@ -5,8 +5,7 @@ OBJS=	    server.o \
 	    ttype.o tanner.o wright.o location.o \
 	    potions/heal.o context.o glyphset.o \
 	    controller.o dice.o player.o money.o \
-	    merchant.o apothecary.o \
-	    lib/libdr1.a
+	    merchant.o apothecary.o 
 
 .c.o:
 	gcc -c -g -Wall -Wno-comment -I. $< -o $@
@@ -24,7 +23,7 @@ subdirs:
 dr1server: ${OBJS}
 	gcc -g -Wl,-warn-common -Wl,-Map=dr1server.map -odr1server \
 	${OBJS} \
-	-lxml2 -lm lib/libdr1.a
+	lib/libdr1.a -lxml2 -lm
 
 depend:
 	makedepend -I. \

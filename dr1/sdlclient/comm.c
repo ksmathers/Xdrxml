@@ -196,7 +196,7 @@ void* comm_main( void* iparm) {
 /*	    printf("R\n"); */
 
 	    /* data from server ready to read */
-	    if ( dr1Stream_gets( &ctx.ios, buf, sizeof(buf)) == 0) {
+	    if ( dr1Stream_fgets( &ctx.ios, buf, sizeof(buf)) == 0) {
 		perror("read"); continue; 
 	    }
 	    printf("buf '%s'\n",buf); /**/
