@@ -7,6 +7,7 @@ GladeXML *glade;
 
 int on_loginok_clicked( GtkButton *gbutton, gpointer userdata) {
     GtkWidget *window = glade_xml_get_widget( glade, "wlogin");
+    GtkWidget *textentry = glade_xml_get_widget( glade, "wtextentry");
     GtkEntry *name = GTK_ENTRY(glade_xml_get_widget( glade, "name"));
     GtkEntry *password = GTK_ENTRY(glade_xml_get_widget( glade, "password"));
     GtkEntry *server = GTK_ENTRY(glade_xml_get_widget( glade, "server"));
@@ -17,6 +18,8 @@ int on_loginok_clicked( GtkButton *gbutton, gpointer userdata) {
     if (strlen( _name) > 0 && strlen( _password) > 0 && strlen( _server) > 0)
     {
         gtk_widget_hide( window);
+    } else {
+        gtk_widget_show( textentry);
     }
 
     printf("User %s, Password %s, Server %s\n", 

@@ -1,3 +1,6 @@
+2002-07-23  gettextize  <bug-gnu-gettext@gnu.org>
+
+
 2002-07-22  gettextize  <bug-gnu-gettext@gnu.org>
 
 	* Makefile.am (SUBDIRS): Remove intl.
