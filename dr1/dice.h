@@ -22,6 +22,26 @@ typedef char* dr1Dice;
 #define dr1Dice_create(s) strdup(s);
 
 /*-------------------------------------------------------------------
+ * dr1Dice_data
+ *
+ *    A function for getting the numerical values of a Dice object
+ *
+ * Parameters:
+ *    ds	Dice string in standard notation ("3d6+1")
+ *    ndice	Numbers of dice
+ *    sides     Sides per die
+ *    offset    Offset to the dice
+ *    mult      Multiplier
+ *
+ * Returns:
+ *    -1	Parse error
+ *    0..N	Random result of Dice throw
+ */
+
+int dr1Dice_data( char *ds, int *nDice, int *sides, int *offset, 
+	int *multiple) ;
+
+/*-------------------------------------------------------------------
  * dr1Dice_roll
  *
  *    A function for rolling standard polyhedra.  If the string doesn't

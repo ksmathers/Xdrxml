@@ -1,3 +1,4 @@
+#include "dice.h"
 #include "monster.h"
 /*-------------------------------------------------------------------
  * dr1monsters
@@ -75,16 +76,45 @@ dr1Monster* dr1Monster_new( char *name) {
  *
  */
 
+static int monster_thac0[] = {
+   21, 21, 21, 20, 19, 18, 16, 15, 13, 12, 10, 9, 8, 7
+};
+
 int dr1Monster_thac0( dr1Monster *m) {
     int level;
+    int thac0;
     int ndice, sides, offset, mul;
-    dr1Dice_data( &ndice, &sides, &offset, &mul);
-    level = ndice;
-    if (sides > 4) {
-	level *= 2;
+    dr1Dice_data( m->type->hd, &ndice, &sides, &offset, &mul);
+
+    /* 
+     * d4-1: 0
+     * d4:   1
+     * d4+1: 2
+     * d8-1: 3
+     * d8:   4
+     * d8+1: 5
+     * 2d8-3d8:  6
+     * 4d8-5d8:  7
+     * etc.
+     *
+     */
+    if (ndice > 1) level = 2 + level/2;
+    else level = ndice;
+
+    if (sides >= 8) {
+        level += 3;
     }
-    if (offset < 0) {
-	level--;
+
+    if (ndice == 1) {
+	if (offset < 0) {
+	    level--;
+	} else if (offset > 0) {
+	    level++;
+	}
     }
-    return 21 - level;
+
+    if (level >= sizeof(monster_thac0) / sizeof(int)) thac0 = 7;
+    else thac0 = monster_thac0[ level];
+
+    return thac0;
 }

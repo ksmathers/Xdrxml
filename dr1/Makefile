@@ -4,12 +4,12 @@
 main: main.o money.o merchant.o apothecary.o dice.o player.o \
 	    barter.o itemset.o item.o attr.o registry.o \
 	    itemreg.o xdrasc.o playerv.o race.o class.o \
-	    smithy.o weapon.o monster.o combatv.o \
+	    smithy.o weapon.o monster.o combatv.o armor.o \
 	    potions/heal.o 
 	gcc -g main.o money.o merchant.o apothecary.o dice.o \
 	player.o barter.o itemset.o item.o attr.o registry.o \
 	itemreg.o xdrasc.o playerv.o race.o class.o \
-	smithy.o weapon.o monster.o combatv.o \
+	smithy.o weapon.o monster.o combatv.o armor.o \
 	potions/heal.o -lm
 
 depend:
