@@ -34,6 +34,8 @@ int buy( dr1Player *p, int c, char **v) {
     char buf[ 100];
     char _who[80];
     char _what[80];
+    char _many[80];
+    int many;
     int len;
     int i;
 
@@ -75,6 +77,18 @@ int buy( dr1Player *p, int c, char **v) {
 
     b = dr1Merchant_buy( merc, what);
     if (!b) return -1;
+
+    if (b->item->type->stackable) {
+	printf("How many would you like to buy?");
+	gets( _many);
+        many = atoi(_many);
+	if (i < 0) return -3;
+	if (i > 1000) return -4;
+	dr1Money_compound( &b->start, (float)many, merc->ep);
+	dr1Money_compound( &b->minsale, (float)many, merc->ep);
+	b->item->count = many;
+    }
+
     offr = dr1Barter_startingOffer( b);
     dr1Money_format( &p->purse, buf);
     printf("You have %s\n", mbuf);
@@ -115,13 +129,18 @@ int equip( dr1Player *p, int c, char **v) {
     if (c != 2) return -1;
     item = dr1ItemSet_findName( &p->pack, v[1]);
     if (!item) return -1;
-    
+
     if (item->weapon) {
+        dr1Weapon *wnew = (dr1Weapon*)item;
+	if (wnew->min_str > p->curr_attr._str) {
+	    printf("Sorry, you aren't strong enough to use that weapon.\n");
+	    return -2;
+	}
 	if (p->weapon) {
 	    unequip = &p->weapon->super;
 	    p->weapon = NULL;
 	}
-	p->weapon = (dr1Weapon*)item;
+	p->weapon = wnew;
     } else if ( dr1Item_isArmor( item)) {
         if (p->armor) {
 	    unequip = &p->armor->super;

@@ -419,6 +419,7 @@ void dr1Money_compound( dr1Money *money, float ratio, int ep) {
     dr1Money delta;
     bzero( &delta, sizeof(delta));
     delta.cp = dr1Money_value( money, ep) * fabs(ratio);
+/*    printf("ratio %f compounds in %d cp\n", ratio, delta.cp); /**/
     dr1Money_normalizex( &delta, 0.0, ep);
 
     if (ratio < 0) {

@@ -15,6 +15,8 @@ static bool_t xdr_dr1Armor( XDR *xdrs, dr1Item *i);
 dr1ItemType dr1Armor_type = {
     sizeof( dr1Armor),		/* size */
     (int)DR1A_BASICARMOR,	/* code */
+    FALSE,			/* stackable */
+    FALSE,			/* unique */
     (void *)0,	 		/* use */
     (void *)0, 			/* drop */
     (void *)0, 			/* take */
@@ -131,11 +133,11 @@ dr1Armor dr1Armor_leather = {
     	/* value       */ GP(10),
 	/* name        */ "Leather",
 	/* encumbrance */ 150,
-	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ FALSE,
 	/* identified  */ TRUE,
 	/* uses        */ 0,
+	/* count       */ 1,
 	/* type        */ &dr1Armor_type
     },
     /* type     */ &leather,
@@ -147,11 +149,11 @@ dr1Armor dr1Armor_studdedleather = {
     	/* value       */ GP(15),
 	/* name        */ "Studded-leather",
 	/* encumbrance */ 200,
-	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ FALSE,
 	/* identified  */ TRUE,
 	/* uses        */ 0,
+	/* count       */ 1,
 	/* type        */ &dr1Armor_type
     },
     /* type     */ &chainmail,
@@ -163,11 +165,11 @@ dr1Armor dr1Armor_scalemail = {
     	/* value       */ GP(45),
 	/* name        */ "Scalemail",
 	/* encumbrance */ 400,
-	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ FALSE,
 	/* identified  */ TRUE,
 	/* uses        */ 0,
+	/* count       */ 1,
 	/* type        */ &dr1Armor_type
     },
     /* type     */ &scalemail,
@@ -179,11 +181,11 @@ dr1Armor dr1Armor_chainmail = {
     	/* value       */ GP(75),
 	/* name        */ "Chainmail",
 	/* encumbrance */ 300,
-	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ FALSE,
 	/* identified  */ TRUE,
 	/* uses        */ 0,
+	/* count       */ 1,
 	/* type        */ &dr1Armor_type
     },
     /* type     */ &chainmail,
@@ -195,11 +197,11 @@ dr1Armor dr1Armor_splintmail = {
     	/* value       */ GP(80),
 	/* name        */ "Splintmail",
 	/* encumbrance */ 400,
-	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ FALSE,
 	/* identified  */ TRUE,
 	/* uses        */ 0,
+	/* count       */ 1,
 	/* type        */ &dr1Armor_type
     },
     /* type     */ &splintmail,
@@ -211,11 +213,11 @@ dr1Armor dr1Armor_platemail = {
     	/* value       */ GP(400),
 	/* name        */ "Platemail",
 	/* encumbrance */ 450,
-	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ FALSE,
 	/* identified  */ TRUE,
 	/* uses        */ 0,
+	/* count       */ 1,
 	/* type        */ &dr1Armor_type
     },
     /* type     */ &platemail,
@@ -266,6 +268,8 @@ static bool_t xdr_dr1Armor( XDR *xdrs, dr1Item *i) {
 
     xdr_attr( xdrs, "type");
     if ( !xdr_int( xdrs, &code)) return FALSE;
+
+/*    printf("armor type 0x%x\n", code); /**/
 
     if ( xdrs->x_op == XDR_DECODE) {
 	/* lookup armor type by code */

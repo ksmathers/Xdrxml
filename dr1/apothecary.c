@@ -19,9 +19,12 @@ dr1Apothecary_init()
     i = calloc( 1, sizeof(dr1pHeal));
     i->super.value = GP(35);
     i->super.name = strdup("Healing-Potion");
-    i->super.encumbrance = 1;
-    i->super.unique = FALSE;
+    i->super.encumbrance = 10;
+    i->super.inuse = FALSE;
+    i->super.weapon = FALSE;
+    i->super.identified = TRUE;
     i->super.uses = 1;
+    i->super.count = 1;
     i->super.type = &dr1pHeal_type;
     i->effect = dr1Dice_create("d8");
 
@@ -30,9 +33,12 @@ dr1Apothecary_init()
     i = calloc( 1, sizeof(dr1pHeal));
     i->super.value = GP(75);
     i->super.name = "Extra-Healing-Potion";
-    i->super.encumbrance = 1;
-    i->super.unique = FALSE;
+    i->super.encumbrance = 10;
+    i->super.inuse = FALSE;
+    i->super.weapon = FALSE;
+    i->super.identified = TRUE;
     i->super.uses = 1;
+    i->super.count = 1;
     i->super.type = &dr1pHeal_type;
     i->effect = dr1Dice_create("3d8");
 

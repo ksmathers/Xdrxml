@@ -137,9 +137,6 @@ static bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
     xdr_attr( xdrs, "encumbrance");
     if (!xdr_int( xdrs, &i->encumbrance)) return FALSE;
    
-    xdr_attr( xdrs, "unique");
-    if (!xdr_int( xdrs, &i->unique)) return FALSE;
-
     xdr_attr( xdrs, "inuse");
     if (!xdr_int( xdrs, &i->inuse)) return FALSE;
 
@@ -151,6 +148,9 @@ static bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
 
     xdr_attr( xdrs, "uses");
     if (!xdr_int( xdrs, &i->uses)) return FALSE;
+
+    xdr_attr( xdrs, "count");
+    if (!xdr_int( xdrs, &i->count)) return FALSE;
 
     if (i->type->xdr) {
 	if (!i->type->xdr( xdrs, i)) return FALSE;
@@ -182,7 +182,7 @@ bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
     if (!xdr_int( xdrs, &tcode)) { return FALSE; }
 
     if (xdrs->x_op == XDR_DECODE) {
-/*	printf("got tcode %lx\n", tcode); /**/
+/*	printf("got tcode 0x%x\n", tcode); /**/
 	if (tcode == DR1ILLEGAL) {
 	    ityp = NULL;
 	} else {

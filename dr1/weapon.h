@@ -33,7 +33,8 @@ enum DR1ProjectileType {
  */
 
 extern dr1ItemType dr1Weapon_primary;
-extern dr1ItemType dr1Weapon_bowType;
+extern dr1ItemType dr1Weapon_bow;
+extern dr1ItemType dr1Weapon_arrow_t;
 
 typedef struct {
     dr1Item super;
@@ -52,6 +53,8 @@ typedef struct {
 extern dr1Weapon dr1Weapon_halfspear;
 extern dr1Weapon dr1Weapon_longsword;
 extern dr1Weapon dr1Weapon_longbow;
+extern dr1Weapon dr1Weapon_shortbow;
+extern dr1Weapon dr1Weapon_arrow;
 
 
 #endif /* __DR1WEAPON__H */

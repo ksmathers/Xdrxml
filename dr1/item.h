@@ -18,11 +18,11 @@ typedef struct {
     long value;			/* in copper */
     char* name;			
     int encumbrance;
-    int unique;
     int inuse;
     int weapon;
     int identified;
     int uses;
+    int count;
 
     struct dr1ItemType *type;
 } dr1Item;
@@ -69,6 +69,8 @@ typedef void (* dr1Item_equip_fnp) ( dr1Item *i, struct dr1Player *p, int equip)
 typedef struct dr1ItemType {
     long size;
     int code;
+    int stackable;
+    int unique;
     dr1Item_use_fnp use;
     dr1Item_drop_fnp drop;
     dr1Item_take_fnp take;

@@ -12,6 +12,8 @@ static bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i);
 dr1ItemType dr1Weapon_primary = {
     sizeof( dr1Weapon),		/* size */
     (int)DR1W_BASICWEAPON,	/* code */
+    FALSE,			/* stackable */
+    FALSE,			/* unique */
     (void *)0,	 		/* use */
     (void *)0, 			/* drop */
     (void *)0, 			/* take */
@@ -23,6 +25,8 @@ dr1ItemType dr1Weapon_primary = {
 dr1ItemType dr1Weapon_bow = {
     sizeof( dr1Weapon),		/* size */
     (int)DR1W_BOW,		/* code */
+    FALSE,			/* stackable */
+    FALSE,			/* unique */
     (void *)0,	 		/* use */
     (void *)0, 			/* drop */
     (void *)0, 			/* take */
@@ -34,6 +38,8 @@ dr1ItemType dr1Weapon_bow = {
 dr1ItemType dr1Weapon_arrow_t = {
     sizeof( dr1Weapon),		/* size */
     (int)DR1W_ARROW,		/* code */
+    TRUE,			/* stackable */
+    FALSE,			/* unique */
     (void *)0,	 		/* use */
     (void *)0, 			/* drop */
     (void *)0, 			/* take */
@@ -47,11 +53,11 @@ dr1Weapon dr1Weapon_halfspear = {
     	/* value       */ GP(1),
 	/* name        */ "Halfspear",
 	/* encumbrance */ 20,
-	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ TRUE,
 	/* identified  */ TRUE,
 	/* uses        */ 0,
+	/* count       */ 1,
 	/* type        */ &dr1Weapon_primary
     },
     /* damage   */ "d6",
@@ -71,11 +77,11 @@ dr1Weapon dr1Weapon_longsword = {
     	/* value       */ GP(15),
 	/* name        */ "Longsword",
 	/* encumbrance */ 150,
-	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ TRUE,
 	/* identified  */ TRUE,
 	/* uses        */ 0,
+	/* count       */ 1,
 	/* type        */ &dr1Weapon_primary
     },
     /* damage   */ "d8",
@@ -90,19 +96,43 @@ dr1Weapon dr1Weapon_longsword = {
     /* min_str      */ 12
 };
 
+dr1Weapon dr1Weapon_shortbow = {
+    /* super */ {
+    	/* value       */ GP(35),
+	/* name        */ "Shortbow",
+	/* encumbrance */ 80,
+	/* inuse       */ FALSE,
+	/* weapon      */ TRUE,
+	/* identified  */ TRUE,
+	/* uses        */ 0,
+	/* count       */ 1,
+	/* type        */ &dr1Weapon_bow
+    },
+    /* damage   */ "0",
+    /* range    */ 60,
+    /* rof      */ 2,
+    /* speed    */ 6,
+    /* dtype    */ DR1PIERCING,
+    /* plusToHit    */ 0,
+    /* plusToDamage */ 0,
+    /* stackable    */ FALSE,
+    /* projectile   */ DR1W_ARROW,
+    /* min_str      */ 8
+};
+
 dr1Weapon dr1Weapon_longbow = {
     /* super */ {
     	/* value       */ GP(60),
 	/* name        */ "Longbow",
 	/* encumbrance */ 100,
-	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ TRUE,
 	/* identified  */ TRUE,
 	/* uses        */ 0,
+	/* count       */ 1,
 	/* type        */ &dr1Weapon_bow
     },
-    /* damage   */ "d6",
+    /* damage   */ "1",
     /* range    */ 120,
     /* rof      */ 2,
     /* speed    */ 6,
@@ -116,14 +146,14 @@ dr1Weapon dr1Weapon_longbow = {
 
 dr1Weapon dr1Weapon_arrow = {
     /* super */ {
-    	/* value       */ 1,
+    	/* value       */ 10,
 	/* name        */ "Arrow",
 	/* encumbrance */ 1,
-	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ TRUE,
 	/* identified  */ TRUE,
 	/* uses        */ 1,
+	/* count       */ 1,
 	/* type        */ &dr1Weapon_arrow_t
     },
     /* damage   */ "d6",

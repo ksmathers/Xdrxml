@@ -17,6 +17,8 @@ static bool_t xdr_dr1pHeal( XDR *xdrs, dr1Item*);
 dr1ItemType dr1pHeal_type = {
     sizeof( dr1pHeal),		/* size */
     (int)DR1P_HEAL,		/* code */
+    TRUE,			/* stackable */
+    FALSE,			/* unique */
     dr1pHeal_quaff, 		/* use */
     (void *)0, 			/* drop */
     (void *)0, 			/* take */

@@ -16,4 +16,6 @@ dr1Wright_init()
     dr1wright.bestoffer = 0.85;
 
     dr1ItemSet_add( &dr1wright.itemStore, &dr1Weapon_longbow.super);
+    dr1ItemSet_add( &dr1wright.itemStore, &dr1Weapon_shortbow.super);
+    dr1ItemSet_add( &dr1wright.itemStore, &dr1Weapon_arrow.super);
 }

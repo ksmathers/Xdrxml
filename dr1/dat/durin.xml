@@ -23,24 +23,24 @@
         <_cha value="0xa"/>
     </curr_attr>
     <purse>
-        <pp value="0x24"/>
-        <gp value="0x1"/>
+        <pp value="0x23"/>
+        <gp value="0x0"/>
         <ep value="0x0"/>
         <sp value="0xe"/>
-        <cp value="0x28b"/>
+        <cp value="0x28a"/>
     </purse>
     <pack>
-        <len value="0x1"/>
+        <len value="0x2"/>
         <item>
             <code value="0x1"/>
             <value value="0xbb8"/>
             <name>Longsword</name>
             <encumbrance value="0x96"/>
-            <unique value="0x0"/>
             <inuse value="0x0"/>
             <weapon value="0x1"/>
             <identified value="0x1"/>
             <uses value="0x0"/>
+            <count value="0x1"/>
             <damage>
                 <dice>d8</dice>
             </damage>
@@ -52,6 +52,29 @@
             <plusToDamage value="0x0"/>
             <stackable value="0x0"/>
             <projectile value="0x0"/>
+            <min_str value="0x10"/>
+        </item>
+        <item>
+            <code value="0x1"/>
+            <value value="0xa"/>
+            <name>Arrow</name>
+            <encumbrance value="0x1"/>
+            <inuse value="0x0"/>
+            <weapon value="0x1"/>
+            <identified value="0x1"/>
+            <uses value="0x1"/>
+            <count value="0x64"/>
+            <damage>
+                <dice>d6</dice>
+            </damage>
+            <range value="0x78"/>
+            <rof value="0x2"/>
+            <speed value="0x6"/>
+            <dtype value="0x0"/>
+            <plusToHit value="0x0"/>
+            <plusToDamage value="0x0"/>
+            <stackable value="0x1"/>
+            <projectile value="0x1"/>
             <min_str value="0x0"/>
         </item>
     </pack>
@@ -60,11 +83,11 @@
         <value value="0x2ee0"/>
         <name>Longbow</name>
         <encumbrance value="0x64"/>
-        <unique value="0x0"/>
         <inuse value="0x0"/>
         <weapon value="0x1"/>
         <identified value="0x1"/>
         <uses value="0x0"/>
+        <count value="0x1"/>
         <damage>
             <dice>d6</dice>
         </damage>
@@ -76,7 +99,7 @@
         <plusToDamage value="0x0"/>
         <stackable value="0x0"/>
         <projectile value="0x0"/>
-        <min_str value="0x0"/>
+        <min_str value="0x10"/>
     </weapon>
     <gauche>
         <code value="0x0"/>
@@ -86,11 +109,11 @@
         <value value="0x3e80"/>
         <name>Splintmail</name>
         <encumbrance value="0x190"/>
-        <unique value="0x0"/>
         <inuse value="0x0"/>
         <weapon value="0x0"/>
         <identified value="0x1"/>
         <uses value="0x0"/>
+        <count value="0x1"/>
         <type value="0x3"/>
         <damage value="0x0"/>
     </armor>

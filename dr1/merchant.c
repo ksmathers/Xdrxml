@@ -61,7 +61,7 @@ dr1Item* dr1Merchant_completeSale( dr1Merchant *m,  dr1Barter *b)
 	dr1Merchant_makeHappy(m);
     }
 
-    if (i->unique) {
+    if (i->type->unique) {
 	t = i;
 	dr1Merchant_removeFromInventory( m, i);
     } else {
