@@ -1,3 +1,4 @@
+Fix trade after same
 Add a joiner?  Change the wheelwright to a joiner?
 fix ranged weapons
 check attribute bonuses against DMG
@@ -7,28 +8,5 @@ add armor type bonuses per weapon damage type
 figure out what to do with gauche.  
 - maybe use it for damage when attacker has a critical miss.
 
-implement armor, add to dr1Player_ac() method
-stat bonuses for AC, reaction, etc.
-race bonuses other that stats
-add character gen routines to player
-equipment class
-add XDR routines
-
-money	-- 
-player	--
-attr --
-potions --
-   heal -- 
-
-timeq --
-set --
-dice --
-barter --
-item --
-itemset --
-merchant --
-
-
-
-
+race bonuses other than stats
 

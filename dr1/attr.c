@@ -4,6 +4,17 @@
 #include "xdrasc.h"
 
 /*-------------------------------------------------------------------
+ * attribute
+ *
+ *   Convert from enum Attribute to string
+ */
+
+char *attribute[] = {
+    "Strength", "Intelligence", "Wisdom", 
+    "Dexterity", "Constitution", "Charisma"
+};
+
+/*-------------------------------------------------------------------
  * Strength modifiers
  *
  *   dr1Attr_str_damage   Damage adjustment
@@ -182,6 +193,52 @@ int dr1Attr_tohit( dr1Attr *a, int ranged) {
 }
 
 /*-------------------------------------------------------------------
+ * dr1Attr_estatptr
+ *
+ *    Get pointer to attribute structure element from the 
+ *    attribute enum
+ *
+ * Parameters:
+ *    a    Attribute set
+ *    stat Attribute element to locate
+ *
+ * Returns:
+ *    Pointer to attribute element (e.g: strength)
+ */
+int *dr1Attr_estatptr( dr1Attr *a, enum Attribute stat) {
+    if ( stat == STRENGTH) return &a->_str;
+    if ( stat == INTELLIGENCE) return &a->_int;
+    if ( stat == WISDOM) return &a->_wis;
+    if ( stat == DEXTERITY) return &a->_dex;
+    if ( stat == CONSTITUTION) return &a->_con;
+    if ( stat == CHARISMA) return &a->_cha;
+    return NULL;
+}
+
+/*-------------------------------------------------------------------
+ * dr1Attr_statptr
+ *
+ *    Get pointer to attribute structure element from the 
+ *    attribute name
+ *
+ * Parameters:
+ *    a    Attribute set
+ *    s    Name of attribute to locate
+ *
+ * Returns:
+ *    Pointer to attribute element (e.g: strength)
+ */
+int *dr1Attr_statptr( dr1Attr *a, char *s) {
+    if ( !strcasecmp( s, "str")) return &a->_str;
+    if ( !strcasecmp( s, "int")) return &a->_int;
+    if ( !strcasecmp( s, "wis")) return &a->_wis;
+    if ( !strcasecmp( s, "dex")) return &a->_dex;
+    if ( !strcasecmp( s, "con")) return &a->_con;
+    if ( !strcasecmp( s, "cha")) return &a->_cha;
+    printf("Unknown attribute '%s'\n", s);
+    return NULL;
+}
+/*-------------------------------------------------------------------
  * dr1Attr_gen_mode4
  *
  *    Generates a new Attribute value by the fourth method; roll
@@ -328,12 +385,12 @@ bool_t xdr_dr1Attr( XDR *xdrs, dr1Attr *a) {
  * Side effects:
  *    b is added into a
  */
-void dr1Attr_adjust( dr1Attr *a, dr1Attr *b, int mul) {
-    a->_str += b->_str * mul;
-    a->_int += b->_int * mul;
-    a->_wis += b->_wis * mul;
-    a->_dex += b->_dex * mul;
-    a->_con += b->_con * mul;
-    a->_cha += b->_cha * mul;
+void dr1Attr_adjust( dr1Attr *a, dr1AttrAdjust *b, int mul) {
+    a->_str += b->offset._str * mul;
+    a->_int += b->offset._int * mul;
+    a->_wis += b->offset._wis * mul;
+    a->_dex += b->offset._dex * mul;
+    a->_con += b->offset._con * mul;
+    a->_cha += b->offset._cha * mul;
 }
 

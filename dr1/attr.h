@@ -13,9 +13,10 @@
  *    and Charisma.
  */
 
-enum {
+enum Attribute {
     STRENGTH, INTELLIGENCE, WISDOM, DEXTERITY, CONSTITUTION, CHARISMA
 };
+extern char *attribute[];
 
 /*-------------------------------------------------------------------
  * dr1Attr
@@ -27,12 +28,12 @@ enum {
 
 typedef struct {
     int _str;
-    int estr;
     int _int;
     int _wis;
     int _dex;
     int _con;
     int _cha;
+    int estr;
 } dr1Attr;
 
 typedef struct {
@@ -71,6 +72,36 @@ int dr1Attr_damage( dr1Attr *a, int ranged);
 int dr1Attr_hp( dr1Attr *a, int fighter);
 
 /*-------------------------------------------------------------------
+ * dr1Attr_estatptr
+ *
+ *    Get pointer to attribute structure element from the 
+ *    attribute enumeration
+ *
+ * Parameters:
+ *    a    Attribute set
+ *    s    Attribute to locate
+ *
+ * Returns:
+ *    Pointer to attribute element (e.g: strength)
+ */
+int *dr1Attr_estatptr( dr1Attr *a, enum Attribute s);
+
+/*-------------------------------------------------------------------
+ * dr1Attr_statptr
+ *
+ *    Get pointer to attribute structure element from the 
+ *    attribute name
+ *
+ * Parameters:
+ *    a    Attribute set
+ *    s    Name of attribute to locate
+ *
+ * Returns:
+ *    Pointer to attribute element (e.g: strength)
+ */
+int *dr1Attr_statptr( dr1Attr *a, char *s);
+
+/*-------------------------------------------------------------------
  * dr1Attr_create_mode1
  *
  *    Generates a new Attribute value by the first method; roll
@@ -107,7 +138,7 @@ dr1Attr dr1Attr_create_mode4( void);
  * Side effects:
  *    b is added into a
  */
-void dr1Attr_adjust( dr1Attr *a, dr1Attr *b, int mul);
+void dr1Attr_adjust( dr1Attr *a, dr1AttrAdjust *b, int mul);
 
 /*-------------------------------------------------------------------
  * xdr_dr1Attr( xdrs, dr1Attr*)

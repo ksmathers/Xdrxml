@@ -10,15 +10,6 @@
 /*
  * Utility functions
  */
-static int *statptr( dr1Attr *a, int stat) {
-    if ( stat == STRENGTH) return &a->_str;
-    if ( stat == INTELLIGENCE) return &a->_int;
-    if ( stat == WISDOM) return &a->_wis;
-    if ( stat == DEXTERITY) return &a->_dex;
-    if ( stat == CONSTITUTION) return &a->_con;
-    if ( stat == CHARISMA) return &a->_cha;
-    return NULL;
-}
 
 /*
  * Combat commands
@@ -238,7 +229,7 @@ void dr1Combatv_showPage( dr1Player *p, int nmon, dr1Monster *m) {
 		xp += m[i].type->xp + m[i].hp * m[i].type->xphp;
 	    }
 	    c = dr1Registry_lookup( &dr1class, p->class);
-	    st = statptr( &p->base_attr, c->primaryStat);
+	    st = dr1Attr_estatptr( &p->base_attr, c->primaryStat);
 	    if ( st && *st >= 16) xp += (xp+5)/10;
             p->xp += xp;
 	    printf("Gained %d xp.\n", xp);

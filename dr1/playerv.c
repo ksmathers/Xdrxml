@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include "playerv.h"
 #include "attr.h"
@@ -8,26 +9,38 @@
 #include "dice.h"
 #include "class.h"
 
-static int estr = 0;
 
 /*
  * Utility functions
  */
-static int *statptr( dr1Attr *a, char *s) {
-    if ( !strcasecmp( s, "str")) return &a->_str;
-    if ( !strcasecmp( s, "int")) return &a->_int;
-    if ( !strcasecmp( s, "wis")) return &a->_wis;
-    if ( !strcasecmp( s, "dex")) return &a->_dex;
-    if ( !strcasecmp( s, "con")) return &a->_con;
-    if ( !strcasecmp( s, "cha")) return &a->_cha;
-    printf("Unknown attribute '%s'\n", s);
-    return NULL;
+
+static void apply_racesex( dr1Player *p) {
+    /* reapply race and sex adjustments for new attributes */
+    dr1AttrAdjust *adj;
+
+    adj = dr1Registry_lookup( &dr1race, p->race);
+    if (adj) dr1Attr_adjust( &p->base_attr, adj, 1);
+    adj = dr1Registry_lookup( &dr1sex, p->sex);
+    if (adj) dr1Attr_adjust( &p->base_attr, adj, 1);
 }
 
-static void fixestr( dr1Player *p) {
+static void undo_racesex( dr1Player *p) {
+    /* undo race and sex adjustments for new attributes */
+    dr1AttrAdjust *adj;
+
+    adj = dr1Registry_lookup( &dr1race, p->race);
+    if (adj) dr1Attr_adjust( &p->base_attr, adj, -1);
+    adj = dr1Registry_lookup( &dr1sex, p->sex);
+    if (adj) dr1Attr_adjust( &p->base_attr, adj, -1);
+}
+
+static void fixestr( dr1Player *p, int reset) {
+    static int estr = 0;
     /*
-     * Fix possible problems after changing stats
+     * Fix enhanced strength after changing character class
      */
+    if (reset) estr = 0;
+    if (estr == 0) estr = dr1Dice_roll("d100");
     if (p->class == DR1C_FIGHTER && p->base_attr._str == 18) {
 	p->base_attr.estr = estr;
     } else {
@@ -36,12 +49,35 @@ static void fixestr( dr1Player *p) {
     p->curr_attr = p->base_attr;
 }
 
+static int check_classattr( dr1Player *p) {
+    int *stat, *min;
+    enum Attribute i;
+    dr1ClassType *cl;
+
+    cl = dr1Registry_lookup( &dr1class, p->class);
+    if (!cl) {
+	/* no class selected yet */
+	return 1;
+    }
+    for (i=STRENGTH; i<=CHARISMA; i++) {
+	stat = dr1Attr_estatptr( &p->base_attr, i);
+	min = dr1Attr_estatptr( &cl->minimum, i);
+	assert(stat);
+	assert(min);
+        if (*stat < *min) {
+	    printf("Your %s is too low to be a %s\n", attribute[i], cl->class);
+	    return -1;
+	}
+    }
+    return 0;
+}
 
 /*
  * Player Generation Commands
  */
 int dr1Playerv_class( dr1Player *p, int c, char **v) {
     dr1ClassType *cl;
+    dr1Player pnew;
     int ccode;
     static dr1Money m[4];
     static int hits[4] = { 0, 0, 0, 0 };
@@ -72,8 +108,12 @@ int dr1Playerv_class( dr1Player *p, int c, char **v) {
     
     cl = dr1Registry_lookup( &dr1class, ccode);
     if (!cl) return -1;
+    pnew = *p;
+    pnew.class = ccode;
 
-    p->class = ccode;
+    if ( check_classattr( &pnew)) return -2;
+    *p = pnew;
+
     if ( !hits[ idx]) {
 	p->hp = dr1Dice_roll( cl->hitdice);
 	p->purse.gp = dr1Dice_roll( cl->startingMoney);
@@ -83,7 +123,7 @@ int dr1Playerv_class( dr1Player *p, int c, char **v) {
         p->hp = hits[ idx];
 	p->purse = m[ idx];
     }
-    fixestr(p);
+    fixestr(p,0);
     return 0;
 }
 
@@ -91,9 +131,11 @@ int dr1Playerv_roll( dr1Player *p, int c, char **v) {
     if (c != 1) return -1;
     p->base_attr = dr1Attr_create_mode4();
     p->curr_attr = p->base_attr;
-    estr = dr1Dice_roll( "d100");
     dr1Playerv_class( p, -1, NULL);  /* reset hitpoints & wealth */
-    fixestr(p);
+    fixestr(p,1);
+    
+    apply_racesex( p);
+
     return 0;
 }
 
@@ -108,13 +150,16 @@ int dr1Playerv_swap( dr1Player *p, int c, char **v) {
     int *a, *b, t;
 
     if (c != 3) return -1;
-    a = statptr( &p->base_attr, v[1]);
-    b = statptr( &p->base_attr, v[2]);
+    undo_racesex(p);
+    a = dr1Attr_statptr( &p->base_attr, v[1]);
+    b = dr1Attr_statptr( &p->base_attr, v[2]);
     if (a == NULL || b == NULL) return -1;
     t = *a;
     *a = *b;
     *b = t;
-    fixestr(p);
+    apply_racesex(p);
+    fixestr(p,0);
+    if ( check_classattr( p)<0) p->class = DR1C_INVALID;
     return 0;
 }
 
@@ -145,9 +190,10 @@ int dr1Playerv_sex( dr1Player *p, int c, char **v) {
     printf("new = %p\n", new);
 
     if (!new) return -1;
-    if (old) dr1Attr_adjust( &p->base_attr, &old->offset, -1);
-    dr1Attr_adjust( &p->base_attr, &new->offset, 1);
+    if (old) dr1Attr_adjust( &p->base_attr, old, -1);
+    dr1Attr_adjust( &p->base_attr, new, 1);
     p->sex = r;
+    if (check_classattr( p)<0) p->class=DR1C_INVALID;
     return 0;
 }
 
@@ -177,9 +223,10 @@ int dr1Playerv_race( dr1Player *p, int c, char **v) {
 
     new = dr1Registry_lookup( &dr1race, r);
     if (!new) return -1;
-    if (old) dr1Attr_adjust( &p->base_attr, &old->offset, -1);
-    dr1Attr_adjust( &p->base_attr, &new->offset, 1);
+    if (old) dr1Attr_adjust( &p->base_attr, old, -1);
+    dr1Attr_adjust( &p->base_attr, new, 1);
     p->race = r;
+    if (check_classattr( p)<0) p->class=DR1C_INVALID;
     return 0;
 }
 
@@ -199,13 +246,16 @@ int dr1Playerv_trade( dr1Player *p, int c, char **v) {
 	c=3;
     }
     if (c != 3) return -1;
-    a = statptr( &p->base_attr, v[1]);
-    b = statptr( &p->base_attr, v[2]);
+    undo_racesex(p);
+    a = dr1Attr_statptr( &p->base_attr, v[1]);
+    b = dr1Attr_statptr( &p->base_attr, v[2]);
     if (a == NULL || b == NULL) return -1;
     if (*a < 5 || *b > 17) return -1;
     *a -= 2;
     *b += 1;
-    fixestr(p);
+    apply_racesex(p);
+    fixestr(p,0);
+    if ( check_classattr( p)<0) return -1;
     return 0;
 }
 
@@ -224,6 +274,7 @@ int dr1Playerv_showDialog( dr1Player *p) {
     dr1AttrAdjust *race;
     dr1ClassType *class;
     int i;
+    int res;
 
     dr1Playerv_init( p);
 
@@ -234,12 +285,7 @@ int dr1Playerv_showDialog( dr1Player *p) {
 	/*
 	 * Fix possible problems after changing stats
 	 */
-	if (p->class == DR1C_FIGHTER && p->base_attr._str == 18) {
-	    p->base_attr.estr = estr;
-	} else {
-	    p->base_attr.estr = 0;
-	}
-	p->curr_attr = p->base_attr;
+	fixestr(p,0);
 
 	dr1Money_format( &p->purse, buf);
 	race = dr1Registry_lookup( &dr1race, p->race);
@@ -270,13 +316,13 @@ int dr1Playerv_showDialog( dr1Player *p) {
 	cmds[0] = strtok( cmd, " \t\n");
 	while ((cmds[++i] = strtok( NULL, " \t\n")) != 0 && i<10 );
 	
-	if ( !strcmp(cmds[0], "roll")) dr1Playerv_roll( p, i, cmds);
-	else if ( !strcasecmp(cmds[0], "swap")) dr1Playerv_swap( p, i, cmds);
-	else if ( !strcasecmp(cmds[0], "trade")) dr1Playerv_trade( p, i, cmds);
-	else if ( !strcasecmp(cmds[0], "race")) dr1Playerv_race( p, i, cmds);
-	else if ( !strcasecmp(cmds[0], "name")) dr1Playerv_name( p, i, cmds);
-	else if ( !strcasecmp(cmds[0], "class")) dr1Playerv_class( p, i, cmds);
-	else if ( !strcasecmp(cmds[0], "sex")) dr1Playerv_sex( p, i, cmds);
+	if ( !strcmp(cmds[0], "roll")) res=dr1Playerv_roll( p, i, cmds);
+	else if ( !strcasecmp(cmds[0], "swap")) res=dr1Playerv_swap( p, i, cmds);
+	else if ( !strcasecmp(cmds[0], "trade")) res=dr1Playerv_trade( p, i, cmds);
+	else if ( !strcasecmp(cmds[0], "race")) res=dr1Playerv_race( p, i, cmds);
+	else if ( !strcasecmp(cmds[0], "name")) res=dr1Playerv_name( p, i, cmds);
+	else if ( !strcasecmp(cmds[0], "class")) res=dr1Playerv_class( p, i, cmds);
+	else if ( !strcasecmp(cmds[0], "sex")) res=dr1Playerv_sex( p, i, cmds);
 	else if ( !strcasecmp(cmds[0], "done")) {
 	    if ( !strcmp(p->name, "Unnamed")) {
 		printf("Your character needs a name.\n");
@@ -288,6 +334,7 @@ int dr1Playerv_showDialog( dr1Player *p) {
 		break;
 	    }
 	} else printf("Unknown command: '%s'\n", cmds[0]);
+	if (res) printf("Error %d in last command.\n", res);
     }
     return 0;
 }
