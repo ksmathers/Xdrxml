@@ -4,6 +4,11 @@
 #include "map.h"
 #include "xdrxml.h"
 
+#define XSIZE 800
+#define YSIZE 600
+#define MAPCOLS (XSIZE/24)
+#define MAPROWS (YSIZE/35)
+
 /*-------------------------------------------------------------------
  * findgraphic()
  */
@@ -213,6 +218,92 @@ int dr1Map_setgraphic( dr1Map *map, char c[2], int x, int y) {
     return 0;
 }
 
+#if 0
+/*-------------------------------------------------------------------
+ * dr1Map_createView
+ *
+ *  PARAMETERS:
+ *     dr1Map map
+ *     int x, y
+ *     int infravision
+ *
+ *  RETURNS:
+ *     dr1Map
+ *
+ *  SIDE EFFECTS:
+ */
+dr1Map*
+dr1Map_createView( dr1Map *map, int xpos, int ypos, int light, int infravision) 
+{
+    int r,c,g;
+    int ambientlight = 0;
+    static int alt = 0;
+    alt ^= 1;
+
+    ambientlight = map->grid[ ypos*map->xsize + xpos].graphic->light;
+    for (r=ypos-MAPROWS/2; r<map->ysize; r++) {
+	if (r<0) continue;
+	if ((r-ypos) > MAPROWS) break;
+	for (c=xpos-MAPCOLS/2; c<map->xsize; c++) {	    
+	    dr1MapSquare *gr = &map->grid[ r*map->xsize +c];
+	    /* reject if off of the map */
+	    if (c<0) continue;
+	    if ((c-xpos) > MAPCOLS) break;
+
+	    /* reject if there is no graphic in this part of map */
+	    if (!gr->graphic) break;
+
+	    if (!gr->seen) {
+		/* reject if beyond light distance */
+		if (!map->outdoors && !gr->graphic->light) {
+		    int dx, dy, d;
+		    int ld;
+		    
+		    dx = xpos - c;
+		    if (dx < 0) dx = -dx;
+		    dy = (ypos - r) * 3 / 2;
+		    if (dy < 0) dy = -dy;
+		    if (dx>dy) { 
+			d = dx + (dy>>1);
+		    } else { 
+			d = dy + (dx>>1);
+		    }
+
+		    if (gr->graphic->dark) {
+			/* magically dark square */
+			ld = darkdist[ NOLIGHT];
+		    } else {
+			if (ambientlight) {
+			    /* lit area */
+			    ld = AMBIENTLIGHTDIST;
+			} else {
+			    /* unlit square */
+			    ld = darkdist[ lightsource];
+			}
+		    }
+		    if (d>ld) continue;
+		}
+
+		/* reject if not in view */
+		if (!dr1_los(ypos,xpos, r, c, map)) continue;
+	    }
+	    
+	    /* else draw all of the glyphs in the graphic */
+	    gr->seen = 1;
+	    assert(gr->graphic->nglyphs>0);
+	    for (g=gr->graphic->nglyphs-1; g >= (gr->invisible?1:0); g--) {
+	        /* FIXME: add graphic to view */
+	    }
+
+	    if (c==xpos && r==ypos) {
+	        /* FIXME: add mobile to view */
+	    }
+	} /* for c */
+    } /* for r */
+    return 0;
+}
+}
+#endif
 
 /*-------------------------------------------------------------------
  * xdr_dr1Glyph

@@ -54,7 +54,7 @@
         <location>
             <mapname>nomap</mapname>
             <x value="0x13"/>
-            <y value="0x9"/>
+            <y value="0xf"/>
         </location>
     </player>
     <map>
@@ -1603,7 +1603,7 @@
                 </x>
                 <x>
                     <code value="0x2323"/>
-                    <seen value="0x0"/>
+                    <seen value="0x1"/>
                     <open value="0x0"/>
                 </x>
                 <x>
@@ -4528,7 +4528,7 @@
                 </x>
                 <x>
                     <code value="0x2f7e"/>
-                    <seen value="0x0"/>
+                    <seen value="0x1"/>
                     <open value="0x0"/>
                 </x>
                 <x>

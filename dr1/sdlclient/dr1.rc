@@ -1,12 +1,12 @@
 
 style "window" 
 {
-    bg_pixmap[NORMAL]="granite.xpm"
+    bg_pixmap[NORMAL]="pixmaps/granite.xpm"
 }
 
 style "ice"
 {
-    bg_pixmap[NORMAL]="ice.xpm"
+    bg_pixmap[NORMAL]="pixmaps/ice.xpm"
     font="-*-zapf chancery-*-*-*-*-24-*-*-*-*-*-iso8859-1"
 #    fg[NORMAL]="#2faf00"
     fg[NORMAL]="#ff3030"
@@ -14,7 +14,7 @@ style "ice"
 
 style "pixbutton" = "button"
 {
-    bg_pixmap[NORMAL]="ice.xpm"
+    bg_pixmap[NORMAL]="pixmaps/ice.xpm"
 }
 
 style "pixparent" = "button"

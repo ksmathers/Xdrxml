@@ -12,6 +12,7 @@
 #define DR1MSG_105 "105 CHARACTER CREATION DIALOG\n"
 #define DR1MSG_110 "110 MAP GLYPHS\n"
 #define DR1MSG_120 "120 MAP DATA\n"
+#define DR1MSG_130 "130 MAP DELTA\n"
 #define DR1MSG_135 "135 PROJECTILE %d %d %d %d %d %d\n"
 #define DR1MSG_140 "140 ATK %d %d %s\n"
 #define DR1MSG_150 "150 DEF %d %d %s %s\n"

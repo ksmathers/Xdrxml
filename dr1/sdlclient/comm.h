@@ -21,5 +21,6 @@
  */
 
 void* comm_main( void* iparm);
+int sendCommand( char key);
 
 #endif /* __DR1__H */

@@ -1,6 +1,7 @@
 #ifndef __DR1COMMON__H
 #define __DR1COMMON__H
 
+#include <SDL.h>
 #include "player.h"
 
 /*-------------------------------------------------------------------
@@ -14,6 +15,12 @@ typedef struct {
 #if 0
     dr1Map map;
 #endif
+    char *server;
+    char *name;
+    char *password;
+    SDL_Surface *screen;
+    dr1Map* map;
+    int xpos, ypos;
 } Common;
 
 extern Common common;

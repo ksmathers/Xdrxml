@@ -17,10 +17,12 @@
 #include "xdrxml.h"
 #include "lib/map.h"
 #include "player.h"
+#include "common.h"
 
 static struct {
     int sd;
     dr1Stream ios;
+    Common *common;
 } ctx = { 0 };
 
 int doConnect( char *server, int port) {
@@ -86,7 +88,7 @@ int handleMessage(char *buf) {
 	case M_IDENT:		/* waiting for IDENT */
 	    if (!strcmp( buf, DR1MSG_IDENT)) {
 /*		showDialog( DLG_LOGIN); */
-		dr1Stream_printf( &ctx.ios, DR1CMD_LOGIN, "foo", "bar");
+ 		psendMessage( &ctx.ios, DR1CMD_LOGIN, common.name, common.password);
 		mode = M_LOGIN;
 	    } else {
 		printf("Expecting '%s', got '%s'\n", DR1MSG_IDENT, buf);
@@ -195,15 +197,16 @@ void* comm_main( void* iparm) {
     struct timeval ttv;
     struct timeval short_wait = { 0, 100000 };
     struct timeval no_wait = { 0, 0 };
-    char *server = (char *)iparm;
+    Common *common = iparm;
+    ctx.common = common;
 
 
     FD_ZERO( &r_set);		/* socket is readable (READABLE) */
     FD_ZERO( &w_set);		/* write queued data */
     FD_ZERO( &e_set);		/* error on socket */
 
-/*    dr1Text_infoMessage( "Connecting to server...", ctx.screen); */
-    doConnect( server, 2300);
+/*    dr1Text_infoMessage( "Connecting to server...", common->server); */
+    doConnect( common->server, 2300);
 /*    dr1Text_infoMessage( "Connected.", ctx.screen); */
     FD_SET( ctx.sd, &r_set);
     maxsock = ctx.sd;
