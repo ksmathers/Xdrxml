@@ -22,6 +22,7 @@
 #include "player.h"
 #include "context.h"
 #include "qio.h"
+#include "lib/xdrxml.h"
 
 /* merchants */
 #include "apothecary.h"
@@ -50,6 +51,23 @@ enum runstate {
 
 static dr1Context* ctx[FD_SETSIZE];
 static char *separator="7608bdb04fee4d6cf23289314582203c"; /* md5sum dr1 */
+
+/*
+ * sendmap 
+ *
+ */
+void sendmap( dr1Context* ctx) {
+    char *buf;
+    xdrxmlsb_reset( &xdrxmlsb);
+    if (xdr_dr1Map( &xdrxmlsb, ctx->map) != TRUE) {
+	printf("Error serializing map.\n");
+    }
+
+    buf = xdrxmlsb_getbuf( &xdrxmlsb); 
+
+    qprintf( ctx, buf);
+    qprintf( ctx, "%s\n", separator);
+}
 
 /*--------------------------------------------------------------------------
  * loginplayer
@@ -133,6 +151,7 @@ int loginplayer( dr1Context *ctx) {
 		    qprintf(ctx, "Error loading %s\n", ctx->fname);
 		    return 1;
 		}
+		sendmap( ctx);
 		dr1Context_popcall( ctx, 0);
 	    } else {
 	        autos->state = NEWPLAYER;
@@ -145,6 +164,7 @@ int loginplayer( dr1Context *ctx) {
 	    ctx->map = dr1Map_readmap( "lib/maps/town.map");
 	    ctx->player.location.x = ctx->map->startx;
 	    ctx->player.location.y = ctx->map->starty;
+	    sendmap( ctx);
 	    dr1Context_popcall( ctx, ctx->cstack[ctx->stackptr-1].result);
 	    return 0;
 
@@ -217,7 +237,7 @@ int playermain( dr1Context *ctx) {
  * init, run, and finit player -- these three routines are the main
  * three routines used to wrap the client socket for a player.
  */
-void initplayer( cs) {
+void initplayer( int cs) {
     printf("%d: initplayer\n", cs);
     ctx[cs] = calloc( 1, sizeof(dr1Context));
     ctx[cs]->fp = fdopen( cs, "r+");

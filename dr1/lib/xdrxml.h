@@ -36,6 +36,7 @@ struct xdr_ops_ext {
 	bool_t (*x_putbit)( XDR *xdrs, bool_t bit);
 	bool_t (*x_getstring)( XDR *xdrs, int prealloc_len, char **str);
 	bool_t (*x_putstring)( XDR *xdrs, char *str);
+        int (*x_printf)( XDR *xdrs, char *fmt, ...);
     };
 
 struct xdrxml_st {
@@ -85,7 +86,7 @@ int xdrxml_nchar( char *path, int c);
  * and two private fields for the use of the particular implementation.
  */
 
-extern XDR xdrxml;
+extern XDR xdrxml, xdrxmlsb;
 
 int xdrxml_error( XDR* xdrs);
 void xdrxml_clearerr( XDR* xdrs);
@@ -136,6 +137,8 @@ bool_t xdrxml_putint32( XDR *__xdrs, __const int32_t *__ip);
 
 /* Extended functions */
 
+int xdrxml_printf( XDR *xdrs, char *fmt, ...);
+
 bool_t xdrxml_getstring( XDR *xdrs, int prealloc_len, char **s); 
     /* get a string from the underlying stream */
 
@@ -149,6 +152,11 @@ bool_t xdrxml_putbit( XDR *xdrs, bool_t bit);
     /* put a bit to the underlying stream */
 
 /* String Buffer functions */
+
+int xdrxmlsb_reset( XDR* xdrs);
+char* xdrxmlsb_getbuf( XDR* xdrs);
+
+int xdrxmlsb_printf( XDR *xdrs, char *fmt, ...);
 
 bool_t xdrxmlsb_putstring( XDR *xdrs, char *s);
 

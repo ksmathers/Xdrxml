@@ -29,7 +29,8 @@ struct xdr_ops_ext xdrxml_extops = {
 	&xdrxml_getbit,
 	&xdrxml_putbit,
         &xdrxml_getstring,
-	&xdrxml_putstring
+	&xdrxml_putstring,
+	&xdrxml_printf
     };
 
 
@@ -115,6 +116,17 @@ int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop) {
     return 0;
 }
 
+int xdrxml_printf( XDR *xdrs, char *fmt, ...) {
+    FILE *fp = XDRXML_DATA(xdrs)->fp;
+    int res;
+    va_list va;
+    va_start( va, fmt);
+
+    if (!fp) fp = stdout;
+    res = vfprintf( fp, fmt, va);
+    va_end( va);
+    return res;
+}
 int xdrxml_error( XDR *xdrs) {
     /* get some bytes from " */
     if (xdrs->x_handy & XDR_ANNOTATE) {
@@ -320,11 +332,8 @@ bool_t xdr_push_note( XDR *xdrs, const char *s)
 
 	/* process the node */
 	if (xdrs->x_op == XDR_ENCODE) {
-	    FILE *fp = xdrd->fp;
-
-	    if (!fp) fp = stdout;
-	    while (ni--) fprintf(fp, "    ");
-	    fprintf( fp, "<%s>\n", s); 
+	    while (ni--) xdrd->ext->x_printf( xdrs, "    ");
+	    xdrd->ext->x_printf( xdrs, "<%s>\n", s); 
 	}
 
 	if (xdrs->x_op == XDR_DECODE) {
@@ -349,13 +358,10 @@ bool_t xdr_pop_note( XDR *xdrs)
 
 	/* process the node */
 	if (xdrs->x_op == XDR_ENCODE) {
-	    FILE *fp = xdrd->fp;
 	    int ni = nchar( xdrd->path, '/');
 
-	    if (!fp) fp = stdout;
-
-	    while (ni--) fprintf(fp, "    ");
-	    fprintf( fp, "</%s>\n", cpos); 
+	    while (ni--) xdrd->ext->x_printf( xdrs, "    ");
+	    xdrd->ext->x_printf( xdrs, "</%s>\n", cpos); 
 	}
 	if (xdrs->x_op == XDR_DECODE) {
 	    xmlNodePtr cur;

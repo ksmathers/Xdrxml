@@ -33,7 +33,8 @@ struct xdr_ops_ext xdrxmlsb_extops = {
 	&xdrxml_getbit,
 	&xdrxmlsb_putbit,
         &xdrxml_getstring,
-	&xdrxmlsb_putstring
+	&xdrxmlsb_putstring,
+	&xdrxmlsb_printf
     };
 
 dr1StringBuffer xdrxmlsb_sb = {
@@ -65,7 +66,18 @@ XDR xdrxmlsb = {
     XDR_ANNOTATE
 };
 
-int xdr_xml_sb_create( XDR* xdrs, dr1StringBuffer *sb, enum xdr_op xop) {
+int xdrxmlsb_reset( XDR* xdrs) {
+    struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+    xdrd->sb->cpos = 0;
+    return 0;
+}
+
+char* xdrxmlsb_getbuf( XDR* xdrs) {
+    struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+    return xdrd->sb->buf;
+}
+
+int xdr_xml_sb_create( XDR* xdrs, char *buf, enum xdr_op xop) {
     struct xdrxml_st *xdrd;
 
     xdrd = calloc( 1, sizeof(struct xdrxml_st));
@@ -74,7 +86,7 @@ int xdr_xml_sb_create( XDR* xdrs, dr1StringBuffer *sb, enum xdr_op xop) {
 	/*
 	 * build an XML tree from a the file;
 	 */
-	xdrd->doc = xmlParseDoc( sb->buf);
+	xdrd->doc = xmlParseDoc( buf);
 	assert(xdrd->doc);
 	if (xdrd->doc == NULL) return -1;
 	xdrd->cur = xmlDocGetRootElement(xdrd->doc);
@@ -97,6 +109,16 @@ int xdr_xml_sb_create( XDR* xdrs, dr1StringBuffer *sb, enum xdr_op xop) {
     xdrs->x_handy = XDR_ANNOTATE;
 
     return 0;
+}
+
+int xdrxmlsb_printf( XDR *xdrs, char *fmt, ...) {
+    dr1StringBuffer *sb = XDRXML_DATA(xdrs)->sb;
+    int res;
+    va_list va;
+    va_start( va, fmt);
+    res = vsbprintf(sb, fmt,va);
+    va_end(va);
+    return res;
 }
 
 bool_t xdrxmlsb_putstring( XDR *xdrs, char *s) {

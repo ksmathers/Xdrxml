@@ -9,9 +9,11 @@
 #include <pthread.h>
 #include <errno.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "lib/map.h"
 #include "lib/glyphset.h"
+#include "lib/strbuf.h"
 #include "glyphset.h"
 #include "util.h"
 #include "text.h"
@@ -242,13 +244,20 @@ int doConnect( char *server, int port) {
 void* comm_main( void* iparm) {
     fd_set r_set, w_set, e_set;
     fd_set tr_set, tw_set, te_set;
+    static dr1StringBuffer *sb = NULL;
     int maxsock;
     int err;
     char buf[80];
     int size;
+    int mode = 0;
     struct timeval ttv;
     struct timeval short_wait = { 0, 100000 };
     char *server = (char *)iparm;
+
+    if (!sb) {
+	sb = dr1StringBuffer_create( NULL);
+    }
+
     FD_ZERO( &r_set);		/* socket is readable (READABLE) */
     FD_ZERO( &w_set);		/* write queued data */
     FD_ZERO( &e_set);		/* error on socket */
@@ -274,9 +283,21 @@ void* comm_main( void* iparm) {
 	    buf[size] = 0;
 	    printf("buf %s\n",buf);
 	    dr1Text_infoMessage( buf, ctx.screen);
-	}
+	    switch (mode) {
+		case 0:
+		    if (!strncmp( buf, "110", 3)) {
+			sb->cpos = 0;
+			mode = 1;
+		    }
+		    break;
+		case 1: /* reading map data */
+		    sbstrcat( sb, buf);
+		    break;
+	    } /* switch */
+	} /* if */
     }
 }
+
 int main( int argc, char **argv) {
     char buf[80];
     int xpos = 0;
@@ -299,8 +320,8 @@ int main( int argc, char **argv) {
 
     /* Initialize the TTF library */
     if ( TTF_Init() < 0 ) {
-	    fprintf(stderr, "Couldn't initialize TTF: %s\n",SDL_GetError());
-	    exit(2);
+	fprintf(stderr, "Couldn't initialize TTF: %s\n",SDL_GetError());
+	exit(2);
     }
     atexit(TTF_Quit);
 

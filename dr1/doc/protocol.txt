@@ -1,0 +1,58 @@
+
+
+svr> DR1/1.0
+clnt> IAM user password
+
+svr> 100 LOGIN OK
+svr> 500 BAD USER/PASSWORD
+svr> 550 BLACKLISTED
+
+svr> 110 MAP GLYPHS <n> 
+svr> <glyph-data>
+svr> 7608bdb04fee4d6cf23289314582203c
+
+svr> 120 MAP DATA <r1> <c1> <r2> <c2> 
+svr> <map-data>
+svr> 7608bdb04fee4d6cf23289314582203c
+
+svr> 130 MOBILE <r1> <c1> <glyph>
+svr> 135 PROJECTILE <r1> <c1> <r2> <c2> <glyph> <end-glyph>
+svr> 140 ATK <attackdata>
+svr> 150 DEF <defenddata>
+svr> 160 INVENTORY <inventory-data>
+svr> 170 PLAYER <player-data>
+svr> 180 TREASURE <treasure-data>
+svr> 190 
+
+svr> 570 FATAL ERROR <string>
+
+clnt> MOVE <0-9>
+svr> 200 OK
+svr> 310 FAILED <code>
+clnt> CMD <n> <cmds>
+svr> 200 OK
+svr> 310 FAILED <code>
+clnt> MESG <whom> <string>
+svr> 210 SENT
+svr> 220 SAVED
+svr> 310 FAILED <code>
+clnt> SAY <string>
+svr> 200 OK
+clnt> YELL <string>
+svr> 200 OK
+svr> 310 FAILED <code>
+
+glyph ::= '<c><c>'
+glyph-data ::= <image-name> <row> <col> <flags> <comment>
+comment ::= '#' newline-terminated-text
+image-name ::= ( db-npcs-1 | db-npcs-2 )
+flags ::= flags flag
+flag ::= ( 'a' | 'v' | 'd' | 'l' | 'D' )
+cmds ::= (buy|sell|enter|exit|equip|attack|run|wait|search|open|use)
+c ::= printable-character
+
+
+100's 
+Asynch status update
+200's
+Response

@@ -28,6 +28,23 @@ struct dr1StringBuffer {
 
 
 /*-------------------------------------------------------------------
+ * dr1StringBuffer_create
+ *
+ *    Initialize a new stringbuffer.  
+ *
+ *  PARAMETERS:
+ *    sb   If non-null sb points to a string buffer to be initialized
+ *
+ *  RETURNS:
+ *    The initialized string buffer, newly malloc'd if the 'sb' parameter
+ *    is NULL.
+ *
+ *  SIDE EFFECTS:
+ */
+dr1StringBuffer*
+dr1StringBuffer_create( dr1StringBuffer *sb);
+
+/*-------------------------------------------------------------------
  * sbprintf
  *
  *    The method prints a formatted string to the string buffer. 
@@ -39,6 +56,9 @@ struct dr1StringBuffer {
  *
  *  SIDE EFFECTS:
  */
+
+int
+vsbprintf( dr1StringBuffer *sb, char *fmt, va_list va); 
 
 int
 sbprintf( dr1StringBuffer *sb, char *fmt, ...); 
@@ -62,4 +82,20 @@ int
 sbputc( dr1StringBuffer *sb, char c); 
 
 
+/*-------------------------------------------------------------------
+ * sbstrcat
+ *
+ *    Add string to a string buffer
+ *
+ *  PARAMETERS:
+ *     sb   String buffer to modify
+ *     str  String to add to the buffer
+ *
+ *  RETURNS:
+ *
+ *  SIDE EFFECTS:
+ */
+
+int
+sbstrcat( dr1StringBuffer *sb, char *str);
 #endif /* __DR1STRBUF__H */
