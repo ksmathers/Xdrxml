@@ -386,7 +386,7 @@ xdr_dr1MapGraphic( XDR *xdrs, dr1MapGraphic *gr) {
 
     /* code */
     xdr_attr( xdrs, "code");
-    if (!xdr_int( xdrs, &gr->code)) return FALSE;
+    if (!xdr_int32_t( xdrs, &gr->code)) return FALSE;
     
     /* nglyphs */
     xdr_attr( xdrs, "nglyphs");
@@ -450,7 +450,7 @@ xdr_dr1MapSquare( XDR *xdrs, dr1MapSquare *square, dr1Map *map) {
     }
 
     xdr_attr( xdrs, "code");
-    if (!xdr_int( xdrs, &code)) return FALSE;
+    if (!xdr_int32_t( xdrs, &code)) return FALSE;
     if (xdrs->x_op == XDR_DECODE) {
         if (code == 0) {
 	    square->graphic = NULL;

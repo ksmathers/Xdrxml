@@ -1,3 +1,6 @@
+Write up ideas on XML/Struct conversion (esp pub/priv & derived modalities)
+Metaserver
+Mapdelta
 Add public/private flags to xdr translation (or perhaps a modality)
    so that private data isn't shipped to the client (like the real weapon
    type, etc.)

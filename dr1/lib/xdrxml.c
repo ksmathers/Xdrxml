@@ -385,6 +385,7 @@ bool_t xdrxml_getlong( XDR *__xdrs, long *__lp)
 {
     /* get a long from underlying stream */
     struct xdrxml_st *xdrd = XDRXML_DATA(__xdrs);
+    xmlDocPtr doc = XDRXML_DATA(__xdrs)->doc;
     char *attr = xdrd->attr;
     xmlNodePtr cur;
     char *value;
@@ -400,7 +401,7 @@ bool_t xdrxml_getlong( XDR *__xdrs, long *__lp)
         return FALSE;
     }
 
-    value = xmlGetProp(cur, "value");
+    value = xmlNodeListGetString(doc, cur->children, 1);
     if (!value) return FALSE;
 
     *__lp = strtol( value, &err, 0);
@@ -427,7 +428,7 @@ bool_t xdrxml_putlong( XDR *__xdrs, __const long *__lp)
     else fp = stdout;
 
     while (ni--) fprintf(fp, "    ");
-    fprintf(fp, "<%s value=\"0x%lx\"/>\n", attr, *__lp);
+    fprintf(fp, "<%s>%ld</%s>\n", attr, *__lp, attr);
     xdrd->attr = NULL;
     return TRUE;
 }

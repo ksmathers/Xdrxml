@@ -178,7 +178,7 @@ bool_t xdrxmlsb_putlong( XDR *__xdrs, __const long *__lp)
     if (!attr) attr = "long";
 
     while (ni--) sbprintf(sb, "    ");
-    sbprintf(sb, "<%s value=\"0x%lx\"/>\n", attr, *__lp);
+    sbprintf(sb, "<%s>%ld</%s>\n", attr, *__lp, attr);
     xdrd->attr = NULL;
     return TRUE;
 }
