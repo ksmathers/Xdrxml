@@ -112,6 +112,10 @@ static bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i) {
     res = xdr_int( xdrs, &w->range);
     if (!res) return FALSE;
 
+    xdr_attr( xdrs, "rof");
+    res = xdr_int( xdrs, &w->rof);
+    if (!res) return FALSE;
+
     xdr_attr( xdrs, "speed");
     res = xdr_int( xdrs, &w->speed);
     if (!res) return FALSE;

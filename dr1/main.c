@@ -99,6 +99,7 @@ int buy( dr1Player *p, int c, char **v) {
 	dr1ItemSet_add( &p->pack, b->item);
     }
     free(b);
+    b = NULL;
     return 0;
 }
 

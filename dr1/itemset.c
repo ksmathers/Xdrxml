@@ -106,6 +106,7 @@ bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
 	if (!xdr_dr1Item( xdrs, *itemp)) return FALSE;
 	if (xdrs->x_op == XDR_FREE) {
 	    free(*itemp);
+	    *itemp = NULL;
 	}
     } else {
 	*itemp = NULL;
@@ -134,6 +135,7 @@ bool_t xdr_dr1ItemSet( XDR *xdrs, dr1ItemSet* set) {
     }
     if (xdrs->x_op == XDR_FREE) {
 	free( set->items);
+	set->items = NULL;
     }
     return TRUE;
 }

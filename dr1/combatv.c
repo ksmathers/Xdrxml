@@ -50,7 +50,7 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
     }
 
     /* check distance */
-    dist = dr1Location_distance( &p->location, &m->location);
+    dist = dr1Location_distance( &p->location, &target->location);
     if (p->weapon->range) {
 	/* ranged combat */
         if (dist <= 10) {
@@ -65,11 +65,11 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
 	/* melee combat */
 	if (dist > 10) {
 	    /* too far away for melee */
-	    p->location = dr1Location_moveTo( &p->location, &m->location, 10);
-	    dist = dr1Location_distance( &p->location, &m->location);
+	    p->location = dr1Location_moveTo( &p->location, &target->location, 10);
+	    dist = dr1Location_distance( &p->location, &target->location);
 
 	    printf( "You charge the %s.  Now you are within %d feet.\n", 
-		    m->type->name, dist);
+		    target->type->name, dist);
 	    return 0;
 	} 
         nattacks = dr1Player_nattacks( p);
@@ -123,6 +123,7 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
 		dam = dr1Dice_roll( "d3") + 
 		    dr1Attr_damage( &p->base_attr, FALSE);
 	    }
+	    dam *= mul;
 	    if (p->weapon->range) {
 		printf("Thunk! %d Damage.\n", dam);
 	    } else {
