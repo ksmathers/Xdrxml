@@ -5,6 +5,7 @@
 #include <assert.h>
 
 #include "player.h"
+#include "playerv.h"
 #include "apothecary.h"
 #include "money.h"
 #include "barter.h"

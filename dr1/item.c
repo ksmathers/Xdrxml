@@ -70,6 +70,15 @@ bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
     xdr_attr( xdrs, "unique");
     if (!xdr_int( xdrs, &i->unique)) return FALSE;
 
+    xdr_attr( xdrs, "inuse");
+    if (!xdr_int( xdrs, &i->inuse)) return FALSE;
+
+    xdr_attr( xdrs, "weapon");
+    if (!xdr_int( xdrs, &i->weapon)) return FALSE;
+
+    xdr_attr( xdrs, "identified");
+    if (!xdr_int( xdrs, &i->identified)) return FALSE;
+
     xdr_attr( xdrs, "uses");
     if (!xdr_int( xdrs, &i->uses)) return FALSE;
 

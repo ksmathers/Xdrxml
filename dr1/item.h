@@ -18,7 +18,11 @@ typedef struct {
     char* name;			
     int encumbrance;
     int unique;
+    int inuse;
+    int weapon;
+    int identified;
     int uses;
+
     struct dr1ItemType *type;
 } dr1Item;
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#include "player.h"
+
+#include "playerv.h"
 #include "attr.h"
 #include "race.h"
 #include "registry.h"
