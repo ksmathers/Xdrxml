@@ -1,4 +1,4 @@
-#include "map.h"
+#include "lib/map.h"
 #include "util.h"
 
 /*
@@ -35,7 +35,7 @@ int isfloor( dr1Map *map, int row, int col) {
     int g;
     if (!gr) return FALSE;
     for (g = 0; g<gr->nglyphs; g++) {
-	if ( gr->glyph[g].wall || 
+	if ( gr->glyph[g].opaque || 
 	     ( gr->glyph[g].door && !map->grid[row *map->xsize + col].open)
 	   )
 	{
