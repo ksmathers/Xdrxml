@@ -1,0 +1,218 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.75 [en] (X11; U; Linux 2.2.16-22 i686) [Netscape]">
+</head>
+<body>
+
+<h1>
+Future, meet the Past</h1>
+
+<h2>
+Mapping Objects to XML using XDR</h2>
+
+<h3>
+Kevin Smathers</h3>
+Forward and backward compatiblity between web-services is one of the most
+important, and the most challenging technical aspect of interoperable web
+services. Where there is no control over when people will upgrade their
+clients or services and those services can be distributed broadly over
+the Internet, only loosely coupled service/client interactions will be
+able to adapt. In this paper I look at how object/stream technologies of
+the past can be adapted to meet the needs of loosely coupled object/XML
+translations, greatly simplifying the work of creating a document interface
+without giving up the benefits of loose coupling.
+<p>XDR (for External Data Representation) is the set of serialization routines
+the Sun provided with Sun RPC when the unix network filesystem was first
+released. XDR is written in C, but uses the OO abstraction of a stream
+to move structures to and from serialized form.
+<p>[Why C in this age of Java and C++? Although I've been doing OOD for
+almost ten years now, and have worked with either C++ or Java for all of
+that time, neither language in my opinion is suitable for library code.
+Whereas C is readily callable from C++, XSLT, Perl, Python, PHP, Fortran,
+Java, and a host of other languages, C++ libraries are only useful to other
+C++ programmers, and the same goes for Java. C may not be pleasant to use
+to implement OO designs, but it is more portable across languages than
+any other language I can think of.]
+<p>For example the following structure would be serialized with the xdr
+function shown below it. Substructures are broken down into further substructures
+until eventually you get to basic data types for which XDR provides standard
+methods for serializing the basic types into network byte-order streams.
+<pre>
+<hr WIDTH="100%">&nbsp;&nbsp;&nbsp; struct Player {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; char *name;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; struct Location loc;
+&nbsp;&nbsp;&nbsp; };</pre>
+
+<pre>&nbsp;&nbsp;&nbsp; bool_t xdr_Player( XDR *xdrs, struct Player *p) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!xdr_wrapstring( xdrs, &amp;p->name)) return FALSE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!xdr_Location( xdrs, &amp;p->loc)) return FALSE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return TRUE;
+&nbsp;&nbsp;&nbsp; }</pre>
+
+<hr WIDTH="100%">While working on a game library that saved persistent
+objects to disk I recently looked into XDR again, but this time to test
+out some ideas I've had about XML. The goal of XML is to decouple internal
+and external representation, so using serialization techniques would seem
+to contradict the most important features of XML. But after writing a few
+dozen XML serialization methods I've noticed, as I'm sure you have, that
+the main part of the serialization is based on the same old stream techniques
+that we've always used for object/stream serialization.
+<p>The only part that is completely new to XML is when pulling apart an
+XML document you search below a particular node for data that will satisfy
+a particular part of the object whereas in object data streams you simply
+insist that the data be received and deserialized in the same order it
+was sent.
+<p>What I've experimented with then, is writing an XDR stream that rather
+than reading directly from a file with elements all placed in a specific
+and required order, reads from a DOM tree and searches for the node that
+will next be deserialized. As a result the objects being read are pleasantly
+immune to extra data in the XML source (data for example that was written
+by a more recent version of the game library) providing a degree of forward
+compatibility; and with some defaulting of missing data can also automatically
+upgrade older XML sources to the new objects in a more recent library.
+<p>If you haven't already, go get the Gnome XML library from www.xmlsoft.org.
+This is a superb and very fast XML library in C with support for DOM, XPath,
+XPointer, and XSLT. Sun RPC with XDR is included in the GNU libc project
+at http://www.gnu.org/software/libc/ included with all Linux distributions,
+and DCE RPC and Microsoft D/COM use similar libraries.
+<p>Several types of stream are already included with Sun RPC. The xdrmem_create()
+function initializes a stream that sends its output to a buffer, while
+xdrstdio_create() creates a stream that will read or write a FILE as defined
+in 'stdio.h'. Adding a new stream type is as simple as defining a new xdr_ops
+structure with function pointers to the basic data type serialization functions.
+In xdrxml.c I define the stream as follows.
+<pre>
+<hr WIDTH="100%">&nbsp;&nbsp;&nbsp; struct xdr_ops xdrxml_ops = {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &amp;xdrxml_getlong,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &amp;xdrxml_putlong,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &amp;xdrxml_getbytes,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &amp;xdrxml_putbytes,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &amp;xdrxml_getpostn,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &amp;xdrxml_setpostn,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &amp;xdrxml_inline,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &amp;xdrxml_destroy,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &amp;xdrxml_getint32,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &amp;xdrxml_putint32
+&nbsp;&nbsp;&nbsp; };</pre>
+
+<hr WIDTH="100%">Each function in the table represents a basic data type
+so that higher level xdr functions like xdr_Player shown above can ultimately
+be implemented in terms of an underlying stream. For xml output to be prettier
+it would be useful to add a new function pointer to this virtual function
+table, but in the current implementation I've just added a new method xdrxml_wrapstring()
+that itself distinguishes between XML streams and legacy streams.
+<p>[The xdrxml library is a part of the open source Dragon's Reach project
+on Sourceforge at http://dr1.sourceforge.net, where you can find all of
+the code presented in this article.]
+<p>In addition to the stream functions we also have to add new method calls
+to all of the xdr serialization functions to correctly annotate where in
+the DOM tree we are working. Three new functions have been added for xdr
+functions to call. These are:
+<pre>
+<hr WIDTH="100%">&nbsp;&nbsp;&nbsp; bool_t xdr_push_note( XDR* xdrs, char* note);
+&nbsp;&nbsp;&nbsp; bool_t xdr_pop_note( XDR* xdrs);
+&nbsp;&nbsp;&nbsp; void xdr_attr( XDR* xdrs, char* attr);</pre>
+
+<hr WIDTH="100%">The first and second calls respectively start and complete
+a node in the XML tree under which other nodes will be placed in a hierarchy
+matching the structure hierarchy. Without these calls the XML tree will
+be flat. The last call sets an attribute name so that a basic data type
+that is being converted can appear in a document leaf-node with a name
+that matches the structure element. Without this call all nodes would be
+named by their data-type only.
+<p>The earlier example of serializing a Player object thus becomes:
+<pre>
+<hr WIDTH="100%">&nbsp;&nbsp;&nbsp; bool_t xdr_Player( XDR *xdrs, struct Player *p) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* serialize a Player object with annotations */
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xdr_attr( xdrs, "name");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!xdrxml_wrapstring( xdrs, &amp;p->name)) return FALSE;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!xdr_push_note( xdrs, "loc")) return FALSE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!xdr_Location( xdrs, &amp;p->loc)) return FALSE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xdr_pop_note( xdrs);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return TRUE;
+&nbsp;&nbsp;&nbsp; }</pre>
+
+<hr WIDTH="100%">The following code snippet excercises this xdr routine.
+The value 'XDR_ENCODE' is one of three modes that XDR defines. Encoding
+means taking and object and writing it to a stream. The value XDR_DECODE
+would read data from the stream and create an object, while XDR_FREE runs
+through the object tree performing a deep free() of the object. Below the
+code snippet is the XML printed to 'player.xml'.
+<pre>
+<hr WIDTH="100%">&nbsp;&nbsp;&nbsp; int main( int argc, char **argv) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; XDR xdrs;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; struct Player bob = { "Bob", { 10, 49 }};
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xdr_xml_create( &amp;xdrs, "player.xml", XDR_ENCODE);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xdr_push_note( &amp;xdrs, "bob");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xdr_Player( &amp;xdrs, &amp;bob);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xdr_pop_note( &amp;xdrs);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xdr_destroy( &amp;xdrs);
+&nbsp;&nbsp;&nbsp; }</pre>
+
+<pre>&nbsp;&nbsp;&nbsp; &lt;bob>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;name>Bob&lt;/name>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;loc>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;x value="0xa"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;y value="0x31"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/loc>
+&nbsp;&nbsp;&nbsp; &lt;bob></pre>
+
+<hr WIDTH="100%">Thus far there has been nothing particularly exciting.
+You get an XML document out that is reasonably well structured and formatted,
+but the real challenge is in reading a structure that doesn't match the
+output exactly. Suppose for example that a new 'health' attribute is added
+to Player to represent how close they are to death. By adding two more
+lines to xdr_Player the code now supports the enhanced Player object. If
+your code ignored the error generated by xdr_push_note when the xdr operation
+is XDR_DECODE then your function would also be able to handle changes to
+the class structure.
+<pre>
+
+<hr WIDTH="100%">&nbsp;&nbsp;&nbsp; bool_t xdr_Player( XDR *xdrs, struct Player *p) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* serialize a Player object with annotations */
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xdr_attr( xdrs, "name");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!xdrxml_wrapstring( xdrs, &amp;p->name)) return FALSE;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!xdr_push_note( xdrs, "loc")) return FALSE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!xdr_Location( xdrs, &amp;p->loc)) return FALSE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xdr_pop_note( xdrs);
+
++&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xdr_attr( xdrs, "health");
++&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!xdr_int( xdrs, &amp;p->health)) return FALSE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return TRUE;
+&nbsp;&nbsp;&nbsp; }</pre>
+
+<hr WIDTH="100%">Reading new and old files using the same xdr routine is
+done by searching the DOM tree created when the file is loaded. When the
+xdr operation is XDR_DECODE then the xdr_push_note() function performs
+a breadth first search of the DOM tree to find a node with the same name.
+xdr_pop_note() marks the node consumed so that future searches won't return
+to the same node of the tree (as for example when serializing an array
+of similar objects.)
+<p>The xdr_attr() function sets up an attribute so that a later call to
+deserialize one of the basic data types will be able to find a leaf node
+of the same name (which is immediately marked as consumed.) If a leaf node
+by the same name can't be found, the basic data type is initialized to
+zero (or an empty string) so that missing nodes can be ignored ensuring
+backward compatibility.
+<p>One reason that most people are unfamiliar with XDR is that although
+it is widely used, most programmers just define their structures in an
+interface definition file and use the 'rpcgen' program or a similar generator
+to convert those interfaces into XDR serialization and other functions.
+<p>As with XDR, all of the methods of the xdrxml serialization functions
+can be derived directly from the structure definition, so one can imagine
+a new version of 'rpcgen' that will eventually make hand-coding XML tree
+walking functions a thing of the past, all without giving up the flexibility,
+the forward and backward compatibility of XML.
+<p>In future work on the xdrxml library I plan to add an XML friendlier
+replacement for xdr_union (for handling discriminated unions) and other
+variant data structures like xdr_reference which should be altered for
+XML to encode the discriminant instead of the structure size since XML
+handles sizing automatically.
+</body>
+</html>

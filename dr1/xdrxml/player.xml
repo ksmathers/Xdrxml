@@ -1,0 +1,8 @@
+<bob>
+    <name>William</name>
+    <loc>
+        <x value="0x32"/>
+        <y value="0x54"/>
+    </loc>
+    <health value="0x64"/>
+</bob>
