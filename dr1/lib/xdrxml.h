@@ -40,6 +40,7 @@ struct xdr_ops_ext {
     };
 
 struct xdrxml_st {
+        int isPublic;		/* public or private mode */
         char path[1024];
 	char *attr;
 	int error;
@@ -57,6 +58,7 @@ struct xdrxml_st {
 
 	/* extended ops */
 	struct xdr_ops_ext *ext;
+
     };
 
 enum { XDR_ANNOTATE = 0x1 };
@@ -92,9 +94,6 @@ int xdrxml_error( XDR* xdrs);
 void xdrxml_clearerr( XDR* xdrs);
 
 int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop);
-    /* open an XML xdr stream */
-
-int xdrxml_mem_create( XDR* xdrs, char *buf, int bufsize, enum xdr_op xop);
     /* open an XML xdr stream */
 
 bool_t xdrxml_bool( XDR *xdrs, int *bool) ;
@@ -152,6 +151,8 @@ bool_t xdrxml_putbit( XDR *xdrs, bool_t bit);
     /* put a bit to the underlying stream */
 
 /* String Buffer functions */
+int xdr_xml_sb_create( XDR* xdrs, char *buf, enum xdr_op xop);
+    /* open an XML xdr stream */
 
 int xdrxmlsb_reset( XDR* xdrs);
 char* xdrxmlsb_getbuf( XDR* xdrs);

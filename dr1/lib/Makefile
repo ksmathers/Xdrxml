@@ -1,7 +1,7 @@
 CFLAGS=-I..
 
-libdr1.a: map.o xdrxml.o strbuf.o xdrxmlsb.o
-	ar rc libdr1.a map.o xdrxml.o strbuf.o xdrxmlsb.o
+libdr1.a: map.o xdrxml.o strbuf.o xdrxmlsb.o qio.o
+	ar rc libdr1.a map.o xdrxml.o strbuf.o xdrxmlsb.o qio.o
 
 clean:
 	rm *.o 
