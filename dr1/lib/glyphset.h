@@ -45,5 +45,6 @@ dr1GlyphTable *dr1GlyphSet_find( char *file);
  *  SIDE EFFECTS:
  */
 char *dr1GlyphTable_file( dr1GlyphTable *gtab);
+
 #endif /* __LIB_DR1GLYPHSET__H */
 

@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include "player.h"
 #include "lib/map.h"
-#define CMDSTACK_SIZE 20
+#include "lib/stream.h"
 
 /*-------------------------------------------------------------------
  * dr1Context
@@ -25,16 +25,54 @@ typedef struct {
     int result;
 } dr1Cmd;
 
+enum { START_MU, START_THIEF, START_CLERIC, START_FIGHTER, START_MAX };
+enum states { LOGIN, NEWPLAYER, TOWN, DUNGEON };
+enum dialog { ACTIVE, DONE, CANCEL };
+
+struct dr1StartingValues {
+    /* starting values per class; reset with each reroll */
+    int hits[START_MAX];
+    dr1Money gold[START_MAX];
+    int estr;
+};
+
+struct dr1CombatState {
+    int surprise;		/* 1 if player surprised, 0 not surprised */
+};
+
+
+struct dr1PurchaseState {
+    int state;
+    char _who[80];
+    char _what[80];
+    char _many[80];
+    dr1Merchant *merc;
+    char* offr;
+    dr1Barter* b;
+};
+
 typedef struct dr1Context {
-    FILE *fp;			/* socket connected to the player */
+    dr1Stream ios;		/* stream connected to the player */
     char fname[80];		/* players xml character file */
     char error[80];		/* error string */
+    char login[80];
+    char passwd[80];
     dr1Player player;		/* the loaded player */
     dr1Map *map;		/* the active map */
-    int state;			/* current dialog state */
+    int state;			/* current protocol */
+    int dialog;			/* dialog completion status */
     int inputready;		/* the socket is readable */
-    dr1Cmd cstack[CMDSTACK_SIZE];	/* command stack */
-    int stackptr;
+
+    /* Character creation state */
+    struct dr1StartingValues creationstate; 	
+				/* prerolls for each possible class */
+
+    /* Combat state */
+    struct dr1CombatState combatstate;
+
+    /* Purchase state */
+    struct dr1PurchaseState purchasestate;
+    
 } dr1Context;
 
 /*-------------------------------------------------------------------
@@ -74,16 +112,11 @@ int dr1Context_load( dr1Context *ctx, char *fname);
 void dr1Context_destroy( dr1Context *ctx);
 
 /*-------------------------------------------------------------------
- * dr1Context_return
+ * dr1Contect_resetCreationState
  *
- *    Sets the error message from a failed subroutine
- *
- *  PARAMETERS:
- *
- *  RETURNS:
- *    The return code of the function that just popcall'd
+ *    Destroy a malloc'd dr1Context structure.
  */
-int dr1Context_return( dr1Context *ctx);
+void dr1Context_resetCreationState( dr1Context *ctx);
 
 /*-------------------------------------------------------------------
  * dr1Context_error
@@ -99,89 +132,4 @@ int dr1Context_return( dr1Context *ctx);
  */
 void dr1Context_error( dr1Context *ctx, char *fmt, ...);
 
-/*-------------------------------------------------------------------
- * dr1Context_auto
- *
- *    Allocates automatic space on the command stack
- *
- *  PARAMETERS:
- *
- *  RETURNS:
- *    Pointer to auto data (newly calloc'd if needed)
- *
- *  SIDE EFFECTS:
- */
-void* dr1Context_auto( dr1Context *ctx, size_t size);
-
-/*-------------------------------------------------------------------
- * dr1Context_args
- *
- *    Returns pointer to the arguments for the current running
- *    function.
- *
- *  PARAMETERS:
- *    ctx   Context 
- *
- *  RETURNS:
- *    Pointer to argument list
- *
- *  SIDE EFFECTS:
- */
-void* dr1Context_args( dr1Context *ctx, char *argtype);
-
-/*-------------------------------------------------------------------
- * dr1Context_pushcallv
- *
- *    The method dr1Context_pushcall adds a command to the command
- *    stack.
- *
- *  PARAMETERS:
- *    ctx     Context to push the call into
- *    cmd     The command to be pushed
- *    argtype Argument type
- *    argsize Size of argument list
- *
- *  RETURNS:
- *    NULL failure
- *    or pointer to newly allocated arglist
- *
- *  SIDE EFFECTS:
- *   allocates space for the args and returns the new pointer.
- */
-void *dr1Context_pushcallv( 
-	dr1Context *ctx, 
-	dr1Command_fnp cmd,
-	char *argtype,
-	int argsize
-    );
-
-/*-------------------------------------------------------------------
- * dr1
- *
- *    The method ...
- *
- *  PARAMETERS:
- *
- *  RETURNS:
- *    0  success
- *   -1  stack overflow
- *
- *  SIDE EFFECTS:
- */
-int dr1Context_pushcall( dr1Context *ctx, dr1Command_fnp cmd);
-
-/*-------------------------------------------------------------------
- * dr1
- *
- *    The method ...
- *
- *  PARAMETERS:
- *
- *  RETURNS:
- *    0  success
- *   -1  stack underflow
- *
- *  SIDE EFFECTS:
- */
-int dr1Context_popcall( dr1Context *ctx, int rcode);
 #endif /* __DR1CONTEXT__H */

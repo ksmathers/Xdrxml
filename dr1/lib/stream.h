@@ -17,7 +17,7 @@ typedef struct dr1Stream {
 
 
 /*-------------------------------------------------------------------
- * dr1
+ * dr1Stream_create
  *
  *    The method constructs a Stream
  *
@@ -32,6 +32,19 @@ typedef struct dr1Stream {
  */
 dr1Stream* 
 dr1Stream_create( dr1Stream *str, int sd);
+
+/*-------------------------------------------------------------------
+ * dr1Stream_finit
+ *
+ *    The method destroys a stream
+ *
+ *  PARAMETERS:
+ *    str   Stream to intialize, or NULL to calloc the stream
+ *
+ *  SIDE EFFECTS:
+ */
+void
+dr1Stream_finit( dr1Stream *str);
 
 /*-------------------------------------------------------------------
  * dr1
@@ -91,7 +104,18 @@ int dr1Stream_write( dr1Stream *str, char *buf, int len);
  *    size  Maximum line length to read
  *
  *  RETURNS:
- *    Number of characters placed into the buffer.  
+ *    Number of characters placed into the buffer.  On a stream error
+ *    the return value is zero unless there is at least one newline
+ *    marker in the input buffer.  Once the buffered lines have been
+ *    consumed gets() will return 0.  
+ *    
+ *    Any characters left after the last newline will never be 
+ *    returned, but can be examined by looking directly at the buffer
+ *    if needed.
+ * 
+ *    A stream read or write error is saved in the str->error variable
+ *    when it occurs, and can be seen immediately or can be examined
+ *    only after gets() has returned 0.
  *
  *  SIDE EFFECTS:
  *    The data read from the socket is written to the buf array.

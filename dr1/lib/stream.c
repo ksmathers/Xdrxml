@@ -13,6 +13,12 @@ dr1Stream* dr1Stream_create( dr1Stream *str, int sd) {
     return str;
 }
 
+void
+dr1Stream_finit( dr1Stream *str) {
+    dr1StringBuffer_finit( &str->ibuf);
+    dr1StringBuffer_finit( &str->obuf);
+}
+
 int dr1Stream_read( dr1Stream *str, char *buf, int min, int max) {
     int count = 0;
     int nread;
@@ -31,6 +37,10 @@ int dr1Stream_read( dr1Stream *str, char *buf, int min, int max) {
 }
 
 int dr1Stream_write( dr1Stream *str, char *buf, int size) {
+    /*
+     * FIXME:  Need to make this asynchronous, but will
+     * have to write unflushed data to the output buffer
+     */
     int count = 0;
     int nwrite;
 
@@ -38,6 +48,7 @@ int dr1Stream_write( dr1Stream *str, char *buf, int size) {
     do {
 	nwrite = write( str->fd, buf, size-count);
 	if (nwrite < 0) {
+	    if (errno == EAGAIN) continue;
 	    str->error = errno;
 	    perror("write");
 	    break;

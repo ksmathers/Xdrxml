@@ -116,4 +116,10 @@ int dr1Monster_thac0( dr1Monster *m);
  */
 extern dr1Registry dr1monsters;
 
+/*-------------------------------------------------------------------
+ * xdr_dr1Monster
+ *
+ */
+
+bool_t xdr_dr1Monster( XDR *xdrs, dr1Monster* m);
 #endif /* __DR1MONSTER__H */

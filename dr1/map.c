@@ -1,7 +1,62 @@
 #include <string.h>
 #include "map.h"
-#include "xdrxml.h"
+#include "set.h"
+#include "lib/xdrxml.h"
+#include "monster.h"
 
+
+/*-------------------------------------------------------------------
+ * mobile_cmp_location()
+ */
+static int mobile_cmp_location( void *a, void *b) {
+    dr1Monster *ma = (dr1Monster*)a;
+    dr1Monster *mb = (dr1Monster*)b;
+    if (ma->location.x < mb->location.x) return -1;
+    if (ma->location.x == mb->location.x) {
+	if (ma->location.y < mb->location.y) return -1;
+	if (ma->location.y == mb->location.y) return 0;
+    }
+    return 1;
+}
+
+/*-------------------------------------------------------------------
+ * xdr_mobileptr
+ *
+ *  PARAMETERS:
+ *
+ *  RETURNS:
+ *
+ *  SIDE EFFECTS:
+ */
+
+static bool_t xdr_mobileptr( XDR *xdrs, void **mp) {
+    bool_t null;
+    if (xdrs->x_op == XDR_ENCODE) {
+	null = (*mp == NULL);
+    }
+    xdr_attr( xdrs, "null");
+    if (!xdrxml_bool( xdrs, &null)) return FALSE;
+
+    if (!null) {
+	if (xdrs->x_op == XDR_DECODE) {
+	    *mp = calloc( 1, sizeof( dr1Monster));
+	}
+	if (!xdr_dr1Monster( xdrs, *mp)) return FALSE;
+	if (xdrs->x_op == XDR_FREE) {
+	    free(*mp);
+	}
+    }
+    return TRUE;
+}
+
+/*-------------------------------------------------------------------
+ * dr1MapMobile_create()
+ */
+dr1MapMobile* dr1MapMobile_create( dr1MapMobile *mm) {
+    if (!mm) mm = calloc(1, sizeof(dr1MapMobile));
+    dr1Set_create( &mm->mobs, mobile_cmp_location, xdr_mobileptr);
+    return mm;
+}
 
 /*-------------------------------------------------------------------
  * findgraphic()
@@ -49,8 +104,9 @@ dr1Map* dr1Map_readmap( char *fname) {
     dr1Map *map = calloc( 1, sizeof(dr1Map));
     dr1MapGraphic *g;
 
+    dr1MapMobile_create( &map->moblayer);
 
-    /* Size of the arrays */
+    /* First Pass: Size of the arrays */
     line = 0;
     do {
 	fgets( buf, sizeof(buf), fp); line++;
@@ -74,7 +130,7 @@ dr1Map* dr1Map_readmap( char *fname) {
     map->grid = calloc( map->xsize * map->ysize,
 		       sizeof(dr1MapSquare) );
 
-    /* Second pass */
+    /* Second pass: Lay out the main map */
     rewind(fp);
 
     /* Get the MapGraphic array */
@@ -359,6 +415,27 @@ xdr_dr1MapSquare( XDR *xdrs, dr1MapSquare *square, dr1Map *map) {
 }
 
 /*-------------------------------------------------------------------
+ * xdr_dr1MapMobile
+ *
+ *  PARAMETERS:
+ *
+ *  RETURNS:
+ *
+ *  SIDE EFFECTS:
+ */
+bool_t xdr_dr1MapMobile( XDR *xdrs, dr1MapMobile *mm) {
+    if (xdrs->x_op == XDR_DECODE) {
+	dr1MapMobile_create( mm);
+    }
+
+    xdr_push_note( xdrs, "mobs");
+    if (!xdr_dr1Set( xdrs, &mm->mobs)) return FALSE;
+    xdr_pop_note( xdrs);
+
+    return TRUE;
+}
+
+/*-------------------------------------------------------------------
  * xdr_dr1Map
  *
  *  PARAMETERS:
@@ -428,6 +505,11 @@ xdr_dr1Map( XDR *xdrs, dr1Map *map) {
     xdr_attr( xdrs, "startx");
     if (!xdr_int( xdrs, &map->startx)) return FALSE;
 
+    xdr_push_note( xdrs, "mobilelayer");
+    if (!xdr_dr1MapMobile( xdrs, &map->moblayer)) return FALSE;
+    xdr_pop_note( xdrs);
+
     return TRUE;
 }
+
 

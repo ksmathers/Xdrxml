@@ -15,31 +15,7 @@
 #include "qio.h"
 #include "lib/protocol.h"
 
-struct cmdargs_t {
-    int c;
-    char **v;
-};
-
-int dobuy( dr1Context *ctx);
-int pushbuy( dr1Context *ctx, int c, char **v) {
-    struct cmdargs_t *args = dr1Context_pushcallv( ctx, dobuy, 
-	    "cmdargs_t", sizeof(*args));
-    args->c = c;
-    args->v = v;
-    return 0;
-}
-int dobuy( dr1Context *ctx) {
-    struct cmdargs_t *args = dr1Context_args( ctx, "cmdargs_t");
-    struct {
-	int state;
-	char _who[80];
-	char _what[80];
-	char _many[80];
-	dr1Merchant *merc;
-	char* offr;
-	dr1Barter* b;
-    } *autos = dr1Context_auto( ctx, sizeof(*autos));
-
+int dobuy( dr1Context *ctx, int c, char **v) {
     /* purchase an item */
     dr1Player *p = &ctx->player;
     dr1Money val;
@@ -60,53 +36,53 @@ int dobuy( dr1Context *ctx) {
     /* end jump table */
     
 ENTRY(INIT)
-    if (args->c == 1) {
-	qprintf( ctx, "Shops in Dragon's Reach:\n");
-	qprintf( ctx, " - Fnord the Apothecary\n");
-	qprintf( ctx, " - Gandor the Blacksmith\n");
-	qprintf( ctx, " - John Frommer's Leathers\n");
-	qprintf( ctx, " - John the Wheel Wright\n\n");
-	qprintf( ctx, "(fnord, gandor, frommer, wright)\n");
-	qprintf( ctx, "Buy from whom:");
+    if (c == 1) {
+	dr1Stream_printf( &ctx->ios, "Shops in Dragon's Reach:\n");
+	dr1Stream_printf( &ctx->ios, " - Fnord the Apothecary\n");
+	dr1Stream_printf( &ctx->ios, " - Gandor the Blacksmith\n");
+	dr1Stream_printf( &ctx->ios, " - John Frommer's Leathers\n");
+	dr1Stream_printf( &ctx->ios, " - John the Wheel Wright\n\n");
+	dr1Stream_printf( &ctx->ios, "(fnord, gandor, frommer, wright)\n");
+	dr1Stream_printf( &ctx->ios, "Buy from whom:");
 
 ENTRY(GETWHO)
 	if (qgets( autos->_who, sizeof(autos->_who), ctx)) return 1;
-	args->v[1]= autos->_who;
-	args->c = 2;
+	v[1]= autos->_who;
+	c = 2;
     } 
 
-    if ( !strcasecmp( args->v[1], "Fnord")) {
+    if ( !strcasecmp( v[1], "Fnord")) {
 	autos->merc = &dr1apothecary;
-    } else if ( !strcasecmp( args->v[1], "Gandor")) {
+    } else if ( !strcasecmp( v[1], "Gandor")) {
 	autos->merc = &dr1smithy;
-    } else if ( !strcasecmp( args->v[1], "Frommer")) {
+    } else if ( !strcasecmp( v[1], "Frommer")) {
 	autos->merc = &dr1tanner;
-    } else if ( !strcasecmp( args->v[1], "Wright")) {
+    } else if ( !strcasecmp( v[1], "Wright")) {
 	autos->merc = &dr1wright;
     } else {
 	dr1Context_popcall( ctx, -1);
 	return 0;
     }
 
-    qprintf( ctx, "Welcome to '%s'\n", autos->merc->store);
+    dr1Stream_printf( &ctx->ios, "Welcome to '%s'\n", autos->merc->store);
     if (autos->merc->mood > 10) {
-	qprintf( ctx, "%s looks a bit peeved today.\n", 
+	dr1Stream_printf( &ctx->ios, "%s looks a bit peeved today.\n", 
 		autos->merc->name);
     }
-    if (args->c == 2) {
-	qprintf( ctx, "(");
+    if (c == 2) {
+	dr1Stream_printf( &ctx->ios, "(");
 	for (i=0; i<autos->merc->itemStore.len; i++) {
-	    qprintf( ctx, "%s%s", (i?",":""), 
+	    dr1Stream_printf( &ctx->ios, "%s%s", (i?",":""), 
 		    autos->merc->itemStore.items[i]->name);
 	}
-	qprintf( ctx, ")\nBuy what:");
+	dr1Stream_printf( &ctx->ios, ")\nBuy what:");
 ENTRY(GETWHAT)
 	if (qgets( autos->_what, sizeof(autos->_what), ctx)) return 1;
-	args->v[2]= autos->_what;
-	args->c = 3;
+	v[2]= autos->_what;
+	c = 3;
     }
 
-    autos->b = dr1Merchant_buy( autos->merc, args->v[2]);
+    autos->b = dr1Merchant_buy( autos->merc, v[2]);
     if (!autos->b) {
 	/* no such item */
 	dr1Context_popcall( ctx, -1);
@@ -114,17 +90,17 @@ ENTRY(GETWHAT)
     }
 
     if (autos->b->item->type->stackable) {
-	if (args->c == 3) {
-	    qprintf( ctx, "How many would you like to buy?");
+	if (c == 3) {
+	    dr1Stream_printf( &ctx->ios, "How many would you like to buy?");
 ENTRY(GETMANY)
 	    if (qgets( autos->_many, sizeof(autos->_many), ctx)) return 1;
-	    args->v[4] = autos->_many;
-	} else if (args->c == 4) {
+	    v[4] = autos->_many;
+	} else if (c == 4) {
 	} else {
 	    dr1Context_popcall( ctx, -1);
 	    return 0;
 	}
-	many = atoi( args->v[4]);
+	many = atoi( v[4]);
 	if (many < 0) {
 	    dr1Context_popcall( ctx, -3);
 	    return 0;
@@ -140,7 +116,7 @@ ENTRY(GETMANY)
 		(float)many, autos->merc->ep);
 	autos->b->item->count = many;
     } else {
-	if (args->c != 3) {
+	if (c != 3) {
 	    dr1Context_popcall( ctx, -1);
 	    return 0;
 	}
@@ -148,14 +124,14 @@ ENTRY(GETMANY)
 
     autos->offr = dr1Barter_startingOffer( autos->b);
     dr1Money_format( &p->purse, mbuf);
-    qprintf( ctx, "You have %s\n", mbuf);
-    qprintf( ctx, "Buying %s\n", args->v[2]);
+    dr1Stream_printf( &ctx->ios, "You have %s\n", mbuf);
+    dr1Stream_printf( &ctx->ios, "Buying %s\n", v[2]);
 
     do {
 /*      printf("mood %d\n", autos->merc->mood); /**/
 	dr1Money_format( &autos->b->start, mbuf);
-	qprintf( ctx, "%s %s\n", autos->offr, mbuf);
-	qprintf( ctx, "You offer? ");
+	dr1Stream_printf( &ctx->ios, "%s %s\n", autos->offr, mbuf);
+	dr1Stream_printf( &ctx->ios, "You offer? ");
 
 ENTRY(GETOFFER)
 	if (qgets( buf, sizeof(buf), ctx)) return 1;
@@ -171,14 +147,14 @@ ENTRY(GETOFFER)
     } while (buy < sell && buy != 0);
 
     if (buy == 0) {
-	qprintf( ctx, "%s\n", (char *) autos->offr);
+	dr1Stream_printf( &ctx->ios, "%s\n", (char *) autos->offr);
 	dr1Context_popcall( ctx, 0);
 	return 0;
     } else {
 	if ( dr1Money_deduct( &p->purse, &autos->b->start)) {
-	    qprintf( ctx, "Sorry, you haven't that much in your purse.\n");
+	    dr1Stream_printf( &ctx->ios, "Sorry, you haven't that much in your purse.\n");
 	} else {
-	    qprintf( ctx, "%s\n", (char *) autos->offr);
+	    dr1Stream_printf( &ctx->ios, "%s\n", (char *) autos->offr);
 	    dr1Merchant_completeSale( autos->merc, autos->b);
 	    dr1ItemSet_add( &p->pack, autos->b->item);
 	}
@@ -205,7 +181,7 @@ int equip( dr1Context *ctx, int c, char **v) {
         dr1Weapon *wnew = (dr1Weapon*)item;
 
 	if (wnew->min_str > p->curr_attr._str) {
-	    qprintf( ctx, "Sorry, you aren't strong enough to use that weapon.\n");
+	    dr1Stream_printf( &ctx->ios, "Sorry, you aren't strong enough to use that weapon.\n");
 	    return -2;
 	}
 
@@ -230,10 +206,10 @@ int equip( dr1Context *ctx, int c, char **v) {
     dr1ItemSet_remove( &p->pack, item);
           
     if (unequip) {
-	qprintf( ctx, "Putting %s back in your pack.\n", unequip->name);
+	dr1Stream_printf( &ctx->ios, "Putting %s back in your pack.\n", unequip->name);
 	dr1ItemSet_add( &p->pack, unequip);
     }
-    qprintf( ctx, "Equipping %s.\n", item->name);
+    dr1Stream_printf( &ctx->ios, "Equipping %s.\n", item->name);
     
     return 0;
 }
@@ -242,7 +218,7 @@ int equip( dr1Context *ctx, int c, char **v) {
 int rest( dr1Context *ctx, int c, char **v) {
     dr1Money roomcost = { 0, 2, 0, 0, 0 };
     dr1Player *p = &ctx->player;
-    qprintf( ctx, "You've rested for 1 day at 2sp per day for room and board.\n");
+    dr1Stream_printf( &ctx->ios, "You've rested for 1 day at 2sp per day for room and board.\n");
     p->wounds --;
     if (p->wounds < 0) p->wounds = 0;
     dr1Money_deduct( &p->purse, &roomcost);
@@ -277,14 +253,14 @@ int dr1Town_showDialog( dr1Context *ctx) {
     switch ( autos->state) {
 	case PROMPT:
 	    if ( strlen( ctx->error)) {
-		qprintf( ctx, DR1MSG_310, 0, ctx->error);
+		dr1Stream_printf( &ctx->ios, DR1MSG_310, 0, ctx->error);
 		*ctx->error = 0;
 	    }
 	    if ( autos->r) {
-		qprintf( ctx, DR1MSG_310, autos->r, "Last command returned error");
+		dr1Stream_printf( &ctx->ios, DR1MSG_310, autos->r, "Last command returned error");
 	    }
 
-	    qprintf( ctx, DR1MSG_190, "(buy, equip, sell, rest, hunt, save, quit)\n");
+	    dr1Stream_printf( &ctx->ios, DR1MSG_190, "(buy, equip, sell, rest, hunt, save, quit)\n");
 	    autos->state = GETCMD;
 	    return 0;
 

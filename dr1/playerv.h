@@ -8,6 +8,7 @@
 #   include "context.h"
 #endif
 
+enum { DIALOG_ERROR=-1, DIALOG_OK, DIALOG_DONE };
 
 /*-------------------------------------------------------------------
  * dr1
@@ -26,6 +27,6 @@
  *    Initializes p from the player's selections
  */
 
-int dr1Playerv_showDialog( dr1Context* ctx);
+int dr1Playerv_cmd( dr1Context* ctx, int argc, char **argv);
 
 #endif /* __DR1PLAYERV__H */

@@ -4,6 +4,9 @@
 #ifndef _RPC_XDR_H
 #   include <rpc/xdr.h>
 #endif
+#ifndef __DR1SET__H
+#   include "set.h"
+#endif
 
 /*-------------------------------------------------------------------
  * dr1Glyph
@@ -63,13 +66,22 @@ struct dr1MapSquare {
     int open:1;			/* top glyph is open */
 };
 
+
+/*-------------------------------------------------------------------
+ * dr1
+ *
+ *    This structure holds mobile objects (Monsters and PCs)
+ */
+typedef struct {
+    /* dynamic */
+    dr1Set mobs;
+} dr1MapMobile;
+
 /*-------------------------------------------------------------------
  * dr1
  *
  *    This structure holds the entire map.
  *
- *    TODO:
- *      need to add a mobile layer
  */
 
 typedef struct dr1Map dr1Map;
@@ -81,6 +93,7 @@ struct dr1Map {
     dr1MapSquare *grid;		/* [xsize*ysize] */
     int startx;
     int starty;
+    dr1MapMobile moblayer;
 };
 
 /*-------------------------------------------------------------------
@@ -97,9 +110,7 @@ struct dr1Map {
  *
  *  SIDE EFFECTS:
  */
-
 dr1Map* dr1Map_readmap( char *fname);
-
 
 bool_t xdr_dr1Map( XDR *xdrs, dr1Map *);
 #endif /* __DR1MAP__H */

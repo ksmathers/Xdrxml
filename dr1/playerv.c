@@ -10,7 +10,6 @@
 #include "dice.h"
 #include "class.h"
 #include "context.h"
-#include "qio.h"
 #include "lib/protocol.h"
 
 
@@ -44,13 +43,13 @@ static void undo_racesex( dr1Player *p) {
     if (adj) dr1Attr_adjust( &p->base_attr, adj, -1);
 }
 
-static void fixestr( dr1Player *p, int *estr) {
+static void fixestr( dr1Player *p, struct dr1StartingValues *sv) {
     /*
      * Fix enhanced strength after changing character class
      */
-    if (*estr == 0) *estr = dr1Dice_roll("d100");
+    if (sv->estr == 0) sv->estr = dr1Dice_roll("d100");
     if (p->class == DR1C_FIGHTER && p->base_attr._str == 18) {
-	p->base_attr.estr = *estr;
+	p->base_attr.estr = sv->estr;
     } else {
 	p->base_attr.estr = 0;
     }
@@ -58,6 +57,14 @@ static void fixestr( dr1Player *p, int *estr) {
 }
 
 static int check_classattr( dr1Player *p) {
+    /*
+     * Test that character class attribute requirements 
+     * Return 0 if OK 
+     * Return -1 if attributes aren't within class requirements
+     * Return 1 if no class has been selected yet.
+     */
+
+
     int *stat, *min;
     enum Attribute i;
     dr1ClassType *cl;
@@ -80,10 +87,17 @@ static int check_classattr( dr1Player *p) {
     return 0;
 }
 
-enum { START_MU, START_THIEF, START_CLERIC, START_FIGHTER, START_MAX };
-
-int apply_class( dr1Player *p, int ccode, int *hits, dr1Money *gold, int *estr) 
+static int apply_class( dr1Player *p, int ccode, struct dr1StartingValues *sv) 
 {
+    /*
+     * Apply the starting values for a particular character class
+     * Class specific starting values include: gold, hitpoints, and
+     * exceptional strength.
+     *
+     * These starting values are stored in external arrays so that
+     * a player cannot select another class and then come back to this
+     * class to reroll starting values (which would be cheating).
+     */
     int idx;
     dr1Player pnew;
     dr1ClassType *cl;
@@ -125,16 +139,16 @@ int apply_class( dr1Player *p, int ccode, int *hits, dr1Money *gold, int *estr)
     *p = pnew;
 
     
-    if ( !hits[ idx]) {
+    if ( !sv->hits[ idx]) {
 	p->hp = dr1Dice_roll( cl->hitdice);
 	p->purse.gp = dr1Dice_roll( cl->startingMoney);
-	gold[ idx] = p->purse;
-	hits[ idx] = p->hp;
+	sv->gold[ idx] = p->purse;
+	sv->hits[ idx] = p->hp;
     } else {
-	p->hp = hits[ idx];
-	p->purse = gold[ idx];
+	p->hp = sv->hits[ idx];
+	p->purse = sv->gold[ idx];
     }
-    fixestr(p, estr);
+    fixestr(p, sv);
     return 0;
 }
 
@@ -143,118 +157,51 @@ int apply_class( dr1Player *p, int ccode, int *hits, dr1Money *gold, int *estr)
  */
 
 /* class: Choose a class for the player */
-struct dr1Playerv_classargs_t {
-    int c;
-    char **v;
-    int* hits;
-    dr1Money* gold;
-    int* estr;
-};
-
-int dr1Playerv_classv( dr1Context *ctx);
-int dr1Playerv_class( 
-	dr1Context *ctx, int c, char **v, int *hits, dr1Money *gold, int *estr
-    ) 
+int dr1Playerv_class( dr1Context *ctx, int c, char **v) 
 {
-    struct dr1Playerv_classargs_t *args = dr1Context_pushcallv( 
-	    ctx, dr1Playerv_classv, "dr1Playerv_classargs_t", sizeof(*args)
-	);
-    if (!args) return -1;
+    dr1Player *p = &ctx->player;
+    int ccode;
+    int res;
 
-    args->c = c;
-    args->v = v;
-    args->gold = gold;
-    args->hits = hits;
-    args->estr = estr;
+    if (c != 2) {
+	dr1Stream_printf( &ctx->ios, DR1MSG_190, "(mu,fighter,cleric,thief)");
+	return -1;
+    }
+
+    if (!strcasecmp( v[1], "mu")) {
+	ccode = DR1C_MU;
+    } else if (!strcasecmp( v[1], "fighter")) {
+	ccode = DR1C_FIGHTER;
+    } else if (!strcasecmp( v[1], "cleric")) {
+	ccode = DR1C_CLERIC;
+    } else if (!strcasecmp( v[1], "thief")) {
+	ccode = DR1C_THIEF;
+    } else {
+	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[1]);
+	return -2;
+    }
+    
+    res = apply_class( p, ccode, &ctx->creationstate);
     return 0;
 }
 
-int dr1Playerv_classv( dr1Context *ctx) {
-    struct dr1Playerv_classargs_t *args = 
-	    dr1Context_args( ctx, "dr1Playerv_classargs_t");
-    struct {
-	int state;
-	char s[20];
-    } *autos = dr1Context_auto( ctx, sizeof(*autos));
-    dr1Player *p = &ctx->player;
-    int ccode;
-    int idx;
-    int res;
-    enum { INIT, GETCLASS, RUN };
-
-    switch (autos->state) {
-
-	case INIT:
-	    if (args->c == 1) {
-		qprintf( ctx, "(mu,fighter,cleric,thief)\n");
-		qprintf( ctx, "Class: ");
-		autos->state = GETCLASS;
-	    } else {
-		autos->state = RUN;
-	    }
-	    return 0;
-
-        case GETCLASS:
-	    if ( qgets( autos->s, sizeof(autos->s), ctx)) return 1;
-	    args->v[1] = autos->s;
-	    autos->state = RUN;
-
-	case RUN:	
-	    if (args->c != 2) {
-	        dr1Context_popcall( ctx, -1);
-		return 0;
-	    }
-
-	    if (!strcasecmp( args->v[1], "mu")) {
-		ccode = DR1C_MU;
-		idx = 0;
-	    } else if (!strcasecmp( args->v[1], "fighter")) {
-		ccode = DR1C_FIGHTER;
-		idx = 1;
-	    } else if (!strcasecmp( args->v[1], "cleric")) {
-		ccode = DR1C_CLERIC;
-		idx = 2;
-	    } else if (!strcasecmp( args->v[1], "thief")) {
-		ccode = DR1C_THIEF;
-		idx = 3;
-	    } else {
-		dr1Context_popcall( ctx, -1);
-		return 0;
-	    }
-	    
-	    res = apply_class( p, ccode, args->hits, args->gold, args->estr);
-	    dr1Context_popcall( ctx, res);
-	    return 0;
-    } /* switch */
-    return -1;
-}
-
-int dr1Playerv_roll( 
-	dr1Context *ctx, int c, char **v, int *hits, dr1Money *gold, int *estr) 
+int dr1Playerv_roll( dr1Context *ctx, int c, char **v)
 {
     dr1Player *p = &ctx->player;
-    int oldclass;
-    int i;
     if (c != 1) return -1;
 
-    oldclass = p->class;
+    /* reroll attributes */
     p->base_attr = dr1Attr_create_mode4();
     p->curr_attr = p->base_attr;
 
-    /* reset class (reroll starting gold, etc) */
-    for (i = 0; i<START_MAX; i++) {
-	hits[i] = 0;
-	bzero( &gold[i], sizeof(gold[i]));
-	*estr = 0;
-    }
+    /* reset class variables */
+    dr1Context_resetCreationState( ctx);
     p->hp = 0;
     p->purse.gp = 0;
 
+    /* reapply original sex, race, and class adjustments */
     apply_racesex( p);
-    apply_class( p, oldclass, hits, gold, estr);
-    fixestr(p,estr);
-
-
+    apply_class( p, p->class, &ctx->creationstate);
     return 0;
 }
 
@@ -266,7 +213,7 @@ int dr1Playerv_name( dr1Context *ctx, int c, char **v) {
     return 0;
 }
 
-int dr1Playerv_sex( dr1Context *ctx, int c, char **v, int *estr) {
+int dr1Playerv_sex( dr1Context *ctx, int c, char **v) {
     dr1AttrAdjust *old, *new;
     int r;
     dr1Player *p = &ctx->player;
@@ -294,248 +241,129 @@ int dr1Playerv_sex( dr1Context *ctx, int c, char **v, int *estr) {
 }
 
 /* race: Choose a race for the player */
-int dr1Playerv_racev( dr1Context *ctx);
-int dr1Playerv_race( dr1Context *ctx, int c, char **v, int *estr) {
-    
-    struct dr1Playerv_args_t *args = dr1Context_pushcallv( 
-	    ctx, dr1Playerv_racev, "dr1Playerv_args_t", sizeof(*args)
-	);
-    if (!args) return -1;
-    args->c = c;
-    args->v = v;
-    args->estr = estr;
-    return 0;
-}
-
-int dr1Playerv_racev( dr1Context *ctx) {
+int dr1Playerv_race( dr1Context *ctx, int c, char **v) {
     dr1AttrAdjust *old, *new;
     int r;
-    struct dr1Playerv_args_t *args = dr1Context_args( ctx, "dr1Playerv_args_t");
-    struct {
-	int state;
-	char s[20];
-    } *autos = dr1Context_auto( ctx, sizeof(*autos));
     dr1Player *p = &ctx->player;
-    enum { INIT, GETRACE, RUN };
     
-    switch ( autos->state) {
-	case INIT:
-	    if (args->c == 1) {
-		qprintf( ctx, "(human, elf, halfling, dwarf, halforc)\n");
-		qprintf( ctx, "Race: ");
-		autos->state = GETRACE;
-		return 0;
-	    }
-	    autos->state = RUN;
-	    return 0;
+    if (c != 2) {
+	dr1Stream_printf( &ctx->ios, "(human, elf, halfling, dwarf, halforc)\n");
+	dr1Stream_printf( &ctx->ios, "Race: ");
+	return -1;
+    }
 
-        case GETRACE:
-	    if ( qgets( autos->s, sizeof(autos->s), ctx)) return 1;
-	
-	    args->v[1] = autos->s;
-	    args->c = 2;
-	    autos->state = RUN;
+    old = dr1Registry_lookup( &dr1race, p->race);
 
-	case RUN:
-	    if (args->c != 2) return -1;
+    if (!strcasecmp( v[1], "human")) r=DR1R_HUMAN;
+    else if (!strcasecmp( v[1], "elf")) r=DR1R_ELF;
+    else if (!strcasecmp( v[1], "halfling")) r=DR1R_HOBBIT;
+    else if (!strcasecmp( v[1], "dwarf")) r=DR1R_DWARF;
+    else if (!strcasecmp( v[1], "halforc")) r=DR1R_HALFORC;
+    else {
+	dr1Context_error( ctx, "Invalid race '%s'", v[1]);
+	dr1Stream_printf( &ctx->ios, "Invalid race '%s'", v[1]);
+	return -1;
+    }
 
-	    old = dr1Registry_lookup( &dr1race, p->race);
+    new = dr1Registry_lookup( &dr1race, r);
+    if (!new) { return -1; }
+    if (old) dr1Attr_adjust( &p->base_attr, old, -1);
+    dr1Attr_adjust( &p->base_attr, new, 1);
+    p->race = r;
 
-	    if (!strcasecmp( args->v[1], "human")) r=DR1R_HUMAN;
-	    else if (!strcasecmp( args->v[1], "elf")) r=DR1R_ELF;
-	    else if (!strcasecmp( args->v[1], "halfling")) r=DR1R_HOBBIT;
-	    else if (!strcasecmp( args->v[1], "dwarf")) r=DR1R_DWARF;
-	    else if (!strcasecmp( args->v[1], "halforc")) r=DR1R_HALFORC;
-	    else {
-	        dr1Context_error( ctx, "Invalid race '%s'", args->v[1]);
-	        dr1Context_popcall( ctx, -1);
-		return 0;
-	    }
+    /* apply exceptional strength if appropriate */
+    fixestr(p,&ctx->creationstate);
 
-	    new = dr1Registry_lookup( &dr1race, r);
-	    if (!new) { dr1Context_popcall( ctx, -2); return 0; }
-	    if (old) dr1Attr_adjust( &p->base_attr, old, -1);
-	    dr1Attr_adjust( &p->base_attr, new, 1);
-	    p->race = r;
-
-            /* apply exceptional strength if appropriate */
-	    fixestr(p,args->estr);
-
-	    if (check_classattr( p)<0) p->class=DR1C_INVALID;
-	    dr1Context_popcall( ctx, 0);
-	    return 0;
-    } /* switch */
-    dr1Context_error( ctx, "Internal error");
-    return 1;
+    if (check_classattr( p)<0) p->class=DR1C_INVALID;
+    return 0;
 }
 
 
 /* trade: Trade points in one stat for points in another */
-int dr1Playerv_swapv( dr1Context *ctx);
-int dr1Playerv_swap( dr1Context *ctx, int c, char **v, int *estr) {
-    
-    struct dr1Playerv_args_t *args = dr1Context_pushcallv( 
-	    ctx, dr1Playerv_swapv, "dr1Playerv_args_t", sizeof(*args)
-	);
-    if (!args) return -1;
-    args->c = c;
-    args->v = v;
-    args->estr = estr;
-    return 0;
-}
-
-int dr1Playerv_swapv( dr1Context *ctx) {
+int dr1Playerv_swap( dr1Context *ctx, int c, char **v) {
     int *a, *b, t;
     dr1Player *p = &ctx->player;
-    struct dr1Playerv_args_t *args = dr1Context_args( ctx, "dr1Playerv_args_t");
-    struct {
-	int state;
-	char v1[10];
-	char v2[10];
-    } *autos = dr1Context_auto( ctx, sizeof(*autos));
-    enum { INIT, READFROM, READTO, CONT };
 
-    switch (autos->state) {
-	case INIT:
-	    if (args->c == 1) {
-		qprintf( ctx, "(str, int, wis, dex, con, cha)\n");
-		qprintf( ctx, "Swap: ");
-		autos->state = READFROM;
-		return 0;
-	    }
-            autos->state = CONT;
-	    return 0;
+    if (c != 3) {
+	dr1Stream_printf( &ctx->ios, DR1MSG_190, "(str, int, wis, dex, con, cha)");
+	return -1;
+    }
 
-	case READFROM:
-	    if (qgets( autos->v1, sizeof(autos->v1), ctx)) return 1;
-	    qprintf( ctx, "With: ");
-	    autos->state = READTO;
-	    return 0;
+    /* get attribute pointers */
+    a = dr1Attr_statptr( &p->base_attr, v[1]);
+    b = dr1Attr_statptr( &p->base_attr, v[2]);
+    if (a == NULL) {
+	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[1]);
+	return -2;
+    }
+    if (b == NULL) {
+	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[2]);
+	return -3;
+    }
 
-	case READTO:
-	    if (qgets( autos->v2, sizeof(autos->v2), ctx)) return 1;
-	    args->v[1] = autos->v1;
-	    args->v[2] = autos->v2;
-	    args->c = 3;
-	    autos->state = CONT;
+    /* swap attributes */
+    undo_racesex(p);
+    t = *a;
+    *a = *b;
+    *b = t;
+    apply_racesex(p);
 
-        case CONT:
-	    if (args->c != 3) return -1;
+    /* apply exceptional strength if appropriate */
+    fixestr(p,&ctx->creationstate);
 
-	    /* get attribute pointers */
-	    a = dr1Attr_statptr( &p->base_attr, args->v[1]);
-	    b = dr1Attr_statptr( &p->base_attr, args->v[2]);
-	    if (a == NULL || b == NULL) {
-		dr1Context_popcall( ctx, -1);
-		return 0;
-	    }
-
-	    /* swap attributes */
-	    undo_racesex(p);
-	    t = *a;
-	    *a = *b;
-	    *b = t;
-	    apply_racesex(p);
-
-            /* apply exceptional strength if appropriate */
-	    fixestr(p,args->estr);
-
-            /* reset class if attributes are out of range */
-	    if ( check_classattr( p)<0) p->class = DR1C_INVALID;
-	    dr1Context_popcall( ctx, 0);
-	    return 0;
-    } /* switch */
-    return -1;
+    /* reset class if attributes are out of range */
+    if ( check_classattr( p)<0) p->class = DR1C_INVALID;
+    return 0;
 }
 
 /* improve: Improve points in one stat at the cost of points in another */
-int dr1Playerv_improvev( dr1Context *ctx);
-int dr1Playerv_improve( dr1Context *ctx, int c, char **v, int *estr) {
-    
-    struct dr1Playerv_args_t *args = dr1Context_pushcallv( 
-	    ctx, dr1Playerv_improvev, "dr1Playerv_args_t", sizeof(*args)
-	);
-    if (!args) return -1;
-    args->c = c;
-    args->v = v;
-    args->estr = estr;
-    return 0;
-}
-
-int dr1Playerv_improvev( dr1Context *ctx) {
+int dr1Playerv_improve( dr1Context *ctx, int c, char **v) {
     int *a, *b;
-    struct dr1Playerv_args_t *args = dr1Context_args( ctx, "dr1Playerv_args_t");
-    struct {
-	int state;
-	char v1[10];
-	char v2[10];
-    } *autos = dr1Context_auto( ctx, sizeof(*autos));
-    enum { INIT, READFROM, READTO, CONT };
 
-    switch (autos->state) {
-	case INIT:
-	    if (args->c == 1) {
-		qprintf( ctx, "(str, int, wis, dex, con, cha)\n");
-		qprintf( ctx, "Trade from: ");
-		autos->state = READFROM;
-		return 0;
-	    }
-            autos->state = CONT;
-	    return 0;
+    if (c != 3) {
+	dr1Stream_printf( &ctx->ios, DR1MSG_190, "(str, int, wis, dex, con, cha)");
+	return -1;
+    }
 
-	case READFROM:
-	    if (qgets( autos->v1, sizeof(autos->v1), ctx)) return 1;
-	    qprintf( ctx, "Trade to: ");
-	    autos->state = READTO;
-	    return 0;
+    /* get stat pointers */
+    a = dr1Attr_statptr( &ctx->player.base_attr, v[1]);
+    b = dr1Attr_statptr( &ctx->player.base_attr, v[2]);
+    if (a == NULL) {
+	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[1]);
+	return -2;
+    }
+    if (b == NULL) {
+	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[2]);
+	return -3;
+    }
 
-	case READTO:
-	    if (qgets( autos->v2, sizeof(autos->v2), ctx)) return 1;
-	    args->v[1] = autos->v1;
-	    args->v[2] = autos->v2;
-	    args->c = 3;
-	    autos->state = CONT;
+    /* check for legal improvement */
+    undo_racesex( &ctx->player);
+    if (*a < 5) { 
+	/* can't decrease a stat to less than 3 */
+	apply_racesex( &ctx->player);
+	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[1]);
+	return -4;
+    }
+    if (*b > 17) { 
+	/* can't improve a stat to more than 18 */
+	apply_racesex( &ctx->player);
+	dr1Stream_printf( &ctx->ios, DR1MSG_590, v[2]);
+	return -5;
+    }
 
-        case CONT:
-	    if (args->c != 3) {
-		dr1Context_popcall( ctx, -1);
-		return 0;
-	    }
+    /* modify the stats */
+    *a -= 2;
+    *b += 1;
+    apply_racesex( &ctx->player);
 
-	    /* get stat pointers */
-	    a = dr1Attr_statptr( &ctx->player.base_attr, args->v[1]);
-	    b = dr1Attr_statptr( &ctx->player.base_attr, args->v[2]);
-	    if (a == NULL || b == NULL) { 
-		/* unknown stat */
-		dr1Context_popcall( ctx, -2); 
-		return 0; 
-	    }
+    /* calculate exceptional strength if appropriate */
+    fixestr( &ctx->player, &ctx->creationstate);
 
-	    if (*a < 5 || *b > 17) { 
-		/* can't improve for more than 18, or less than 3 */
-		dr1Context_popcall( ctx, -3); return 0; 
-	    }
+    /* check if the stats are in bounds for your class */
+    if ( check_classattr( &ctx->player)<0) ctx->player.class = DR1C_INVALID;
 
-	    /* modify the stats */
-	    undo_racesex( &ctx->player);
-	    *a -= 2;
-	    *b += 1;
-	    apply_racesex( &ctx->player);
-
-            /* calculate exceptional strength if appropriate */
-	    fixestr( &ctx->player, args->estr);
-
-	    /* check if the stats are in bounds for your class */
-	    if ( check_classattr( &ctx->player)<0) { 
-		dr1Context_popcall( ctx, -4); return 0; 
-	    }
-
-	    /* return to main */
-	    dr1Context_popcall( ctx, 0);
-	    return 0;
-    } /* switch */
-    errno = ENOSYS;
-    return 1;
+    return 0;
 }
 
 int dr1Playerv_init( dr1Player *p) {
@@ -546,99 +374,77 @@ int dr1Playerv_init( dr1Player *p) {
     return 0;
 }
 
-int dr1Playerv_showDialog( dr1Context *ctx) {
+int dr1Playerv_cmd( dr1Context *ctx, int c, char **v) {
+    /*
+     * Execute a player character creation command.  
+     * Returns 0 on success
+     * Returns -1 on fatal error
+     */
     char buf[80];
-    int i;
-    int *res = &ctx->cstack[ ctx->stackptr-1].result;
+    int res;
     dr1Player *p = &ctx->player;
-    struct {
-        char cmd[80];
-	char *cmds[10];
-	int nargs;
-	int state;
-	int hits[START_MAX];
-	dr1Money gold[START_MAX];
-	int estr;
-    } *autos = dr1Context_auto( ctx, sizeof(*autos));
-    enum { INIT, SHOWPAGE, CMDPROMPT, GETCMD, SHOWRES };
 
-    printf("%d: dr1Playerv_showDialog\n", fileno( ctx->fp));
+    printf("%d: dr1Playerv_showDialog\n", ctx->ios.fd);
 
-    switch (autos->state) {
-        case INIT:
-	    dr1Playerv_init( p);
-	    autos->state = SHOWPAGE;
-	    return 0;
 
-	case SHOWPAGE:
-	    /*
-	     * Fix possible problems after changing stats
-	     */
-	    fixestr(p, &autos->estr);
-
-	    dr1Money_format( &p->purse, buf);
-	    sendplayer( ctx);
-
-	case CMDPROMPT:
-	    qprintf( ctx, DR1MSG_190, "(roll, swap, improve, race, sex, class, name, accept)");
-	    autos->state = GETCMD;
-	    return 0;
-
-	case GETCMD:
-	    if (qgets( autos->cmd, sizeof(autos->cmd), ctx)) return 1;
-
-            /* tokenize the command */
-	    autos->cmds[0] = strtok( autos->cmd, " \t\n");
-	    i=0;
-	    while ((autos->cmds[++i] = strtok( NULL, " \t\n")) != 0 && i<10 );
-            autos->nargs = i;
-
-	    /* interpret command */
-	    *res = 0;
-	    if ( !strcasecmp(autos->cmds[0], "roll")) {
-		*res=dr1Playerv_roll( ctx, autos->nargs, autos->cmds, 
-			autos->hits, autos->gold, &autos->estr);
-	    } else if ( !strcasecmp(autos->cmds[0], "swap")) {
-		*res=dr1Playerv_swap( ctx, autos->nargs, autos->cmds, 
-			&autos->estr);
-	    } else if ( !strcasecmp(autos->cmds[0], "improve")) {
-		*res=dr1Playerv_improve( ctx, autos->nargs, autos->cmds, 
-			&autos->estr);
-	    } else if ( !strcasecmp(autos->cmds[0], "race")) {
-		*res=dr1Playerv_race( ctx, autos->nargs, autos->cmds, 
-			&autos->estr);
-	    } else if ( !strcasecmp(autos->cmds[0], "name")) {
-		*res=dr1Playerv_name( ctx, autos->nargs, autos->cmds);
-	    } else if ( !strcasecmp(autos->cmds[0], "class")) { 
-		*res=dr1Playerv_class( ctx, autos->nargs, autos->cmds, 
-			autos->hits, autos->gold, &autos->estr);
-	    } else if ( !strcasecmp(autos->cmds[0], "sex")) {
-		*res=dr1Playerv_sex( ctx, autos->nargs, autos->cmds, 
-			&autos->estr);
-	    } else if ( !strcasecmp(autos->cmds[0], "done")) {
-		if ( !strcmp(p->name, "Unnamed")) {
-		    qprintf( ctx, "Your character needs a name.\n");
-		} else if ( p->class == DR1C_INVALID) {
-		    qprintf( ctx, "Your character has no class.\n");
-		} else if ( p->base_attr._str < 3) {
-		    qprintf( ctx, "Your character has no stats.  Roll stats first.\n");
-		} else {
-		    dr1Context_popcall( ctx, 0);
-		    return 0;
-		}
-	    } else qprintf( ctx, "Unknown command: '%s'\n", autos->cmds[0]);
-	    autos->state = SHOWRES;
-	    return 0;
-
-	case SHOWRES:	
-	    if (*res) {
-	        autos->state = CMDPROMPT;
-		qprintf( ctx, "Error %d in last command.\n", *res);
-	    } else {
-		autos->state = SHOWPAGE;
-	    }
-	    return 0;
+    if (c == 0) {
+	dr1Stream_printf( &ctx->ios, DR1MSG_190, "(roll, swap, improve, race, sex, class, name, accept)");
+	return 0;
     }
-    return 1;
+
+    /* interpret command */
+    res = 0;
+    if ( !strcasecmp(v[0], "newplayer")) {
+	dr1Playerv_init( p);
+    } else if ( !strcasecmp(v[0], "roll")) {
+	res=dr1Playerv_roll( ctx, c, v);
+    } else if ( !strcasecmp(v[0], "swap")) {
+	res=dr1Playerv_swap( ctx, c, v);
+    } else if ( !strcasecmp(v[0], "improve")) {
+	res=dr1Playerv_improve( ctx, c, v);
+    } else if ( !strcasecmp(v[0], "race")) {
+	res=dr1Playerv_race( ctx, c, v);
+    } else if ( !strcasecmp(v[0], "name")) {
+	res=dr1Playerv_name( ctx, c, v);
+    } else if ( !strcasecmp(v[0], "class")) { 
+	res=dr1Playerv_class( ctx, c, v);
+    } else if ( !strcasecmp(v[0], "sex")) {
+	res=dr1Playerv_sex( ctx, c, v);
+    } else if ( !strcasecmp(v[0], "done")) {
+	if ( !strcmp(p->name, "Unnamed")) {
+	    dr1Stream_printf( &ctx->ios, DR1MSG_310, DR1ENONAME, "Your character needs a name.");
+	    return 0;
+	} else if ( p->class == DR1C_INVALID) {
+	    dr1Stream_printf( &ctx->ios, DR1MSG_310, DR1ENOCLASS, "Your character has no class.");
+	    return 0;
+	} else if ( p->base_attr._str < 3) {
+	    dr1Stream_printf( &ctx->ios, DR1MSG_310, DR1ENOSTATS, "Your character has no stats.  Roll stats first.\n");
+	    return 0;
+	} else {
+	    /* ok */
+	    ctx->dialog = DONE;
+	    dr1Stream_printf( &ctx->ios, DR1MSG_200);
+	    return 0;
+	}
+    } else {
+	dr1Stream_printf( &ctx->ios, DR1MSG_530, v[0], "dr1Playerv_cmd");
+	return 0;
+    }
+
+    if (res) {
+	dr1Stream_printf( &ctx->ios, DR1MSG_560, res);
+	return 0;
+    } else {
+	dr1Stream_printf( &ctx->ios, DR1MSG_200);
+    }
+
+    /*
+     * Fix possible problems after changing stats
+     */
+    fixestr(p, &ctx->creationstate);
+    dr1Money_format( &p->purse, buf);
+    sendplayer( ctx);
+
+    return 0;
 }
 

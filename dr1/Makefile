@@ -9,19 +9,19 @@ subdirs:
 	cd gfx/24x35 ; make
 	cd lib ; make
 	cd mapedit ; make
-	cd sdlclient ; make
+#	cd sdlclient ; make
 
 dr1server: server.o money.o merchant.o apothecary.o dice.o player.o \
 	    barter.o itemset.o item.o attr.o registry.o \
 	    itemreg.o playerv.o race.o class.o \
-	    smithy.o weapon.o monster.o combatv.o armor.o \
-	    ttype.o tanner.o wright.o location.o qio.o \
+	    smithy.o weapon.o monster.o armor.o \
+	    ttype.o tanner.o wright.o location.o \
 	    potions/heal.o context.o town.o glyphset.o 
 	gcc -g -Wl,-warn-common -Wl,-Map=dr1server.map -odr1server server.o money.o merchant.o \
 	apothecary.o dice.o \
 	player.o barter.o itemset.o item.o attr.o registry.o \
 	itemreg.o playerv.o race.o class.o \
-	smithy.o weapon.o monster.o combatv.o armor.o \
+	smithy.o weapon.o monster.o armor.o \
 	ttype.o tanner.o wright.o location.o qio.o \
 	context.o town.o glyphset.o \
 	potions/heal.o -lxml2 -lm lib/libdr1.a

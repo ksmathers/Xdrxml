@@ -21,7 +21,7 @@
 #include "globals.h"
 #include "player.h"
 #include "context.h"
-#include "qio.h"
+#include "lib/stream.h"
 #include "lib/xdrxml.h"
 #include "lib/protocol.h"
 
@@ -38,269 +38,67 @@
 #include "town.h"
 
 #define PORT 2300
-enum states {
-    INIT,
-    LOGIN,
-    ROLLPLAYERDIALOG,
-    READY
-};
-
-enum runstate {
-    EXECUTE, 
-    READABLE
-};
 
 static dr1Context* ctx[FD_SETSIZE];
-
-/*
- * sendmap 
- *
- */
-void sendmap( dr1Context* ctx) {
-    char *buf;
-    int res;
-    xdrxmlsb_reset( &xdrxmlsb);
-    xdr_push_note( &xdrxmlsb, "map");
-    if (xdr_dr1Map( &xdrxmlsb, ctx->map) != TRUE) {
-	printf("Error serializing map.\n");
-    }
-    xdr_pop_note( &xdrxmlsb);
-
-    buf = xdrxmlsb_getbuf( &xdrxmlsb); 
-
-    qprintf( ctx, DR1MSG_120, 0, 0, ctx->map->xsize, ctx->map->ysize);
-    res = qprintf( ctx, buf);
-    if (res != strlen(buf)) perror("qprintf-1");
-    res = qprintf( ctx, "%s\n", SEPARATOR);
-    if (res != strlen(SEPARATOR)) perror("qprintf-2");
-}
-
-/*
- * sendplayer 
- *
- */
-void sendplayer( dr1Context* ctx) {
-    char *buf;
-    int res;
-    xdrxmlsb_reset( &xdrxmlsb);
-    xdr_push_note( &xdrxmlsb, "player");
-    if (xdr_dr1Player( &xdrxmlsb, &ctx->player) != TRUE) {
-	printf("Error serializing player.\n");
-    }
-    xdr_pop_note( &xdrxmlsb);
-
-    buf = xdrxmlsb_getbuf( &xdrxmlsb); 
-
-    qprintf( ctx, "%s\n", DR1MSG_170);
-    res = qprintf( ctx, buf);
-    if (res != strlen(buf)) perror("qprintf-3");
-    res = qprintf( ctx, "%s\n", SEPARATOR);
-    if (res != strlen(SEPARATOR)) perror("qprintf-4");
-}
-
-/*--------------------------------------------------------------------------
- * loginplayer
- *
- *     Runs through the login sequence.  Calls dr1Playerv_showDialog to 
- *     create a new login if needed.
- *
- *     This is one of several input handling routines that returns 
- *     immediately each time it is called.  If the function is blocked
- *     on input it should set errno to EWOULDBLOCK and return 1.
- *
- *     Normal return is zero, indicating that the function at the top
- *     of the call stack should be called the next time there is 
- *     an execution slice, or there is data ready for input.
- *
- *   Parameters:
- *     ctx    Player context
- *
- *   Returns:
- *     0      Continue processing
- *     1      Context exception 
- *     errno is set to various error conditions
- *          EWOULDBLOCK if no input is waiting and the socket would be read
- *          ENOSYS internal error, system is in an invalid state
- *
- *   Side Effects:
- *     ctx is changed to reflect the state of the interaction with the user
- *     data is read or written to the player socket
- */
-int loginplayer( dr1Context *ctx) {
-    struct stat pdat;
-    int pdatf;
-    int loadOk;
-    char *cpos;
-    char *tok;
-    char buf[80];
-    struct {
-        int state;
-	char *login;
-	char *password;
-    } *autos = dr1Context_auto( ctx, sizeof(*autos));
-    enum { INIT, LOGIN, PASSWORD, NEWPLAYER };
-
-    printf("%d: loginplayer\n", fileno(ctx->fp));
-
-    switch (autos->state) {
-	case INIT:
-	    qprintf( ctx, "%s\n", DR1MSG_IDENT);
-	    autos->state = LOGIN;
-	    return 0;
-
-        case LOGIN:
-	    if (!ctx->inputready) { errno=EWOULDBLOCK; return 1; }
-	    qgets( buf, sizeof(buf), ctx);
-
-	    tok = strtok( buf, " ");
-	    if (!strcmp( tok, "IAM")) {
-	        /* login request */
-		autos->login = strdup( strtok( NULL, " "));
-		autos->password = strdup( strtok( NULL, " "));
-		autos->state = PASSWORD;
-		return 0;
-	    }
-	    qprintf( ctx, DR1MSG_510);
-	    return 0;
-
-	case PASSWORD:
-	    for (cpos = autos->login; *cpos != 0; cpos++) {
-		if (!isalnum(*cpos)) *cpos = '_';
-	    }
-
-	    for (cpos = autos->password; *cpos != 0; cpos++) {
-		if (!isalnum(*cpos)) *cpos = '_';
-	    }
-
-	    strncpy( ctx->fname, autos->login, sizeof(ctx->fname)-4);
-	    strncat( ctx->fname, "-", sizeof(ctx->fname)-4);
-	    strncat( ctx->fname, autos->password, sizeof(ctx->fname)-4);
-	    strcat( ctx->fname, ".xml");
-	    ctx->fname[ sizeof(ctx->fname)-1] = 0;
-
-	    pdatf = stat( ctx->fname, &pdat);
-	    if (!pdatf && S_ISREG(pdat.st_mode)) {
-		loadOk = dr1Context_load( ctx, ctx->fname);
-		if (!loadOk) {
-		    qprintf(ctx, DR1MSG_520, ctx->fname);
-		    return 1;
-		}
-		qprintf(ctx, DR1MSG_100);
-		sendplayer( ctx);
-		sendmap( ctx); 
-		dr1Context_popcall( ctx, 0);
-	    } else {
-	        autos->state = NEWPLAYER;
-	        dr1Context_pushcall( ctx, dr1Playerv_showDialog);
-	    }
-	    return 0;
-	
-	case NEWPLAYER:
-	    qprintf(ctx, DR1MSG_100);
-	    ctx->map = dr1Map_readmap( "lib/maps/town.map");
-	    ctx->player.location.x = ctx->map->startx;
-	    ctx->player.location.y = ctx->map->starty;
-	    sendplayer( ctx);
-	    sendmap( ctx);
-	    dr1Context_popcall( ctx, ctx->cstack[ctx->stackptr-1].result);
-	    return 0;
-
-	default:
-	    qprintf(ctx, DR1MSG_570, "Invalid state");
-	    printf( "%d: Invalid state.\n", fileno(ctx->fp));
-	    errno = EINVAL;
-	    return 1;
-    }
-    return 0;
-}
-
-int savegame( dr1Context *ctx) {
-    return dr1Context_save( ctx);
-}
-
-int playermain( dr1Context *ctx) {
-    int *state;
-    enum { LOGIN, TOWN, OUTOFTOWN, DUNGEON, OUTOFDUNGEON, DEAD, EXITING };
-    
-    printf("%d playermain\n", fileno(ctx->fp));
-    state = dr1Context_auto( ctx, sizeof(*state));
-
-    switch (*state) {
-	case LOGIN:
-	    dr1Context_pushcall( ctx, loginplayer);
-	    *state = TOWN;
-	    return 0;
-
-	case TOWN:
-	    if (HITPOINTS(&ctx->player) < -10) {
-		*state = DEAD;
-		return 0;
-	    }
-	    dr1Context_pushcall( ctx, dr1Town_showDialog);
-	    *state = OUTOFTOWN;
-	    return 0;
-
-	case OUTOFTOWN:
-	    savegame( ctx);
-	    if (dr1Context_return( ctx) == 'x') *state = EXITING;
-	    else *state = DUNGEON;
-	    return 0;
-
-	case DUNGEON:
-	    dr1Context_pushcall( ctx, dr1Combatv_showDialog);
-	    *state = OUTOFDUNGEON;
-	    return 0;
-
-	case OUTOFDUNGEON:
-	    savegame( ctx);
-	    if (dr1Context_return( ctx) == 'd') *state = DEAD;
-	    else *state = TOWN;
-	    return 0;
-
-	case DEAD:
-	    qprintf( ctx, "O Mater Dei, memento mei.\n");
-	    qprintf( ctx, "You have not been resurrected (yet).\n");
-	    *state = EXITING;
-
-	case EXITING:
-	    savegame( ctx);
-	    errno = ENOSYS;
-	    return 1;
-    }
-    return 0;
-}
-
+enum runstate_t { READABLE, EXECUTE };
 
 /* 
- * init, run, and finit player -- these three routines are the main
- * three routines used to wrap the client socket for a player.
+ * init, run, and finit player context -- these three routines are 
+ * the main three routines used to wrap the client socket for a player.
  */
-void initplayer( int cs) {
+void pc_init( int cs) {
     printf("%d: initplayer\n", cs);
     ctx[cs] = calloc( 1, sizeof(dr1Context));
-    ctx[cs]->fp = fdopen( cs, "r+");
-    dr1Context_pushcall( ctx[cs], playermain);
+    dr1Stream_create( &ctx[cs]->ios, cs);
+
+    /* announce ourselves on the new player connection */
+    dr1Stream_printf( &ctx[cs]->ios, DR1MSG_IDENT);
 }
 
-int runplayer( int cs, enum runstate st) {
+int pc_runcmd( int cs, enum runstate_t state) {
+    /*
+     * Tokenizes input from the player connection, and passes it
+     * off for to the protocol handler. 
+     *
+     * A non-zero return indicates that there is a fatal error
+     * on the socket, or in the protocol, and that the connection
+     * should be closed.
+     */
     dr1Context *c = ctx[cs];
-    printf("%d: runplayer\n", cs);
-    if (st == READABLE) c->inputready = 1;
-    else c->inputready = 0;
+    char* cmds[10];
+    char  buf[500];
+    int i;
+    int nargs;
+    printf("%d: runplayer (%d)\n", cs, state);
 
-    /* call the command at the top of the command stack */
-    if (c->stackptr <= 0) return -1;
-    return c->cstack[ c->stackptr - 1].cmd( c);
+    if (state == READABLE) {
+	if ( dr1Stream_fgets( &c->ios, buf, sizeof(buf)) == 0 ) return 1;
+
+	/* tokenize the command */
+	i=0;
+	cmds[i++] = strtok( buf, " \t\n");
+	while ((cmds[i] = strtok( NULL, " \t\n")) != 0) {
+	    if (++i == sizeof(cmds)/sizeof(*cmds)) break;
+	}
+	nargs = i;
+    } else if (state == EXECUTE) {
+	cmds[0] = "tick";
+	nargs = 1;
+    }
+
+    /* handle it */
+    return dr1Protocol_handleCommand( c, nargs, cmds);
 }
 
-int finitplayer( cs) {
+int pc_finit( cs) {
     printf("%d: finitplayer\n", cs);
-    fclose( ctx[cs]->fp);
+    dr1Stream_finit( &ctx[cs]->ios);
     free( ctx[cs]);
     ctx[cs] = NULL;
     return 0;
 }
 
+/* main */
 int main( int argc, char **argv) {
     int ss, cs, maxsock;
     int xsocks;
@@ -364,7 +162,6 @@ int main( int argc, char **argv) {
 	if (err < 0) { perror("select"); abort(); }
 	printf("select returned %d\n", err);
 
-        xsocks=0;
         for (i=0; i<=maxsock; i++) {
 	    readerr=0;
 /*	    printf("checking %d\n", i); /**/
@@ -373,51 +170,38 @@ int main( int argc, char **argv) {
 	        printf("readable %d\n", i);
 		/* readable */
 	        if (i == ss) {
+		    /* service socket */
 		    cs = accept( ss, &csin, &sa_len);
 		    printf("%d: Client connect on %d\n", cs, PORT);
 		    if (cs < 0) {
 			perror("accept");
 		    } else {
-		        initplayer( cs);
+		        pc_init( cs);
 			if (cs > maxsock) maxsock = cs;
 			FD_SET( cs, &r_set);
 			FD_SET( cs, &e_set);
-			FD_SET( cs, &x_set);
-			xsocks++;		/* turn on timeslicing */
 		    } /* if */
 		} else {
-		    FD_SET( i, &x_set); /* mark executable */
-		    readerr = runplayer( i, READABLE);
+		    /* player socket */
+		    readerr = pc_runcmd( i, READABLE);
 		}
 	    } /* if */
 
 	    if (FD_ISSET( i, &tw_set)) {
 		/* writable */
 		/*
-		 * FIXME: right now qprintf is synchronous, so
+		 * FIXME: right now dr1Stream_printf is synchronous, so
 		 * this doesn't do anything yet.  Eventually
 		 * this should flush queues as write space becomes
 		 * available on the socket
 		 */
 	    } /* if */
 
-            if (FD_ISSET( i, &x_set)) {
-	        xsocks++;
-		readerr = runplayer(i, EXECUTE); 
-		if (readerr) {
-		    if (errno == EWOULDBLOCK) {
-		        readerr = 0;
-		        xsocks--;
-			FD_CLR( i, &x_set);
-		    } 
-		}
-	    }
-
 	    if (FD_ISSET( i, &te_set) || readerr) {
 		/* errors */
 		printf("%d: Error on socket.\n", i);
 		perror("select");
-		finitplayer(i);
+		pc_finit(i);
 		close(i);
 		FD_CLR( i, &r_set);
 		FD_CLR( i, &w_set);

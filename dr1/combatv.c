@@ -7,7 +7,7 @@
 #include "dice.h"
 #include "class.h"
 #include "ttype.h"
-#include "qio.h"
+#include "lib/stream.h"
 
 /*
  * Utility functions
@@ -50,13 +50,13 @@ int attack( dr1Context *ctx, int nmon, dr1Monster *m, int *surprise, int c, char
 	}
     }
     if (i >= nmon) {
-	qprintf( ctx, "Unknown monster\n");
+	dr1Stream_printf( &ctx->ios, "Unknown monster\n");
 	return -1;
     }
 
     /* check attributes */
     if (p->weapon->min_str > p->curr_attr._str) {
-	qprintf( ctx, "You aren't strong enough to wield a %s.\n", 
+	dr1Stream_printf( &ctx->ios, "You aren't strong enough to wield a %s.\n", 
 		p->weapon->super.name);
 	return -5;
     }
@@ -78,11 +78,11 @@ int attack( dr1Context *ctx, int nmon, dr1Monster *m, int *surprise, int c, char
 	if (p->weapon->missile) {
 	    missile = (dr1Weapon*)p->gauche;
 	    if (!missile) {
-		qprintf( ctx, "No arrows ready.\n");
+		dr1Stream_printf( &ctx->ios, "No arrows ready.\n");
 		return -1;
 	    }
             if (missile->missile != p->weapon->missile) {
-		qprintf( ctx, "You can't fire a %s with a %s\n", 
+		dr1Stream_printf( &ctx->ios, "You can't fire a %s with a %s\n", 
 			missile->super.name,
 			p->weapon->super.name
 		    );
@@ -96,7 +96,7 @@ int attack( dr1Context *ctx, int nmon, dr1Monster *m, int *surprise, int c, char
 	    p->location = dr1Location_moveTo( &p->location, &target->location, 10);
 	    dist = dr1Location_distance( &p->location, &target->location);
 
-	    qprintf( ctx,  "You charge the %s.  Now you are within %d feet.\n", 
+	    dr1Stream_printf( &ctx->ios,  "You charge the %s.  Now you are within %d feet.\n", 
 		    target->type->name, dist);
 	    return 0;
 	} 
@@ -115,7 +115,7 @@ int attack( dr1Context *ctx, int nmon, dr1Monster *m, int *surprise, int c, char
 	    /* weapon uses missiles */
 
 	    if (!missile) {
-		qprintf( ctx, "Out of arrows.\n");
+		dr1Stream_printf( &ctx->ios, "Out of arrows.\n");
 		return -1;
 	    }
 
@@ -131,17 +131,17 @@ int attack( dr1Context *ctx, int nmon, dr1Monster *m, int *surprise, int c, char
 
 	if ( roll == 1) {
 	    /* critical miss */
-	    qprintf( ctx, "Critical Miss!\n");
+	    dr1Stream_printf( &ctx->ios, "Critical Miss!\n");
 	    *surprise = 1;
 	    break;
 	} else {
 	    if ( roll == 20) {
 		/* natural 20 gets a bonus */
-		qprintf( ctx, "Rolled natural 20\n");
+		dr1Stream_printf( &ctx->ios, "Rolled natural 20\n");
 		if ( tohit>20) roll += 5;
 		else crit=dr1Dice_roll("d12");
 	    } else {
-		qprintf( ctx, "Attack dice rolled %d\n", roll);
+		dr1Stream_printf( &ctx->ios, "Attack dice rolled %d\n", roll);
 	    }
 	}
 
@@ -151,11 +151,11 @@ int attack( dr1Context *ctx, int nmon, dr1Monster *m, int *surprise, int c, char
 	    case 9:
 	    case 10:
 	    case 11: 
-		qprintf( ctx, "Critical hit x2!\n");
+		dr1Stream_printf( &ctx->ios, "Critical hit x2!\n");
 		mul = 2;
 		break;
 	    case 12: 
-		qprintf( ctx, "Critical hit x3!\n");
+		dr1Stream_printf( &ctx->ios, "Critical hit x3!\n");
 		mul = 3;
 		break;
 	}
@@ -181,9 +181,9 @@ int attack( dr1Context *ctx, int nmon, dr1Monster *m, int *surprise, int c, char
 	    dam += damage_bonus;
 	    dam *= mul;
 	    if (p->weapon->range) {
-		qprintf( ctx, "Thunk! %d Damage.\n", dam);
+		dr1Stream_printf( &ctx->ios, "Thunk! %d Damage.\n", dam);
 	    } else {
-		qprintf( ctx, "Slash! %d Damage.\n", dam);
+		dr1Stream_printf( &ctx->ios, "Slash! %d Damage.\n", dam);
 	    }
 	    target->wounds += dam;
 
@@ -191,9 +191,9 @@ int attack( dr1Context *ctx, int nmon, dr1Monster *m, int *surprise, int c, char
 	    /* missed */
 
 	    if (p->weapon->range ) {
-		qprintf( ctx, "Thwip!\n");
+		dr1Stream_printf( &ctx->ios, "Thwip!\n");
 	    } else {
-		qprintf( ctx, "Swish!\n");
+		dr1Stream_printf( &ctx->ios, "Swish!\n");
 	    }
 	}
     } /* for */
@@ -227,7 +227,7 @@ int defend( dr1Context *ctx, dr1Monster *m, int *surprise) {
 	    m->location = dr1Location_moveTo( &m->location, &p->location, 10);
 	    dist = dr1Location_distance( &p->location, &m->location);
 
-	    qprintf( ctx,  "%s charges you.  Now you are within %d feet.\n", 
+	    dr1Stream_printf( &ctx->ios,  "%s charges you.  Now you are within %d feet.\n", 
 		    m->type->name, dist);
 	    return 0;
 	} 
@@ -264,10 +264,10 @@ int defend( dr1Context *ctx, dr1Monster *m, int *surprise) {
 	if (roll >= tohit) {
 	    int dam;
 	    dam = dr1Dice_roll( m->type->damage[i]->damage);
-	    qprintf( ctx, "%s struck Thee! %d damage.\n", m->type->name, dam);
+	    dr1Stream_printf( &ctx->ios, "%s struck Thee! %d damage.\n", m->type->name, dam);
 	    p->wounds += dam;
 	} else {
-	    qprintf( ctx, "Swish!\n");
+	    dr1Stream_printf( &ctx->ios, "Swish!\n");
 	}
     } /* for */
 
@@ -316,14 +316,7 @@ struct combatargs_t {
     dr1Monster *m;
 };
 
-int dr1Combatv_showPage( dr1Context *ctx) {
-    struct combatargs_t *args = dr1Context_args( ctx, "combatargs_t");
-    struct {
-	int state;
-	char cmd[80];
-	char *cmds[10];
-	int surprise;
-    } *autos = dr1Context_auto( ctx, sizeof(*autos));
+int dr1Combatv_showPage( dr1Context *ctx, int c, char **v) {
     int nmon = args->nmon;
     dr1Player *p = &ctx->player;
     dr1Monster *m = args->m;
@@ -334,20 +327,20 @@ int dr1Combatv_showPage( dr1Context *ctx) {
     
     switch ( autos->state) {
 	case SHOWPAGE:
-	    qprintf( ctx, "-------------------------------------------------------\n");
-	    qprintf( ctx, "Player: %-20s       Hits: %d/%d    Location: (%d,%d)\n", p->name, HITPOINTS(p), HITPOINTSMAX(p), p->location.x, p->location.y);
+	    dr1Stream_printf( &ctx->ios, "-------------------------------------------------------\n");
+	    dr1Stream_printf( &ctx->ios, "Player: %-20s       Hits: %d/%d    Location: (%d,%d)\n", p->name, HITPOINTS(p), HITPOINTSMAX(p), p->location.x, p->location.y);
 	    for (i=0; i < nmon; i++) {
 		dist = dr1Location_distance( &p->location, &m[i].location);
 		if (m[i].wounds < m[i].hp) {
-		    qprintf( ctx, "%2d:Monster: %-20s   Damage: %-3d  Range: %d\" (%d,%d)\n", i+1, m[i].type->name, m[i].wounds, dist/10, m[i].location.x, m[i].location.y );
+		    dr1Stream_printf( &ctx->ios, "%2d:Monster: %-20s   Damage: %-3d  Range: %d\" (%d,%d)\n", i+1, m[i].type->name, m[i].wounds, dist/10, m[i].location.x, m[i].location.y );
 		} else {
-		    qprintf( ctx, "%2d:Monster: %-20s   Damage: dead Range: %d\" (%d,%d)\n", i+1, m[i].type->name, dist/10, m[i].location.x, m[i].location.y );
+		    dr1Stream_printf( &ctx->ios, "%2d:Monster: %-20s   Damage: dead Range: %d\" (%d,%d)\n", i+1, m[i].type->name, dist/10, m[i].location.x, m[i].location.y );
 		}
 	    }
 
 	case PROMPT:
-	    qprintf( ctx, "(attack, equip, use, run)\n");
-	    qprintf( ctx, "Command: ");
+	    dr1Stream_printf( &ctx->ios, "(attack, equip, use, run)\n");
+	    dr1Stream_printf( &ctx->ios, "Command: ");
 	    autos->state = GETCMD;
 
 	case GETCMD:
@@ -366,7 +359,7 @@ int dr1Combatv_showPage( dr1Context *ctx) {
 	    if (!strcasecmp( autos->cmds[0], "attack")) {
 		attack( ctx, nmon, m, &autos->surprise, i, autos->cmds);
 	    } else if (!strcasecmp( autos->cmds[0], "run")) {
-		qprintf( ctx, "Fleeing.\n");
+		dr1Stream_printf( &ctx->ios, "Fleeing.\n");
 		dr1Context_popcall( ctx, 0);
 		return 0;
 	    } else if (!strcasecmp( autos->cmds[0], "use")) {
@@ -374,7 +367,7 @@ int dr1Combatv_showPage( dr1Context *ctx) {
 /*            } else if (!strcasecmp( autos->cmds[0], "equip")) {
 		equip( p, i, autos->cmds); /**/
 	    } else {
-		qprintf( ctx, "Unknown command %s.\n", autos->cmds[0]);
+		dr1Stream_printf( &ctx->ios, "Unknown command %s.\n", autos->cmds[0]);
 		autos->state = PROMPT;
 		return 0;
 	    }
@@ -388,7 +381,7 @@ int dr1Combatv_showPage( dr1Context *ctx) {
 	    }
 
 	    if (HITPOINTS(p) <= 0) {
-		qprintf( ctx, "Thou'rt slain.  Dux vitae mortuus, regnat vivus.\n");
+		dr1Stream_printf( &ctx->ios, "Thou'rt slain.  Dux vitae mortuus, regnat vivus.\n");
 		dr1Context_popcall( ctx, 0);
 		return 0;
 	    }
@@ -410,7 +403,7 @@ int dr1Combatv_showPage( dr1Context *ctx) {
 		int jewelry;
 		int *st;
 
-		qprintf( ctx, "The beast is slain.  Facio Domine.\n");
+		dr1Stream_printf( &ctx->ios, "The beast is slain.  Facio Domine.\n");
 
 		/* calculate experience w/ bonus */
 		xp = 0;
@@ -421,14 +414,14 @@ int dr1Combatv_showPage( dr1Context *ctx) {
 		st = dr1Attr_estatptr( &p->base_attr, c->primaryStat);
 		if ( st && *st >= 16) xp += (xp+5)/10;
 		p->xp += xp;
-		qprintf( ctx, "Gained %d xp.\n", xp);
+		dr1Stream_printf( &ctx->ios, "Gained %d xp.\n", xp);
 
 		/* collect treasures */
 		for (i=0; i<nmon; i++) {
 		    dr1TType_collect( m[i].type->ttype, &t, &gems, &jewelry);
 		    dr1Money_format( &t, buf);
 		    dr1Money_add( &p->purse, &t);
-		    qprintf( ctx, "Collected %sfrom the %s carcass.\n", buf, m[i].type->name);
+		    dr1Stream_printf( &ctx->ios, "Collected %sfrom the %s carcass.\n", buf, m[i].type->name);
 		}
 	    }
 	    dr1Context_popcall( ctx, 0);
@@ -456,8 +449,8 @@ int dr1Combatv_showDialog( dr1Context *ctx) {
 
     switch( autos->state) {
 	case INIT:
-	    qprintf( ctx, "(kobold)\n");
-	    qprintf( ctx, "Hunt what: ");
+	    dr1Stream_printf( &ctx->ios, "(kobold)\n");
+	    dr1Stream_printf( &ctx->ios, "Hunt what: ");
 
 	case GETMNAME:
 	    if (qgets( mname, sizeof(mname), ctx)) return 1; 
@@ -465,7 +458,7 @@ int dr1Combatv_showDialog( dr1Context *ctx) {
 	    nmon = dr1Dice_roll("d6");
 	    for (i=0; i<nmon; i++) {
 		if ( dr1Monster_init( &m[i], mname)) {
-		    qprintf( ctx, "There are no %s about.\n", mname);
+		    dr1Stream_printf( &ctx->ios, "There are no %s about.\n", mname);
 		    dr1Context_popcall( ctx, -1);
 		    return 0;
 		}
@@ -484,15 +477,15 @@ int dr1Combatv_showDialog( dr1Context *ctx) {
 	case DONE:
 	    if ( HITPOINTS(p) <= 0 ) {
 		if ( HITPOINTS(p) < -10) {
-		    qprintf( ctx, "Ewww.  What a mess.\n");
+		    dr1Stream_printf( &ctx->ios, "Ewww.  What a mess.\n");
 		    dr1Context_popcall( ctx, 'd');
 		    return 0;
 		}
 		dead = dr1Dice_roll( "d100");
 		if (dead < 30) {
-		    qprintf( ctx, "You awaken hours later, and stumble weakened back to town.\n");
+		    dr1Stream_printf( &ctx->ios, "You awaken hours later, and stumble weakened back to town.\n");
 		} else {
-		    qprintf( ctx, "A kindly cleric found your body.  He thanks you for your donation.\n");
+		    dr1Stream_printf( &ctx->ios, "A kindly cleric found your body.  He thanks you for your donation.\n");
 		    bzero( &ctx->player.purse, sizeof(ctx->player.purse));
 		}
 	    }

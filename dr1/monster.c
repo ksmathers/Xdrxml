@@ -1,5 +1,6 @@
 #include "dice.h"
 #include "monster.h"
+#include "lib/xdrxml.h"
 /*-------------------------------------------------------------------
  * dr1monsters
  *
@@ -142,4 +143,26 @@ int dr1Monster_thac0( dr1Monster *m) {
     else thac0 = monster_thac0[ level];
 
     return thac0;
+}
+
+/* 
+ * xdr_dr1Monster
+ *
+ */
+
+bool_t xdr_dr1Monster( XDR *xdrs, dr1Monster* m) {
+    int code;
+
+    if (xdrs->x_op == XDR_ENCODE) code = m->type->mtype;
+
+    xdr_attr( xdrs, "type");
+    if (!xdr_int( xdrs, &code)) return FALSE;
+
+    if (xdrs->x_op == XDR_DECODE) {
+	dr1MonsterType* mtype = dr1Registry_lookup( &dr1monsters, code);
+	if (!mtype) return FALSE;
+
+	dr1Monster_init( m, mtype->name);
+    }
+    return TRUE;
 }
