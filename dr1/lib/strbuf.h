@@ -98,4 +98,40 @@ sbputc( dr1StringBuffer *sb, char c);
 
 int
 sbstrcat( dr1StringBuffer *sb, char *str);
+
+/*-------------------------------------------------------------------
+ * sbcat
+ *
+ *    Add string to a string buffer
+ *
+ *  PARAMETERS:
+ *     sb   String buffer to modify
+ *     str  String to add to the buffer
+ *     len  Length of the string to add
+ *
+ *  RETURNS:
+ *
+ *  SIDE EFFECTS:
+ */
+
+int
+sbcat( dr1StringBuffer *sb, char *str, int len);
+
+/*-------------------------------------------------------------------
+ * sbtail
+ *
+ *    Remove text from a buffer, leaving only the tail
+ *
+ *  PARAMETERS:
+ *     sb          String buffer to modify
+ *     first_char  First character of the revised buffer
+ *
+ *  RETURNS:
+ *
+ *  SIDE EFFECTS:
+ */
+
+int
+sbtail( dr1StringBuffer *sb, int first_char);
+
 #endif /* __DR1STRBUF__H */

@@ -63,11 +63,24 @@ sbputc( dr1StringBuffer *sb, char c) {
 
 int
 sbstrcat( dr1StringBuffer *sb, char *str) {
-    int len = strlen(str);
+    return sbcat( sb, str, strlen(str));
+}
+
+int
+sbcat( dr1StringBuffer *sb, char *str, int len) {
     if (sb->cpos + len >= sb->bufsize) {
 	dr1StringBuffer_grow( sb, max( len+1, 1024));
 	if (!sb->buf) return -1;
     }
-    strcat(sb->buf + sb->cpos, str);
+    memcpy(sb->buf + sb->cpos, str, len);
+    sb->cpos += len;
+    sb->buf[sb->cpos] = 0;
     return 0;
+}
+
+int
+sbtail( dr1StringBuffer *sb, int start_char) {
+    memcpy( sb->buf, sb->buf + start_char, sb->cpos - start_char);
+    sb->buf[sb->cpos] = 0;
+    sb->cpos -= start_char;
 }

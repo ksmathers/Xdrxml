@@ -22,15 +22,15 @@
  *  SIDE EFFECTS:
  *    buf gets the string read from the socket
  */
-int dr1_qgets( char *buf, int size, dr1Context *ctx)
+int dr1_qgets( char *buf, int size, dr1Stream *str)
 {
     char *nl;
+    int len;
 
-    if (!ctx->inputready) { errno=EWOULDBLOCK; return 1; }
+    if (!str->inputready) { errno=EWOULDBLOCK; return 1; }
     buf[0] = 0;
-    fgets(buf, size, ctx->fp);
-    if (feof(ctx->fp)) return -1;
-    if (ferror(ctx->fp)) return -1;
+    len = dr1Stream_gets(str, buf, size);
+    if (len == 0) return -1;
 
     nl = rindex( buf, '\n');
     if (nl) *nl = 0;
@@ -47,7 +47,7 @@ int dr1_qgets( char *buf, int size, dr1Context *ctx)
  *    socket
  *
  *  PARAMETERS:
- *    cs   Socket to write to
+ *    str  Socket to write to
  *    fmt  Format string (see printf)
  *
  *  RETURNS:
@@ -55,7 +55,7 @@ int dr1_qgets( char *buf, int size, dr1Context *ctx)
  *
  *  SIDE EFFECTS:
  */
-int dr1_qprintf( dr1Context *ctx, char *fmt, ...) {
+int dr1_qprintf( dr1Stream *str, char *fmt, ...) {
     va_list va;
     va_start( va, fmt);
     vfprintf( ctx->fp, fmt, va);
