@@ -133,7 +133,8 @@ bool_t xdrxmlsb_putstring( XDR *xdrs, char *s) {
 
     sb = xdrd->sb;
 
-    while (ni--) sbprintf(sb, "<%s>", attr);
+    while (ni--) sbprintf(sb, "    ");
+    sbprintf(sb, "<%s>", attr);
     len = strlen( s);
     for (i=0; i<len; i++) {
 	c = s[ i];

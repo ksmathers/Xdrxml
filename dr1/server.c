@@ -187,7 +187,7 @@ int loginplayer( dr1Context *ctx) {
 		}
 		qprintf(ctx, DR1MSG_100);
 		sendplayer( ctx);
-/*		sendmap( ctx); */
+		sendmap( ctx); 
 		dr1Context_popcall( ctx, 0);
 	    } else {
 	        autos->state = NEWPLAYER;

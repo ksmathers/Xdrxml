@@ -15,6 +15,7 @@
 #include "stream.h"
 #include "protocol.h"
 #include "xdrxml.h"
+#include "lib/map.h"
 #include "../player.h"
 
 static struct {
@@ -118,15 +119,28 @@ int handleMessage(char *buf) {
 		switch (mode) {
 		    case M_MAPDATA:    /* reading map data */
 			printf("Got map.\n");
+			{
+			    dr1Map* map;
+			    map = calloc( 1, sizeof( dr1Map));
+			    ok = xdr_dr1Map( &xdrs, map);
+			    if (!ok) {
+				printf("Error decoding map data\n");
+				break;
+			    }
+			    setmap( map);
+			}
 			break;
 		    case M_PLAYERDATA: /* reading player data */
 			printf("Got player data \n");
 			{
-			    dr1Player p;
-			    ok = xdr_dr1Player( &xdrs, &p);
+			    dr1Player *p;
+			    p = calloc( 1, sizeof(dr1Player));
+			    ok = xdr_dr1Player( &xdrs, p);
 			    if (!ok) {
 				printf("Error decoding player data\n");
+				break;
 			    }
+			    setplayer( p);
 			}
 			break;
 		}

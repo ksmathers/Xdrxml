@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <assert.h>
+#include "../player.h"
 
 
 /*-------------------------------------------------------------------
@@ -118,6 +119,17 @@ int dr1Text_init( SDL_Surface *screen);
 
 int dr1Text_show( SDL_Surface *screen);
 
-
+/*-------------------------------------------------------------------
+ * dr1Text_setPlayer
+ *
+ *    The method shows all of the text for a player update
+ *
+ *  PARAMETERS:
+ *
+ *  RETURNS:
+ *
+ *  SIDE EFFECTS:
+ */
+int dr1Text_setPlayer( dr1Player *p);
 #endif /* __DR1__H */
 

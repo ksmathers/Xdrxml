@@ -5,6 +5,7 @@
 #include <string.h>
 #include "text.h"
 #include "common.h"
+#include "race.h"
 
 char* race_name[] = { 
 	"HUMAN",
@@ -60,9 +61,14 @@ static char* _msgattr[] = { "Str:", "Int:", "Wis:", "Dex:", "Con:", "Cha:" };
 #define NAME_PTSIZE 24
 #define DEFAULT_PTSIZE 18
 #define MESSAGE_PTSIZE 18
+
+/* left column status box -- half line feed vertical position macro */
 #define lpos(ln) (61 + (ln) * 11)
-#define mpos(ln) (screen->h - 103 + (ln) * 10)
 #define XPOS 20
+
+/* message status box -- half line feed vertical position macro */
+#define mpos(ln) (screen->h - 103 + (ln) * 10)
+
 
 int dr1Text_setInfo( dr1Text *buf, char *string, int ptsize, int x, int y, enum Position pos) 
 {
@@ -170,9 +176,10 @@ int dr1Text_showInfo( SDL_Surface *screen, dr1Text *txt) {
     return 0;
 }
 
-#if 0
 int dr1Text_setPlayer( dr1Player *p) {
     int i;
+    char buf[80];
+    common.player = *p;
     dr1Text_setInfo( &_text.name, common.player.name,
 	    NAME_PTSIZE, XPOS, lpos(2), ANCHOR_TOPLEFT);
     dr1Text_setInfo( &_text.race, race_name[ common.player.race],
@@ -181,34 +188,51 @@ int dr1Text_setPlayer( dr1Player *p) {
             common.player.level);
     dr1Text_setInfo( &_text.class_level, buf,
 	    DEFAULT_PTSIZE, XPOS, lpos(7), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.sex, "Male", 
+    dr1Text_setInfo( &_text.sex, 
+            (common.player.sex == DR1R_MALE) ? "Male":"Female", 
 	    DEFAULT_PTSIZE, XPOS, lpos(9), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.experience, "x: 123456789", 
+    sprintf(buf, "x: %ld", common.player.xp);
+    dr1Text_setInfo( &_text.experience, buf,
 	    DEFAULT_PTSIZE, XPOS, lpos(11), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.hits, "Hits: 23/109", 
+    sprintf(buf, "Hits: %d/%d", common.player.hp - common.player.wounds,
+	    common.player.hp);
+    dr1Text_setInfo( &_text.hits, buf,
 	    DEFAULT_PTSIZE, XPOS, lpos(13), ANCHOR_TOPLEFT);
     dr1Text_setInfo( &_text.fatigue, "Fat: 100%", 
 	    DEFAULT_PTSIZE, XPOS, lpos(15), ANCHOR_TOPLEFT);
 
     /* stats */
     for (i=0; i<6; i++) {
-	dr1Text_setInfo( &_text.stats_labels[i], _msgattr[i], 
-		DEFAULT_PTSIZE, 60, lpos(17+(i<<1)), ANCHOR_TOPRIGHT);
-	dr1Text_setInfo( &_text.stats_values[i], (i==0?"18/00":"18"), 
+        int *sp = dr1Attr_estatptr( &common.player.curr_attr, i);
+	int estr = common.player.curr_attr.estr;
+
+        if (i == 0 && estr) {
+	    if (estr == 100) estr = 0;
+	    sprintf(buf, "%d/%02d", *sp, common.player.curr_attr.estr);
+	} else {
+	    sprintf(buf, "%d", *sp);
+	}
+	dr1Text_setInfo( &_text.stats_values[i], buf,
 		DEFAULT_PTSIZE, 65, lpos(17+(i<<1)), ANCHOR_TOPLEFT);
     }
 
     /* equip */
-    dr1Text_setInfo( &_text.weapon, "Bastard Swd", 
+    if (common.player.weapon) {
+	dr1Text_setInfo( &_text.weapon, common.player.weapon->super.name,
 	    DEFAULT_PTSIZE, XPOS, lpos(29), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.gauche, "Large Shield", 
+    }
+    if (common.player.gauche) {
+	dr1Text_setInfo( &_text.gauche, common.player.gauche->name,
 	    DEFAULT_PTSIZE, XPOS, lpos(31), ANCHOR_TOPLEFT);
-    dr1Text_setInfo( &_text.armor, "Padded Lthr", 
+    }
+    if (common.player.armor) {
+	dr1Text_setInfo( &_text.armor, common.player.armor->super.name,
 	    DEFAULT_PTSIZE, XPOS, lpos(33), ANCHOR_TOPLEFT);
+    }
     dr1Text_setInfo( &_text.encumbrance, "Carry: 135#", 
 	    DEFAULT_PTSIZE, XPOS, lpos(35), ANCHOR_TOPLEFT);
+    return 0;
 }
-#endif
 
 int dr1Text_init( SDL_Surface *screen) {
     int i;

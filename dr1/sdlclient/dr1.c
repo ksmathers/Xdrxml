@@ -30,7 +30,8 @@ int darkdist[] = { 0, 1, 3 };
 struct {
     char *server;
     SDL_Surface *screen;
-    dr1Player player;
+    dr1Map* map;
+    int xpos, ypos;
 } ctx = { NULL };
 
 dr1GlyphTable *dr1_npcs1;
@@ -56,6 +57,23 @@ struct border_t {
 #define YSIZE 600
 #define MAPCOLS (XSIZE/24)
 #define MAPROWS (YSIZE/35)
+
+void
+setmap( dr1Map *map) {
+    if (ctx.map) {
+	/* destroy old map */
+	/* FIXME */
+    }
+    ctx.map = map;
+}
+
+void 
+setplayer( dr1Player *player) {
+    ctx.xpos = player->location.x;
+    ctx.ypos = player->location.y;
+    dr1Text_setPlayer( player);
+    /* FIXME: player should be destroyed here */
+}
 
 void
 opendoor( dr1Map *map, int xpos, int ypos) {
@@ -229,18 +247,18 @@ struct dr1Point {
     int y;
 };
 
-#ifndef NDEBUG
+#if 0
 extern int EF_ALLOW_MALLOC_0;
 #endif
 
 int main( int argc, char **argv) {
     char buf[80];
-    int xpos = 0;
-    int ypos = 0;
     int oxpos, oypos;
     char *server;
 
+#if 0
     EF_ALLOW_MALLOC_0 = 1;
+#endif
      
     if (argc != 2) { 
          printf("Usage: ./dr1 <server>\n");
@@ -266,8 +284,6 @@ int main( int argc, char **argv) {
     dr1Dice_seed();
 
     {   
-        dr1Map *map = NULL;
-
 #if 1
 	ctx.screen = SDL_SetVideoMode(XSIZE, YSIZE, 16, SDL_SWSURFACE);
 #else
@@ -299,7 +315,7 @@ int main( int argc, char **argv) {
 
 		/* Draw the screen */
 	        SDL_FillRect( ctx.screen, NULL, 0);
-		if (map) showMap( ctx.screen, map, xpos, ypos);
+		if (ctx.map) showMap( ctx.screen, ctx.map, ctx.xpos, ctx.ypos);
 		showBorder( ctx.screen);
 		dr1Text_show( ctx.screen);
 		SDL_Flip( ctx.screen);
@@ -309,8 +325,8 @@ int main( int argc, char **argv) {
 		while ( SDL_PollEvent(&event) ) {
 		    switch (event.type) {
 		        case SDL_KEYDOWN:
-			    oxpos = xpos;
-			    oypos = ypos;
+			    oxpos = ctx.xpos;
+			    oypos = ctx.ypos;
 			    switch ( event.key.keysym.sym) {
 			        case SDLK_s:
 				    printf("screenshot");
@@ -318,26 +334,26 @@ int main( int argc, char **argv) {
 				    break;
 
 				case SDLK_h:
-				    xpos--;
+				    ctx.xpos--;
 				    break;
 				case SDLK_j:
-				    ypos++;
+				    ctx.ypos++;
 				    break;
 				case SDLK_k:
-				    ypos--;
+				    ctx.ypos--;
 				    break;
 				case SDLK_l:
-				    xpos++;
+				    ctx.xpos++;
 				    break;
 				case SDLK_o:
-				    opendoor( map, xpos, ypos);
+				    opendoor( ctx.map, ctx.xpos, ctx.ypos);
 				    break;
 				case SDLK_q:
 				    exit(3);
 				default:
 			    }
 			    {
-				dr1MapSquare *gr = &map->grid[ ypos*map->xsize + xpos];
+				dr1MapSquare *gr = &ctx.map->grid[ ctx.ypos*ctx.map->xsize + ctx.xpos];
 				if ( !gr->graphic || 
 				     gr->graphic->glyph[0].wall ||
 				     ( gr->graphic->glyph[0].door && 
@@ -345,8 +361,8 @@ int main( int argc, char **argv) {
 				   )
 				{
 				    if (gr->graphic) gr->seen = 1;
-				    xpos = oxpos;
-				    ypos = oypos;
+				    ctx.xpos = oxpos;
+				    ctx.ypos = oypos;
 				}
 			    }
 			    break;
