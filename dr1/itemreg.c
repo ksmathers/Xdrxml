@@ -12,7 +12,7 @@ static dr1RegistryEntry e[] = {
     { (int)DR1P_HEAL, &dr1pHeal_type },
     { (int)DR1W_BASICWEAPON, &dr1Weapon_primary },
     { (int)DR1W_BOW, &dr1Weapon_bow },
-    { (int)DR1W_ARROW, &dr1Weapon_arrow_t },
+    { (int)DR1W_MISSILE, &dr1Weapon_missile },
     { (int)DR1A_BASICARMOR, &dr1Armor_type },
     { -1, 0 }
 };

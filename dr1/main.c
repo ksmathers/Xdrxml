@@ -132,15 +132,22 @@ int equip( dr1Player *p, int c, char **v) {
 
     if (item->weapon) {
         dr1Weapon *wnew = (dr1Weapon*)item;
+
 	if (wnew->min_str > p->curr_attr._str) {
 	    printf("Sorry, you aren't strong enough to use that weapon.\n");
 	    return -2;
 	}
-	if (p->weapon) {
-	    unequip = &p->weapon->super;
-	    p->weapon = NULL;
+
+	if (wnew->super.type->code == DR1W_MISSILE) {
+	    unequip = p->gauche;
+	    p->gauche = &wnew->super;
+	} else {
+	    if (p->weapon) {
+		unequip = &p->weapon->super;
+		p->weapon = NULL;
+	    }
+	    p->weapon = wnew;
 	}
-	p->weapon = wnew;
     } else if ( dr1Item_isArmor( item)) {
         if (p->armor) {
 	    unequip = &p->armor->super;

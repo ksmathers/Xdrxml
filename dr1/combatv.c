@@ -24,6 +24,7 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
     int tohit_penalty = 0;
     int damage_bonus = 0;
     dr1Monster *target;
+    dr1Weapon *missile = NULL;
 
     /* choose target */
     if (c == 1) {
@@ -61,7 +62,23 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
 	    /* FIXME */
 	    tohit_penalty = (4 * dist) / p->weapon->range;
 	}
+
 	nattacks = p->weapon->rof;
+
+	if (p->weapon->missile) {
+	    missile = (dr1Weapon*)p->gauche;
+	    if (!missile) {
+		printf("No arrows ready.\n");
+		return -1;
+	    }
+            if (missile->missile != p->weapon->missile) {
+		printf("You can't fire a %s with a %s\n", 
+			missile->super.name,
+			p->weapon->super.name
+		    );
+		return -2;
+	    }
+	}
     } else {
 	/* melee combat */
 	if (dist > 10) {
@@ -84,6 +101,23 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
 	crit = 0;
 	tohit = p_thac0 - target->type->ac - tohit_penalty;
 	roll = dr1Dice_roll("d20");
+	if ( p->weapon->missile) {
+	    /* weapon uses missiles */
+
+	    if (!missile) {
+		printf("Out of arrows.\n");
+		return -1;
+	    }
+
+	    if (missile->super.count <= 0) {
+		p->gauche = NULL;
+		/* FIXME: free missile */
+		missile = NULL;
+		return -2;
+	    }
+
+            missile->super.count --;
+	}
 
 	if ( roll == 1) {
 	    /* critical miss */
@@ -93,6 +127,7 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
 	} else {
 	    if ( roll == 20) {
 		/* natural 20 gets a bonus */
+		printf("Rolled natural 20\n");
 		if ( tohit>20) roll += 5;
 		else crit=dr1Dice_roll("d12");
 	    } else {
@@ -122,10 +157,17 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
 	    if (p->weapon) {
 		dam = dr1Dice_roll( p->weapon->damage) + 
 		    dr1Attr_damage( &p->base_attr, p->weapon->range > 0);
+/*	        printf("Damage %s + str = %d", p->weapon->damage, dam); /**/
 	    } else {
 		dam = dr1Dice_roll( "d3") + 
 		    dr1Attr_damage( &p->base_attr, FALSE);
 	    }
+
+	    if (missile) {
+		dam += dr1Dice_roll( missile->damage);
+/*	        printf("+ Missile Damage %s\n", missile->damage); /**/
+	    }
+
 	    dam += damage_bonus;
 	    dam *= mul;
 	    if (p->weapon->range) {

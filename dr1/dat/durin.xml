@@ -1,6 +1,6 @@
 <player>
     <name>Durin</name>
-    <xp value="0x19b"/>
+    <xp value="0x220"/>
     <level value="0x1"/>
     <hp value="0x8"/>
     <wounds value="0x0"/>
@@ -23,49 +23,26 @@
         <_cha value="0xa"/>
     </curr_attr>
     <purse>
-        <pp value="0x23"/>
-        <gp value="0x0"/>
+        <pp value="0x22"/>
+        <gp value="0x3"/>
         <ep value="0x0"/>
-        <sp value="0xe"/>
-        <cp value="0x28a"/>
+        <sp value="0x4"/>
+        <cp value="0x35b"/>
     </purse>
     <pack>
-        <len value="0x2"/>
+        <len value="0x1"/>
         <item>
-            <code value="0x1"/>
-            <value value="0xbb8"/>
-            <name>Longsword</name>
-            <encumbrance value="0x96"/>
+            <code value="0x2"/>
+            <value value="0x2ee0"/>
+            <name>Longbow</name>
+            <encumbrance value="0x64"/>
             <inuse value="0x0"/>
             <weapon value="0x1"/>
             <identified value="0x1"/>
             <uses value="0x0"/>
             <count value="0x1"/>
             <damage>
-                <dice>d8</dice>
-            </damage>
-            <range value="0x0"/>
-            <rof value="0x0"/>
-            <speed value="0x6"/>
-            <dtype value="0x2"/>
-            <plusToHit value="0x0"/>
-            <plusToDamage value="0x0"/>
-            <stackable value="0x0"/>
-            <projectile value="0x0"/>
-            <min_str value="0x10"/>
-        </item>
-        <item>
-            <code value="0x1"/>
-            <value value="0xa"/>
-            <name>Arrow</name>
-            <encumbrance value="0x1"/>
-            <inuse value="0x0"/>
-            <weapon value="0x1"/>
-            <identified value="0x1"/>
-            <uses value="0x1"/>
-            <count value="0x64"/>
-            <damage>
-                <dice>d6</dice>
+                <dice>1</dice>
             </damage>
             <range value="0x78"/>
             <rof value="0x2"/>
@@ -73,21 +50,44 @@
             <dtype value="0x0"/>
             <plusToHit value="0x0"/>
             <plusToDamage value="0x0"/>
-            <stackable value="0x1"/>
-            <projectile value="0x1"/>
-            <min_str value="0x0"/>
+            <stackable value="0x0"/>
+            <missile value="0x1"/>
+            <min_str value="0x10"/>
         </item>
     </pack>
     <weapon>
         <code value="0x1"/>
-        <value value="0x2ee0"/>
-        <name>Longbow</name>
-        <encumbrance value="0x64"/>
+        <value value="0xbb8"/>
+        <name>Longsword</name>
+        <encumbrance value="0x96"/>
         <inuse value="0x0"/>
         <weapon value="0x1"/>
         <identified value="0x1"/>
         <uses value="0x0"/>
         <count value="0x1"/>
+        <damage>
+            <dice>d8</dice>
+        </damage>
+        <range value="0x0"/>
+        <rof value="0x0"/>
+        <speed value="0x6"/>
+        <dtype value="0x2"/>
+        <plusToHit value="0x0"/>
+        <plusToDamage value="0x0"/>
+        <stackable value="0x0"/>
+        <missile value="0x0"/>
+        <min_str value="0x10"/>
+    </weapon>
+    <gauche>
+        <code value="0x3"/>
+        <value value="0xa"/>
+        <name>Arrow</name>
+        <encumbrance value="0x1"/>
+        <inuse value="0x0"/>
+        <weapon value="0x1"/>
+        <identified value="0x1"/>
+        <uses value="0x1"/>
+        <count value="0x3f"/>
         <damage>
             <dice>d6</dice>
         </damage>
@@ -97,12 +97,9 @@
         <dtype value="0x0"/>
         <plusToHit value="0x0"/>
         <plusToDamage value="0x0"/>
-        <stackable value="0x0"/>
-        <projectile value="0x0"/>
-        <min_str value="0x10"/>
-    </weapon>
-    <gauche>
-        <code value="0x0"/>
+        <stackable value="0x1"/>
+        <missile value="0x1"/>
+        <min_str value="0x0"/>
     </gauche>
     <armor>
         <code value="0x2001"/>
@@ -121,7 +118,7 @@
     <sex value="0x0"/>
     <class value="0x3"/>
     <location>
-        <x value="0x1d"/>
-        <y value="0x10"/>
+        <x value="0x1c"/>
+        <y value="0xa"/>
     </location>
 </player>

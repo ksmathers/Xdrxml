@@ -35,9 +35,9 @@ dr1ItemType dr1Weapon_bow = {
     xdr_dr1Weapon,		/* xdr */
 };
 
-dr1ItemType dr1Weapon_arrow_t = {
+dr1ItemType dr1Weapon_missile = {
     sizeof( dr1Weapon),		/* size */
-    (int)DR1W_ARROW,		/* code */
+    (int)DR1W_MISSILE,		/* code */
     TRUE,			/* stackable */
     FALSE,			/* unique */
     (void *)0,	 		/* use */
@@ -68,7 +68,7 @@ dr1Weapon dr1Weapon_halfspear = {
     /* plusToHit    */ 0,
     /* plusToDamage */ 0,
     /* stackable    */ FALSE,
-    /* projectile   */ DR1W_NONE,
+    /* missile      */ DR1W_NONE,
     /* min_str      */ 8
 };
 
@@ -92,7 +92,7 @@ dr1Weapon dr1Weapon_longsword = {
     /* plusToHit    */ 0,
     /* plusToDamage */ 0,
     /* stackable    */ FALSE,
-    /* projectile   */ DR1W_NONE,
+    /* missile      */ DR1W_NONE,
     /* min_str      */ 12
 };
 
@@ -116,7 +116,7 @@ dr1Weapon dr1Weapon_shortbow = {
     /* plusToHit    */ 0,
     /* plusToDamage */ 0,
     /* stackable    */ FALSE,
-    /* projectile   */ DR1W_ARROW,
+    /* missile      */ DR1W_ARROW,
     /* min_str      */ 8
 };
 
@@ -140,7 +140,7 @@ dr1Weapon dr1Weapon_longbow = {
     /* plusToHit    */ 0,
     /* plusToDamage */ 0,
     /* stackable    */ FALSE,
-    /* projectile   */ DR1W_ARROW,
+    /* missile      */ DR1W_ARROW,
     /* min_str      */ 16
 };
 
@@ -154,7 +154,7 @@ dr1Weapon dr1Weapon_arrow = {
 	/* identified  */ TRUE,
 	/* uses        */ 1,
 	/* count       */ 1,
-	/* type        */ &dr1Weapon_arrow_t
+	/* type        */ &dr1Weapon_missile
     },
     /* damage   */ "d6",
     /* range    */ 120,
@@ -164,7 +164,7 @@ dr1Weapon dr1Weapon_arrow = {
     /* plusToHit    */ 0,
     /* plusToDamage */ 0,
     /* stackable    */ TRUE,
-    /* projectile   */ DR1W_ARROW,
+    /* missile      */ DR1W_ARROW,
     /* min_str      */ 0
 };
 /*-------------------------------------------------------------------
@@ -214,10 +214,10 @@ static bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i) {
     xdr_attr( xdrs, "stackable");
     if (!xdr_int( xdrs, &w->stackable)) return FALSE;
     
-    xdr_attr( xdrs, "projectile");
-    tmp = w->projectile;
+    xdr_attr( xdrs, "missile");
+    tmp = w->missile;
     res = xdr_int( xdrs, &tmp);
-    w->projectile = tmp;
+    w->missile = tmp;
     if (!res) return FALSE;
     
     xdr_attr( xdrs, "min_str");

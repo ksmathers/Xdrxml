@@ -16,10 +16,10 @@
 
 enum {
     DR1W_BASICWEAPON = DR1WEAPONS,
-    DR1W_BOW
+    DR1W_BOW, DR1W_MISSILE
 };
 
-enum DR1ProjectileType {
+enum DR1MissileType {
     DR1W_NONE,
     DR1W_ARROW, DR1W_BOLT, 
     DR1W_STONE, DR1W_BLOWDART, 
@@ -34,7 +34,7 @@ enum DR1ProjectileType {
 
 extern dr1ItemType dr1Weapon_primary;
 extern dr1ItemType dr1Weapon_bow;
-extern dr1ItemType dr1Weapon_arrow_t;
+extern dr1ItemType dr1Weapon_missile;
 
 typedef struct {
     dr1Item super;
@@ -46,7 +46,7 @@ typedef struct {
     int plusToHit;
     int plusToDamage;
     int stackable;
-    enum DR1ProjectileType projectile;  /* type of projectile */
+    enum DR1MissileType missile;  /* type of missile */
     int min_str;	/* minimum strength required to use */
 } dr1Weapon;
 
