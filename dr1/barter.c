@@ -117,7 +117,7 @@ char* dr1Barter_offer( dr1Barter *b, dr1Money o) {
 	int mood = b->merchant->mood; /* 0..20, large is angry */
 
 	/* shifted bell curve */
-	int rnd = min(dr1Dice_roll("3dr1") + mood * 5, 99); 
+	int rnd = min(dr1Dice_roll("3d10") + mood * 5, 99); 
 
 	int span = start - dr1Money_value(&b->minsale, b->merchant->ep);
 	int delta = span - (span * rnd / 100);

@@ -1,6 +1,7 @@
 #include "dice.h"
 #include "smithy.h"
 #include "weapon.h"
+#include "armor.h"
 
 /* global */
 dr1Merchant dr1smithy;
@@ -15,4 +16,5 @@ dr1Smithy_init()
 
     dr1ItemSet_add( &dr1smithy.itemStore, &dr1Weapon_halfspear.super);
     dr1ItemSet_add( &dr1smithy.itemStore, &dr1Weapon_longsword.super);
+    dr1ItemSet_add( &dr1smithy.itemStore, &dr1Armor_chainmail.super);
 }

@@ -1,3 +1,4 @@
+add default and copy constructors
 figure out what to do with gauche.  
 - maybe use it for damage when attacker has a critical miss.
 

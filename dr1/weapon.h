@@ -10,7 +10,13 @@
 #ifndef __DR1DICE__H
 #   include "dice.h"
 #endif
+#ifndef __DR1GLOBALS__H
+#   include "globals.h"
+#endif
 
+enum {
+    DR1W_BASICWEAPON = DR1WEAPONS
+};
 /*-------------------------------------------------------------------
  * dr1
  *
@@ -29,18 +35,5 @@ typedef struct {
 extern dr1Weapon dr1Weapon_halfspear;
 extern dr1Weapon dr1Weapon_longsword;
 
-/*-------------------------------------------------------------------
- * dr1
- *
- *    The method ...
- *
- *  PARAMETERS:
- *
- *  RETURNS:
- *
- *  SIDE EFFECTS:
- */
-
-bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i);
 
 #endif /* __DR1WEAPON__H */

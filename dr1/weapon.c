@@ -7,13 +7,16 @@
  *
  *    Represents the item archetype for common weapons
  */
+static bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i);
 
 dr1ItemType dr1Weapon_type = {
     sizeof( dr1Weapon),		/* size */
-    (int)'WEAP',		/* code */
+    (int)DR1W_BASICWEAPON,	/* code */
     (void *)0,	 		/* use */
     (void *)0, 			/* drop */
     (void *)0, 			/* take */
+    (void *)0,			/* init */
+    (void *)0,                  /* copy */
     xdr_dr1Weapon,		/* xdr */
 };
 
@@ -54,7 +57,7 @@ dr1Weapon dr1Weapon_longsword = {
 /*-------------------------------------------------------------------
  * dr1
  *
- *    The method ...
+ *    The method 
  *
  *  PARAMETERS:
  *
@@ -62,7 +65,7 @@ dr1Weapon dr1Weapon_longsword = {
  *
  *  SIDE EFFECTS:
  */
-bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i) {
+static bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i) {
     bool_t res;
     dr1Weapon *w = (dr1Weapon*)i;
     xdr_push_note( xdrs, "damage");

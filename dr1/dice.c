@@ -22,7 +22,7 @@ void dr1Dice_seed() {
  *
  * Returns:
  *    -1	Parse error
- *    0..N	Random result of Dice throw
+ *    0 	Success
  */
 
 int dr1Dice_data( char *ds, int *nDice, int *sides, int *offset, int *multiple) 
@@ -47,6 +47,7 @@ int dr1Dice_data( char *ds, int *nDice, int *sides, int *offset, int *multiple)
 	*offset = 0;
     } 
     if (pm == '-') *offset = -*offset;
+    return 0;
 }
 
 /*-------------------------------------------------------------------

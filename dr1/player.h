@@ -17,6 +17,9 @@
 #ifndef __DR1WEAPON__H
 #   include "weapon.h"
 #endif
+#ifndef __DR1ARMOR__H
+#   include "armor.h"
+#endif
 
 #define MAXNAMELEN 1024
 
@@ -44,6 +47,7 @@ typedef struct dr1Player {
     dr1ItemSet pack;		/* Backpack equipment */
     dr1Weapon* weapon;		/* Equipped weapon */
     dr1Item* gauche;		/* Offhand item */
+    dr1Armor* armor;		/* Equipped armor */
 
     int race;			/* Elf, Human, ... */
     int sex;			/* Male, Female */

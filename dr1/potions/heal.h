@@ -7,7 +7,13 @@
 #include "item.h"
 #include "dice.h"
 #include "player.h"
+#ifndef __DR1GLOBALS__H
+#   include "globals.h"
+#endif
 
+enum {
+    DR1P_HEAL = DR1POTIONS
+};
 /*-------------------------------------------------------------------
  * dr1pHeal_type
  *
@@ -44,10 +50,5 @@ typedef struct {
  */
 void dr1pHeal_quaff( dr1Player *p, dr1Item *i, int fn);
 
-
-/*-------------------------------------------------------------------
- * xdr_dr1pHeal( xdrs, dr1Item*)
- */
-bool_t xdr_dr1pHeal( XDR *xdrs, dr1Item*);
 
 #endif /* __DR1PHEAL__H */

@@ -116,13 +116,13 @@ int dr1Playerv_class( dr1Player *p, int c, char **v) {
 
     if (c != 2) return -1;
     if (!strcasecmp( v[1], "mu")) {
-	ccode = 'MU  ';
+	ccode = DR1C_MU;
     } else if (!strcasecmp( v[1], "fighter")) {
-	ccode = 'FIGH';
+	ccode = DR1C_FIGHTER;
     } else if (!strcasecmp( v[1], "cleric")) {
-	ccode = 'CLER';
+	ccode = DR1C_CLERIC;
     } else if (!strcasecmp( v[1], "thief")) {
-	ccode = 'THIE';
+	ccode = DR1C_THIEF;
     } else return -1;
     
     cl = dr1Registry_lookup( &dr1class, ccode);

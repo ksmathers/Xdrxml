@@ -1,0 +1,3 @@
+#ifndef __DR1GLOBALS__H
+#   include "globals.h"
+#endif

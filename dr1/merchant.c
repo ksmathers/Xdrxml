@@ -65,8 +65,7 @@ dr1Item* dr1Merchant_completeSale( dr1Merchant *m,  dr1Barter *b)
 	t = i;
 	dr1Merchant_removeFromInventory( m, i);
     } else {
-        dr1Item *t = malloc( sizeof(dr1Item));
-	memcpy( t, i, sizeof(dr1Item));
+        t = dr1Item_dup( i);
     }
     return t;
 }

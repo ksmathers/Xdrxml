@@ -7,6 +7,23 @@
 #include "item.h"
 #include "itemreg.h"
 #include "xdrasc.h"
+#include "armor.h"
+
+/*-------------------------------------------------------------------
+ * dr1itemReg
+ *
+ *    This registry contains the item types known to the system.
+ *
+ *    See 'itemreg.c' for the real definition.
+ *
+ * static dr1RegistryEntry e[] = {
+ *    { (int)DR1P_HEAL, &dr1pHeal_type },
+ *    { (int)DR1W_BASICWEAPON, &dr1Weapon_type },
+ *    { (int)DR1A_BASICARMOR, &dr1Armor_type },
+ *    { -1, 0 }
+ * };
+ *
+ */
 
 /*-------------------------------------------------------------------
  * dr1Item_destroy
@@ -36,6 +53,53 @@ dr1Item_destroy( dr1Item *i) {
  */
 long dr1Item_size( dr1Item *i) {
     return i->type->size;
+}
+
+/*-------------------------------------------------------------------
+ * dr1Item_isArmor
+ *
+ *    The method checks the item to see if it is one of the armor 
+ *    subtypes of item
+ *
+ *  PARAMETERS:
+ *    i     The item to check
+ *
+ *  RETURNS:
+ *    TRUE  It is an armor
+ *    FALSE Otherwise
+ *
+ */
+int dr1Item_isArmor( dr1Item *i) {
+    int res;
+
+    res = ( DR1ARMOR <= i->type->code && i->type->code < DR1ARMOR_END );
+    return res;
+}
+
+/*-------------------------------------------------------------------
+ * dr1Item_dup
+ *
+ *    The method dup duplicates an existing item
+ *
+ *  PARAMETERS:
+ *    orig	The original item
+ *
+ *  RETURNS:
+ *    Pointer to the newly malloc'd duplicate of the original
+ *
+ */
+dr1Item* dr1Item_dup( dr1Item *orig) {
+    int size = dr1Item_size( orig);
+    dr1Item* copy = calloc( 1, size);
+    if ( orig->type->copy) {
+        /* use the virtual copy constructor if available */
+	orig->type->copy( copy, orig);
+    } else {
+        /* otherwise just do a shallow copy */
+	memcpy( copy, orig, size);
+    }
+    return copy;
+
 }
 
 /*-------------------------------------------------------------------

@@ -1,5 +1,6 @@
 #include "class.h"
 
+
 /*-------------------------------------------------------------------
  * dr1
  *
@@ -48,10 +49,10 @@ static dr1ClassType class_fighter = {
 };
 
 static dr1RegistryEntry entries[] = {
-    { 'MU  ', &class_mu },
-    { 'THIE', &class_thief },
-    { 'FIGH', &class_fighter },
-    { 'CLER', &class_cleric },
+    { DR1C_MU,      &class_mu },
+    { DR1C_THIEF,   &class_thief },
+    { DR1C_FIGHTER, &class_fighter },
+    { DR1C_CLERIC,  &class_cleric },
     { -1, NULL }
 };
 

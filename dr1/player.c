@@ -2,15 +2,10 @@
 #include <string.h>
 #include <assert.h>
 
-#ifndef __DR1PLAYER__H
-#   include "player.h"
-#endif
-#ifndef __DR1XDRASC__H
-#   include "xdrasc.h"
-#endif
-#ifndef __DR1CLASS__H
-#   include "class.h"
-#endif
+#include "player.h"
+#include "xdrasc.h"
+#include "class.h"
+#include "armor.h"
 
 #if 0
 struct dr1Player_state {
@@ -115,7 +110,11 @@ int dr1Player_thac0( dr1Player *p) {
  */
 
 int dr1Player_ac( dr1Player *p, int surprise, int ranged, int dtype) {
-    return 10;
+    int ac = 10;
+    if (p->armor) {
+	ac = p->armor->type->base_ac;
+    }
+    return ac;
 }
 
 /*-------------------------------------------------------------------
@@ -181,6 +180,10 @@ bool_t xdr_dr1Player( XDR *xdrs, dr1Player* p) {
 
    xdr_push_note( xdrs, "gauche");
    if (!xdr_dr1ItemPtr( xdrs, &p->gauche)) return FALSE;
+   xdr_pop_note( xdrs);
+
+   xdr_push_note( xdrs, "armor");
+   if (!xdr_dr1ItemPtr( xdrs, (dr1Item **)&p->armor)) return FALSE;
    xdr_pop_note( xdrs);
 
    xdr_attr( xdrs, "race");

@@ -96,18 +96,34 @@ int buy( dr1Player *p, int c, char **v) {
 int equip( dr1Player *p, int c, char **v) {
     /* equip armor, weapons, etc. */
     dr1Item *item;
+    dr1Item *unequip = NULL;
 
     if (c != 2) return -1;
     item = dr1ItemSet_findName( &p->pack, v[1]);
-    if (!item || !item->weapon) return -1;
-    if (p->weapon) {
-        printf("Putting %s back in your pack.\n", p->weapon->super.name);
-	dr1ItemSet_add( &p->pack, &p->weapon->super);
-        p->weapon = NULL;
+    if (!item) return -1;
+    
+    if (item->weapon) {
+	if (p->weapon) {
+	    unequip = &p->weapon->super;
+	    p->weapon = NULL;
+	}
+	p->weapon = (dr1Weapon*)item;
+    } else if ( dr1Item_isArmor( item)) {
+        if (p->armor) {
+	    unequip = &p->armor->super;
+	    p->armor = NULL;
+	}   
+	p->armor = (dr1Armor*)item;
+    } else return -2;
+
+    dr1ItemSet_remove( &p->pack, item);
+          
+    if (unequip) {
+	printf("Putting %s back in your pack.\n", unequip->name);
+	dr1ItemSet_add( &p->pack, unequip);
     }
     printf("Equipping %s.\n", item->name);
-    dr1ItemSet_remove( &p->pack, item);
-    p->weapon = (dr1Weapon*)item;
+    
     return 0;
 }
 

@@ -3,6 +3,20 @@
 
 #include "registry.h"
 #include "dice.h"
+
+/*-------------------------------------------------------------------
+ * dr1
+ *
+ *    enumerates the possible character classes
+ */
+enum {
+    DR1C_INVALID,
+    DR1C_MU,
+    DR1C_CLERIC,
+    DR1C_FIGHTER,
+    DR1C_THIEF
+};
+    
 /*-------------------------------------------------------------------
  * dr1
  *

@@ -4,12 +4,31 @@
 #ifndef _RPC_XDR_H
 #   include <rpc/xdr.h>
 #endif
+#ifndef __DR1GLOBALS__H
+#   include "globals.h"
+#endif
 #ifndef __DR1ITEM__H
 #   include "item.h"
 #endif
 #ifndef __DR1DICE__H
 #   include "dice.h"
 #endif
+
+
+/*-------------------------------------------------------------------
+ * ItemType enumerations for armor types
+ */
+enum {
+    DR1A_BASICARMOR = DR1ARMOR
+};
+
+/*-------------------------------------------------------------------
+ * Armor subtypes
+ */
+enum {
+    DR1A_LEATHER,
+    DR1A_CHAINMAIL
+};
 
 /*-------------------------------------------------------------------
  * dr1
@@ -32,20 +51,24 @@ typedef struct {
     int damage;
 } dr1Armor;
 
-extern dr1ArmorType dr1ArmorType_leather;
+extern dr1Armor dr1Armor_leather;
+extern dr1Armor dr1Armor_chainmail;
 
 /*-------------------------------------------------------------------
- * dr1
+ * dr1Armor_copy
  *
- *    The method ...
+ *    The method copies an armor from a prototype.
  *
  *  PARAMETERS:
+ *    dest    The destination storage
+ *    source  The prototype armor object
  *
  *  RETURNS:
  *
  *  SIDE EFFECTS:
+ *    Initializes the damage limit result->damage
  */
 
-bool_t xdr_dr1Armor( XDR *xdrs, dr1Item *i);
+void dr1Armor_copy( dr1Item *dest, dr1Item *src);
 
 #endif /* __DR1WEAPON__H */
