@@ -70,7 +70,7 @@ static xmlNodePtr bfs1( xmlNodePtr node, const char *name) {
     while (cur != NULL && strcasecmp( cur->name, name) != 0) {
     	cur = cur->next;
     }
-    printf("%s %s\n", cur?"found":"lost", name); /**/
+/*    printf("%s %s\n", cur?"found":"lost", name); /**/
     return cur;
 }
 
@@ -131,6 +131,8 @@ bool_t xdrxml_getstring( XDR *xdrs, int prealloc_len, char **s) {
     value = xmlNodeListGetString(doc, cur->children, 1);
     if (!value) return FALSE;
 
+/*    printf("Decoding node %s value '%s'\n", attr, value); /**/
+
     /* get the final string size */
     for (len=0, cpos=value; *cpos; cpos++) {
         len++;
@@ -166,6 +168,7 @@ bool_t xdrxml_getstring( XDR *xdrs, int prealloc_len, char **s) {
 	    (*s)[i] = c;
 	}
     }
+    (*s)[len]=0;
     XDRXML_DATA(xdrs)->attr = 0;
     return TRUE;
 }

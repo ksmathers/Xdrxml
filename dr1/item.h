@@ -140,8 +140,8 @@ long dr1Item_tcode_size( int tcode);
 long dr1Item_size( dr1Item *i);
 
 /*-------------------------------------------------------------------
- * xdr_dr1Item( xdrs, dr1Item*)
+ * xdr_dr1ItemPtr( xdrs, dr1Item**)
  */
-bool_t xdr_dr1Item( XDR *xdrs, dr1Item*);
+bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item**);
 
 #endif

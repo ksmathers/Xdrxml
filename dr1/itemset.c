@@ -2,6 +2,7 @@
 #include <string.h>
 #include "itemset.h"
 #include "xdrxml.h"
+#include "globals.h"
 
 /*-------------------------------------------------------------------
  * dr1ItemSetAdd
@@ -91,48 +92,6 @@ int dr1ItemSet_encumbrance( dr1ItemSet* set) {
 }
 
 
-bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
-    long siz = 0;
-    long tcode = 0;
-    
-    if (xdrs->x_op == XDR_ENCODE) {
-	if (*itemp) {
-	    tcode = (*itemp)->type->code;
-	} else {
-	    tcode = -1;
-	}
-    }
-
-    /* need the virtual size of the item being read */
-    /* try reading tcode first */
-    xdr_attr( xdrs, "tcode");
-    if (xdr_long( xdrs, &tcode)) {
-	/* tcode */
-	printf("got tcode %ld\n", tcode);
-	if (tcode == -1) siz = 0;
-	else siz = dr1Item_tcode_size( tcode);
-    } else {
-	/* no tcode, so perhaps there is a size? */
-	xdr_attr( xdrs, "size");
-	if (!xdr_long( xdrs, &siz)) return FALSE;
-    }
-
-    if (siz) {
-	if (xdrs->x_op == XDR_DECODE) {
-	    *itemp = calloc( 1, siz);
-	}
-	if (!xdr_dr1Item( xdrs, *itemp)) return FALSE;
-	if (xdrs->x_op == XDR_FREE) {
-	    free(*itemp);
-	    *itemp = NULL;
-	}
-    } else {
-	*itemp = NULL;
-    }
-
-    return TRUE;
-}
-
 /*-------------------------------------------------------------------
  * xdr_dr1ItemSet( xdrs, dr1ItemSet*)
  */
@@ -144,7 +103,7 @@ bool_t xdr_dr1ItemSet( XDR *xdrs, dr1ItemSet* set) {
 
     if (xdrs->x_op == XDR_DECODE) {
 	set->size = set->len;
-	set->items = malloc(sizeof(dr1Item*) * set->len);
+	set->items = calloc(set->len, sizeof(dr1Item*));
     }
     for ( i=0; i<set->len; i++) {
         xdr_push_note( xdrs, "item");

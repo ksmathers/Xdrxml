@@ -81,11 +81,6 @@ void dr1ItemSet_remove( dr1ItemSet* set, dr1Item *i);
 int dr1ItemSet_encumbrance( dr1ItemSet* set);
 
 /*-------------------------------------------------------------------
- * xdr_dr1ItemPtr( xdrs, dr1Item**)
- */
-bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item**);
-
-/*-------------------------------------------------------------------
  * xdr_dr1ItemSet( xdrs, dr1ItemSet*)
  */
 bool_t xdr_dr1ItemSet( XDR *xdrs, dr1ItemSet*);

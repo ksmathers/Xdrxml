@@ -1,5 +1,5 @@
 <player>
-    <name>Durin=a7=06=08=10</name>
+    <name>Durin</name>
     <xp value="0x19b"/>
     <level value="0x1"/>
     <hp value="0x8"/>
@@ -83,7 +83,7 @@
         <dtype value="0x0"/>
     </weapon>
     <gauche>
-        <tcode value="0xffffffff"/>
+        <tcode value="0x0"/>
     </gauche>
     <armor>
         <tcode value="0x2001"/>

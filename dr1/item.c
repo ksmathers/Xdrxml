@@ -125,28 +125,9 @@ dr1Item* dr1Item_dup( dr1Item *orig) {
 }
 
 /*-------------------------------------------------------------------
- * xdr_dr1Item( xdrs, dr1Item*)
+ * xdr_dr1ItemPtr( xdrs, dr1Item**)
  */
-bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
-    int code;
-    char *s = 0;
-    
-    if (xdrs->x_handy & XDR_ANNOTATE) {
-	s = (char *)xdrs->x_private;
-	s += strlen( s);
-    }
-
-    if (xdrs->x_op == XDR_ENCODE) {
-        code = i->type->code;
-    }
-    xdr_attr( xdrs, "code");
-    if (!xdr_int( xdrs, &code)) return FALSE;
-/*    printf("code %x\n", code); /**/
-    if (xdrs->x_op == XDR_DECODE) {
-        i->type = dr1Registry_lookup( &dr1itemReg, code);
-	assert(i->type);
-    }
-
+static bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
     xdr_attr( xdrs, "value");
     if (!xdr_long( xdrs, &i->value)) return FALSE;
    
@@ -175,6 +156,62 @@ bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
     if (i->type->xdr) {
 	if (!i->type->xdr( xdrs, i)) return FALSE;
     }
+    return TRUE;
+}
+
+/*-------------------------------------------------------------------
+ * xdr_dr1ItemPtr( xdrs, dr1Item**)
+ */
+bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
+    int tcode = 0;
+    dr1ItemType *ityp;
+    
+    /*
+     * Get the virtual type pointer 
+     */
+    if (xdrs->x_op == XDR_ENCODE || xdrs->x_op == XDR_FREE) {
+	if (*itemp) {
+	    ityp = (*itemp)->type;
+	    tcode = ityp->code;
+	} else {
+	    ityp = NULL;
+	    tcode = DR1ILLEGAL;
+	}
+    } 
+    
+    xdr_attr( xdrs, "code");
+    if (!xdr_int( xdrs, &tcode)) { return FALSE; }
+
+    if (xdrs->x_op == XDR_DECODE) {
+	printf("got tcode %lx\n", tcode); /**/
+	if (tcode == DR1ILLEGAL) {
+	    ityp = NULL;
+	} else {
+	    ityp = dr1Registry_lookup( &dr1itemReg, tcode);
+	    assert(ityp);
+	    if (!ityp) return FALSE;
+	}
+    } /* decode */
+
+    /*
+     * Read the rest of the object
+     */
+    if (ityp) {
+	/* Non-null object */
+	if (xdrs->x_op == XDR_DECODE) {
+	    *itemp = calloc( 1, ityp->size);
+	    (*itemp)->type = ityp;
+	}
+	if (!xdr_dr1Item( xdrs, *itemp)) return FALSE;
+	if (xdrs->x_op == XDR_FREE) {
+	    free(*itemp);
+	    *itemp = NULL;
+	}
+    } else {
+        /* Null object */
+	*itemp = NULL;
+    }
+
     return TRUE;
 }
 
