@@ -11,8 +11,12 @@
 #ifndef __DR1PLAYER__H
 #   include "player.h"
 #endif
-
-
+#ifndef __DR1REGISTRY__H
+#   include "registry.h"
+#endif
+#ifndef __DR1WEAPON__H
+#   include "weapon.h"
+#endif
 
 /*-------------------------------------------------------------------
  * dr1MonsterType
@@ -20,15 +24,17 @@
  *    The structure defines a type of monster
  */
 
-typedef void (*dr1Monster_attack_fnp)( dr1Monster *mon, dr1Player *p);
-typedef void (*dr1Monster_defend_fnp)( dr1Monster *mon, dr1Player *p);
+struct dr1Monster;
+typedef void (*dr1Monster_attack_fnp)( struct dr1Monster *mon, dr1Player *p);
+typedef void (*dr1Monster_defend_fnp)( struct dr1Monster *mon, dr1Player *p);
 typedef struct {
     int mtype;
+    char *name;
     dr1Attr attr;
     dr1Dice hd;
     int ac;
     int nattacks;
-    dr1Dice damage[4];
+    dr1Weapon* damage[4];
     int xp;
     int ttype;
     dr1Monster_attack_fnp attack;
@@ -41,9 +47,41 @@ typedef struct {
  *    The structure holds a combat monster 
  */
 typedef struct {
-    dr1MonsterType *type
+    dr1MonsterType *type;
+    int full_hp;
     int hp;
 } dr1Monster;
+
+/*-------------------------------------------------------------------
+ * dr1Monster_new
+ *
+ *    Create a new monster object on the heap and return it.
+ *
+ *  PARAMETERS:
+ *    name	Monster type name
+ *
+ *  RETURNS:
+ *    monster
+ *
+ */
+
+dr1Monster* dr1Monster_new( char *name);
+
+/*-------------------------------------------------------------------
+ * dr1
+ *
+ *    The method dr1Monster_thac0 returns the to hit for AC 0 
+ *    for the monster type.
+ *
+ *  PARAMETERS:
+ *    m     The monster in question
+ *
+ *  RETURNS:
+ *    To hit
+ *
+ */
+
+int dr1Monster_thac0( dr1Monster *m);
 
 /*-------------------------------------------------------------------
  * dr1monsters

@@ -1,3 +1,6 @@
+implement armor, add to dr1Player_ac() method
+stat bonuses for AC, reaction, etc.
+race bonuses other that stats
 add character gen routines to player
 equipment class
 add XDR routines

@@ -14,6 +14,7 @@ typedef struct {
     dr1Dice hitdice;
     dr1Dice startingMoney;
     int primaryStat;
+    int thac0;			/* THAC0 as a level 1 character */
 } dr1ClassType;
 
 /*-------------------------------------------------------------------

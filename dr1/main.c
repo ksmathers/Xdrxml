@@ -13,6 +13,8 @@
 #include "dice.h"
 #include "xdrasc.h"
 #include "itemset.h"
+#include "monster.h"
+#include "combatv.h"
 
 int buy( dr1Player *p, int c, char **v) {
     /* purchase an item */
@@ -109,6 +111,29 @@ int equip( dr1Player *p, int c, char **v) {
     return 0;
 }
 
+int hunt( dr1Player *p, int c, char **v) {
+    char buf[80];
+    char *mname;
+    dr1Monster *m;
+
+    if (c < 2) {
+	printf("Hunt what: ");
+        gets( buf);
+	v[1] = buf;
+	c = 2;
+    }
+
+    if (c != 2) return -1;
+    mname = v[1];
+
+    m = dr1Monster_new( mname);
+    
+    if (!m) return -2;
+
+    dr1Combatv_showPage( p, m);
+    return 0;
+}
+
 int main( int argc, char** argv) {
     FILE *fp;
     XDR xdrs;
@@ -144,7 +169,7 @@ int main( int argc, char** argv) {
 	printf("---------------------------------------------------------\n");
 	if (player.name) printf("Name: %s\n", player.name);
 
-	printf("(buy, sell, hunt, quit)\n");
+	printf("(buy, equip, sell, hunt, quit)\n");
 	printf("Command: ");
 	fgets( cmd, sizeof(cmd), stdin);
 
@@ -154,6 +179,7 @@ int main( int argc, char** argv) {
 	
 	if ( !strcmp(cmds[0], "buy")) r=buy( p, i, cmds);
 	else if ( !strcmp(cmds[0], "equip")) r=equip( p, i, cmds);
+	else if ( !strcmp(cmds[0], "hunt")) r=hunt( p, i, cmds);
 	else if ( !strcmp(cmds[0], "quit")) break;
 	else printf("Unknown command: '%s'\n", cmds[0]);
 	if (r) printf("Command returned code %d\n", r);

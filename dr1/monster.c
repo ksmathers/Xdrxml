@@ -5,33 +5,78 @@
  *    Registry of monster types
  */
 
-static dr1MonsterType mkobold = {
-    /* mtype     */ 'MKOB', 
-    /* attr      */ {},
+static dr1MonsterType kobold = {
+    /* mtype     */ 'KOBO', 
+    /* name      */ "Kobold",
+    /* attr      */ { 0, 0, 0, 0, 0, 0},
     /* hd        */ "d4+1",
     /* ac        */ 15,
-    /* nattacks  */ 2,
-    /* damage    */ { 'LXBO', 'HSPR' },
+    /* nattacks  */ 1,
+    /* damage    */ { &dr1Weapon_halfspear, NULL, NULL, NULL },
     /* xp        */ 10,
     /* ttype     */ 'J',
     /* attack    */ NULL,
     /* defend    */ NULL
-}
+};
 
-static dr1Registry dr1monsters[] = {
-    { 'KOBO', &mkobold },
+static dr1RegistryEntry entries[] = {
+    { 'KOBO', &kobold },
     { -1, NULL }
+};
+
+dr1Registry dr1monsters = {
+    entries
+};
+
+/*-------------------------------------------------------------------
+ * dr1Monster_new
+ *
+ *    Create a new monster object on the heap and return it.
+ *
+ *  PARAMETERS:
+ *    name	Monster type name
+ *
+ *  RETURNS:
+ *    monster, or NULL if the name is unknown
+ *
+ */
+
+dr1Monster* dr1Monster_new( char *name) {
+    dr1MonsterType *mtype = NULL;
+    dr1Monster *m;
+    int i;
+
+    for (i=0; dr1monsters.entries[i].code != -1; i++) {
+        mtype = dr1monsters.entries[i].value;
+	if (!strcasecmp( mtype->name, name)) {
+	    break;
+	}
+    }
+    if (!mtype) return NULL;
+
+    m = malloc( sizeof(dr1Monster));
+    m->type = mtype;
+    m->hp = dr1Dice_roll( mtype->hd);
+    m->full_hp = m->hp;
+    return m;
 }
 
 /*-------------------------------------------------------------------
  * dr1
  *
- *    The method ...
+ *    The method dr1Monster_thac0 returns the to hit for AC 0 
+ *    for the monster type.
  *
  *  PARAMETERS:
+ *    m     The monster in question
  *
  *  RETURNS:
+ *    To hit
  *
- *  SIDE EFFECTS:
  */
 
+int dr1Monster_thac0( dr1Monster *m) {
+    int level = 1;
+    sscanf( m->type->hd, "%dd", &level);
+    return 20 - level;
+}

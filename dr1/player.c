@@ -2,8 +2,15 @@
 #include <string.h>
 #include <assert.h>
 
-#include "player.h"
-#include "xdrasc.h"
+#ifndef __DR1PLAYER__H
+#   include "player.h"
+#endif
+#ifndef __DR1XDRASC__H
+#   include "xdrasc.h"
+#endif
+#ifndef __DR1CLASS__H
+#   include "class.h"
+#endif
 
 #if 0
 struct dr1Player_state {
@@ -31,6 +38,7 @@ struct dr1Player_stat[] dr1Player_create_cont = {
 	{ PC1_NAME, "name", dr1Player_align, -1 }
     };
 #endif
+
 
 /*-------------------------------------------------------------------
  * dr1Player_load
@@ -73,6 +81,39 @@ dr1Player *dr1Player_load( dr1Player *buf, char* fname) {
 }
 
 /*-------------------------------------------------------------------
+ * dr1Player_thac0
+ *
+ *    Calculates the THAC0 of the player
+ */
+int dr1Player_thac0( dr1Player *p) {
+    dr1ClassType *c;
+    c = dr1Registry_lookup( &dr1class, p->class);
+    if (!c) return 25;
+    return c->thac0 - p->level;
+}
+
+/*-------------------------------------------------------------------
+ * dr1Player_ac
+ *
+ *    The method dr1Player_ac returns the effective ac of the 
+ *    player, given certain attack conditions
+ *
+ *  PARAMETERS:
+ *    p         The player in question
+ *    surprise  Is the player surprised?
+ *    ranged    Is it a ranged attack?
+ *    dtype     Damage type
+ *
+ *  RETURNS:
+ *    To hit
+ *
+ */
+
+int dr1Player_ac( dr1Player *p, int surprise, int ranged, int dtype) {
+    return 10;
+}
+
+/*-------------------------------------------------------------------
  * dr1Player_destroy
  *
  *    Destroy a malloc'd dr1Player structure.
@@ -103,6 +144,9 @@ bool_t xdr_dr1Player( XDR *xdrs, dr1Player* p) {
 
    xdr_attr( xdrs, "xp");
    if (!xdr_long( xdrs, &p->xp)) return FALSE;
+
+   xdr_attr( xdrs, "level");
+   if (!xdr_int( xdrs, &p->level)) return FALSE;
 
    xdr_attr( xdrs, "hp");
    if (!xdr_int( xdrs, &p->hp)) return FALSE;

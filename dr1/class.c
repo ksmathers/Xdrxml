@@ -4,28 +4,32 @@ static dr1ClassType class_mu = {
     "Magic User",
     "d4",
     "3d4*10",
-    'INT '
+    'INT ',
+    25
 };
 
 static dr1ClassType class_thief = {
     "Thief",
     "d6",
     "3d6*10",
-    'DEX '
+    'DEX ',
+    23
 };
 
 static dr1ClassType class_cleric = {
     "Cleric",
     "d8",
     "3d8*10",
-    'WIS '
+    'WIS ',
+    22
 };
 
 static dr1ClassType class_fighter = {
     "Fighter",
     "d10",
     "3d10*10",
-    'STR '
+    'STR ',
+    20
 };
 
 static dr1RegistryEntry entries[] = {

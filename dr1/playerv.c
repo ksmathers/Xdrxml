@@ -162,6 +162,7 @@ int dr1Playerv_init( dr1Player *p) {
     p->name = strdup( "Unnamed");
     p->race = 'MAN ';
     p->sex = 'MALE';
+    p->level = 1;
     return 0;
 }
 

@@ -32,6 +32,7 @@
 typedef struct dr1Player {
     char *name;			/* Character name */
     long xp;			/* Experience points */
+    int level;			/* Training level */
 
     int hp;			/* Hit points */
     int full_hp;		/* Full undamaged hits */
@@ -89,6 +90,40 @@ void dr1Player_destroy( dr1Player *);
 
 int dr1Player_encumbrance();
 
+/*-------------------------------------------------------------------
+ * dr1Player_thac0
+ *
+ *    The method dr1Player_thac0 returns the to hit for AC 0 
+ *    for the monster type.
+ *
+ *  PARAMETERS:
+ *    p     The player in question
+ *
+ *  RETURNS:
+ *    To hit
+ *
+ */
+
+int dr1Player_thac0( dr1Player *p);
+
+/*-------------------------------------------------------------------
+ * dr1Player_ac
+ *
+ *    The method dr1Player_ac returns the effective ac of the 
+ *    player, given certain attack conditions
+ *
+ *  PARAMETERS:
+ *    p         The player in question
+ *    surprise  Is the player surprised?
+ *    ranged    Is it a ranged attack?
+ *    dtype     Damage type
+ *
+ *  RETURNS:
+ *    Armor Class
+ *
+ */
+
+int dr1Player_ac( dr1Player *p, int surprise, int ranged, int dtype);
 
 /*-------------------------------------------------------------------
  * bool_t xdr_dr1Player( xdrs, dr1Player*)
