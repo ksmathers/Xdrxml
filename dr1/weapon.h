@@ -26,6 +26,9 @@ typedef struct {
     int speed;
 } dr1Weapon;
 
+extern dr1Weapon dr1Weapon_halfspear;
+extern dr1Weapon dr1Weapon_longsword;
+
 /*-------------------------------------------------------------------
  * dr1
  *

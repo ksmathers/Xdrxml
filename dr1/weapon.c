@@ -16,10 +16,10 @@ dr1ItemType dr1Weapon_type = {
     xdr_dr1Weapon,		/* xdr */
 };
 
-dr1Weapon half_spear = {
+dr1Weapon dr1Weapon_halfspear = {
     /* super */ {
     	/* value       */ GP(4),
-	/* name        */ "Half spear",
+	/* name        */ "Halfspear",
 	/* encumbrance */ 20,
 	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
@@ -31,6 +31,23 @@ dr1Weapon half_spear = {
     /* damage   */ "d6-1",
     /* ranged   */ FALSE,
     /* speed    */ 4
+};
+
+dr1Weapon dr1Weapon_longsword = {
+    /* super */ {
+    	/* value       */ GP(4),
+	/* name        */ "Longsword",
+	/* encumbrance */ 150,
+	/* unique      */ FALSE,
+	/* inuse       */ FALSE,
+	/* weapon      */ TRUE,
+	/* identified  */ TRUE,
+	/* uses        */ 0,
+	/* type        */ &dr1Weapon_type
+    },
+    /* damage   */ "d8",
+    /* ranged   */ FALSE,
+    /* speed    */ 6
 };
 
 /*-------------------------------------------------------------------
