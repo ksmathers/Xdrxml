@@ -6,6 +6,7 @@
 #endif
 #include <stdio.h>
 #include "player.h"
+#include "map.h"
 #define CMDSTACK_SIZE 20
 
 /*-------------------------------------------------------------------
@@ -29,6 +30,7 @@ typedef struct dr1Context {
     char fname[80];		/* players xml character file */
     char error[80];		/* error string */
     dr1Player player;		/* the loaded player */
+    dr1Map *map;		/* the active map */
     int state;			/* current dialog state */
     int inputready;		/* the socket is readable */
     dr1Cmd cstack[CMDSTACK_SIZE];	/* command stack */

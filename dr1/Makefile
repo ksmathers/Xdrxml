@@ -8,14 +8,14 @@ dr1server: server.o money.o merchant.o apothecary.o dice.o player.o \
 	    itemreg.o xdrxml.o playerv.o race.o class.o \
 	    smithy.o weapon.o monster.o combatv.o armor.o \
 	    ttype.o tanner.o wright.o location.o qio.o \
-	    potions/heal.o context.o town.o
+	    potions/heal.o context.o town.o map.o
 	gcc -g -Wl,-warn-common -odr1server server.o money.o merchant.o \
 	apothecary.o dice.o \
 	player.o barter.o itemset.o item.o attr.o registry.o \
 	itemreg.o xdrxml.o playerv.o race.o class.o \
 	smithy.o weapon.o monster.o combatv.o armor.o \
 	ttype.o tanner.o wright.o location.o qio.o \
-	context.o town.o \
+	context.o town.o map.o \
 	potions/heal.o -lxml2 -lm -L. -lefence
 
 main: main.o money.o merchant.o apothecary.o dice.o player.o \

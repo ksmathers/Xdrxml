@@ -40,6 +40,9 @@ extern XDR xdrxml;
 int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop);
     /* open an XML xdr stream */
 
+bool_t xdrxml_bool( XDR *xdrs, int *bool) ;
+    /* read/write boolean as node (instead of int) */
+
 bool_t xdrxml_wrapstring( XDR *xdrs, char **s) ;
     /* read/write strings as strings (instead of int+bytes+bytes) */
 

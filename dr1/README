@@ -13,6 +13,27 @@ Prerequisites:
    so if you are using Redhat 7 you'll probably be best off compiling 
    'libxml2' from source.
 
+   sdl
+   ===
+
+   Get and install the SDL graphics gaming library from www.libsdl.org.
+   With Redhat 7, I just installed the SDL and SDL_devel RPMs for version
+   1.2.0 of the library.  The code isn't backward compatible with 1.1 so
+   you will have to get 1.2 from the network.
+
+   sdl_ttf
+   =======
+
+   Truetype font library for SDL.  You can find this library on the
+   'library' page at www.libsdl.org.  Build and install.
+
+   freetype
+   ========
+
+   SDL_ttf currently only supports the version 1.x series of Freetype.  You
+   can download freetype 1.3.1 from www.freetype.org, or just install the
+   devel package from the second binary disk if you are using Redhat 7.
+
 To Build:
 
     dr1server
@@ -43,4 +64,9 @@ To Run:
     The server saves player data to files with names like 
     'login-password.xml' in the current directory.
 
-    
+    sdlclient
+    =========
+
+    The custom client test code is in the sdlclient subdirectory.
+    Feel free to try it out, but it isn't yet connected to the 
+    server.

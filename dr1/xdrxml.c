@@ -209,6 +209,57 @@ bool_t xdrxml_putstring( XDR *xdrs, char *s) {
     return TRUE;
 }
 
+bool_t xdrxml_getbit( XDR *xdrs, bool_t *bit) {
+    /* find a bit */
+    struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+    xmlNodePtr cur = xdrd->cur;
+    char *attr = xdrd->attr;
+
+    if (!attr) attr="bit";
+
+    /* assume bit clear */
+    *bit = 0;
+
+    cur = bfs1( cur, attr);
+    if (cur) {
+        /* bit set */
+	*bit = 1;
+    }
+    mark(cur);
+    return TRUE;
+}
+
+bool_t xdrxml_putbit( XDR *xdrs, bool_t bit) {
+    /* put a bit to the stream */
+    FILE *fp;
+    char *attr = XDRXML_DATA(xdrs)->attr;
+    int ni = nchar( XDRXML_DATA(xdrs)->path, '/');
+
+    fp = XDRXML_DATA(xdrs)->fp;
+    if (!fp) fp = stdout;
+    if (!attr) attr = "bit";
+    
+    while (ni--) fprintf(fp, "    ");
+    fprintf(fp, "<%s/>\n", attr);
+    return TRUE;
+}
+
+
+bool_t xdrxml_bool( XDR *xdrs, bool_t *bool) {
+    bool_t res;
+    if (xdrs->x_handy & XDR_ANNOTATE) {
+	/* xml stream */
+        if (xdrs->x_op == XDR_DECODE) {
+	    res = xdrxml_getbit( xdrs, bool);
+	} else if (xdrs->x_op == XDR_ENCODE) {
+	    res = xdrxml_putbit( xdrs, *bool);
+	}
+    } else {
+	res = xdr_bool( xdrs, bool);
+    }
+    return res;
+}
+
 bool_t xdrxml_wrapstring( XDR *xdrs, char **s) 
 {
     bool_t res;

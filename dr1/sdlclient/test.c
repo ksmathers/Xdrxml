@@ -6,9 +6,16 @@
 #include "map.h"
 #include "util.h"
 #define NOLIGHTDIST 0
-#define TORCHLIGHTDIST 1
-#define LANTERNLIGHTDIST 3
-#define AMBIENTLIGHTDIST 10
+
+#ifdef DAYLIGHT
+#   define TORCHLIGHTDIST 10
+#   define LANTERNLIGHTDIST 10
+#   define AMBIENTLIGHTDIST 10
+#else
+#   define TORCHLIGHTDIST 1
+#   define LANTERNLIGHTDIST 3
+#   define AMBIENTLIGHTDIST 10
+#endif
 
 SDL_Surface *dr1_npcs1;
 SDL_Surface *dr1_npcs2;
@@ -480,6 +487,11 @@ int main( int argc, char **argv) {
 			    oxpos = xpos;
 			    oypos = ypos;
 			    switch ( event.key.keysym.sym) {
+			        case SDLK_s:
+				    printf("screenshot");
+				    SDL_SaveBMP(screen, "screenshot.bmp");
+				    break;
+
 				case SDLK_h:
 				    xpos--;
 				    break;

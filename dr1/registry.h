@@ -11,6 +11,8 @@
  *    an object.
  */
 
+typedef int (*dr1Registry_compare_fnp)(void *a, void *b);
+
 typedef struct {
     int code;
     void *value;
@@ -36,5 +38,23 @@ typedef struct {
  */
 
 void *dr1Registry_lookup( dr1Registry *r, int code);
+
+/*-------------------------------------------------------------------
+ * dr1Registry_findByValue
+ *
+ *    The method dr1Registry_findByValue returns the code for a 
+ *    class.
+ *
+ *  PARAMETERS:
+ *    r     The registry to search
+ *    class The class pointer
+ *    cmp   A callback function for comparing the values in the registry.
+ *
+ *  RETURNS:
+ *    code
+ */
+
+int dr1Registry_findByValue( dr1Registry *r, void *value, 
+			     dr1Registry_compare_fnp cmp);
 
 #endif /* __DR1REGISTRY__H */

@@ -139,6 +139,9 @@ int loginplayer( dr1Context *ctx) {
 	
 	case NEWPLAYER:
 	    qprintf( ctx, "Welcome to Dragon's Reach, traveller!\n");
+	    ctx->map = dr1Map_readmap( "town.map");
+	    ctx->player.location.x = ctx->map->startx;
+	    ctx->player.location.y = ctx->map->starty;
 	    dr1Context_popcall( ctx, ctx->cstack[ctx->stackptr-1].result);
 	    return 0;
 
