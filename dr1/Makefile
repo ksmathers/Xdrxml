@@ -1,3 +1,13 @@
+OBJS=	    server.o \
+	    barter.o itemset.o item.o attr.o registry.o \
+	    itemreg.o playerv.o race.o class.o \
+	    smithy.o weapon.o monster.o armor.o \
+	    ttype.o tanner.o wright.o location.o \
+	    potions/heal.o context.o glyphset.o \
+	    controller.o dice.o player.o money.o \
+	    merchant.o apothecary.o \
+	    lib/libdr1.a
+
 .c.o:
 	gcc -c -g -Wall -Wno-comment -I. $< -o $@
 
@@ -11,20 +21,10 @@ subdirs:
 	cd mapedit ; make
 #	cd sdlclient ; make
 
-dr1server: server.o money.o merchant.o apothecary.o dice.o player.o \
-	    barter.o itemset.o item.o attr.o registry.o \
-	    itemreg.o playerv.o race.o class.o \
-	    smithy.o weapon.o monster.o armor.o \
-	    ttype.o tanner.o wright.o location.o \
-	    potions/heal.o context.o town.o glyphset.o 
-	gcc -g -Wl,-warn-common -Wl,-Map=dr1server.map -odr1server server.o money.o merchant.o \
-	apothecary.o dice.o \
-	player.o barter.o itemset.o item.o attr.o registry.o \
-	itemreg.o playerv.o race.o class.o \
-	smithy.o weapon.o monster.o armor.o \
-	ttype.o tanner.o wright.o location.o qio.o \
-	context.o town.o glyphset.o \
-	potions/heal.o -lxml2 -lm lib/libdr1.a
+dr1server: ${OBJS}
+	gcc -g -Wl,-warn-common -Wl,-Map=dr1server.map -odr1server \
+	${OBJS} \
+	-lxml2 -lm lib/libdr1.a
 
 depend:
 	makedepend -I. \

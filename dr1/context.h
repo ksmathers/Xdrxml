@@ -6,6 +6,7 @@
 #endif
 #include <stdio.h>
 #include "player.h"
+#include "merchant.h"
 #include "lib/map.h"
 #include "lib/stream.h"
 

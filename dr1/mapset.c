@@ -36,6 +36,7 @@ void dr1mapset_init( void) {
 dr1Map *dr1MapSet_selectmap( char *mapname) {
     dr1Map *m, mt;
     mt.name = mapname;
+    if (!dr1mapset) dr1mapset_init();
     m = dr1Set_find( &dr1mapset->maps, &mt);
     if (!m) {
 	m = dr1Map_readmap( mapname);

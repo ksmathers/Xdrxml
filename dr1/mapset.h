@@ -2,10 +2,6 @@
 #define __DR1MAPSET__H
 #include "map.h"
 
-#ifndef _RPC_XDR_H
-#   include <rpc/xdr.h>
-#endif
-
 /*-------------------------------------------------------------------
  * dr1
  *

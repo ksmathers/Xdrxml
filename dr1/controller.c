@@ -1,3 +1,12 @@
+#include <ctype.h>
+#include <sys/stat.h>
+
+#include "controller.h"
+#include "playerv.h"
+#include "town.h"
+
+#include "lib/protocol.h"
+#include "lib/xdrxml.h"
 
 /*
  * sendmap 
@@ -67,6 +76,11 @@ void sendplayer( dr1Context* ctx) {
 int 
 setLoginPassword(dr1Context *ctx, char *login, char *passwd)
 {
+    int i;
+    char *cpos;
+    struct stat pdat;
+    int pdatf;
+
     strncpy( ctx->login, login, sizeof(ctx->login));
     strncpy( ctx->passwd, passwd, sizeof(ctx->passwd));
 
@@ -113,11 +127,7 @@ setLoginPassword(dr1Context *ctx, char *login, char *passwd)
  *     data written to the player socket
  */
 int dr1Controller_handleLogin( dr1Context *ctx, int argc, char **argv) {
-    struct stat pdat;
-    int pdatf;
     int loadOk;
-    int i;
-    char *cpos;
     int exists;
 
     printf("%d: handleLogin\n", ctx->ios.fd);
@@ -151,7 +161,7 @@ dr1Controller_handleNewPlayer( dr1Context *ctx, int argc, char **argv) {
     if (!strcasecmp( argv[0], "cancel")) {
 	ctx->dialog = CANCEL;
     } else if (!strcasecmp( argv[0], "newplayer")) {
-	exists = setLoginPassword( argv[1], argv[2]);
+	exists = setLoginPassword( ctx, argv[1], argv[2]);
 	if (exists) {
 	    dr1Stream_printf( &ctx->ios, DR1MSG_580, argv[2]);
 	} else {
@@ -258,7 +268,7 @@ int dr1Controller_handleCommand( dr1Context *ctx, int argc, char **argv) {
 	    }
 	} else if (!strcasecmp( argv[0], "newplayer")) {
 	    int exists;
-	    exists = setLoginPassword( argv[1], argv[2]);
+	    exists = setLoginPassword( ctx, argv[1], argv[2]);
 	    if (exists) {
 		dr1Stream_printf( &ctx->ios, DR1MSG_580, argv[2]);
 	    } else {
@@ -272,14 +282,14 @@ int dr1Controller_handleCommand( dr1Context *ctx, int argc, char **argv) {
 	}
     } else if (ctx->state == NEWPLAYER) {
 	status = dr1Controller_handleNewPlayer( ctx, argc, argv);
-	if (ctx->dialog = DIALOG_DONE) {
+	if (ctx->dialog == DIALOG_DONE) {
 	    /* loaded ok */
 	    if (ctx->map->town) {
 		ctx->state = TOWN;
 	    } else {
 		ctx->state = DUNGEON;
 	    }
-	} else if (ctx->dialog = CANCEL) {
+	} else if (ctx->dialog == CANCEL) {
 	    ctx->state = LOGIN;
 	}
     } else {
@@ -287,7 +297,7 @@ int dr1Controller_handleCommand( dr1Context *ctx, int argc, char **argv) {
 
 	/* global commands (dead or alive) */
 	if (!strcasecmp( argv[0], "talk")) {
-	    status = dotalk( ctx, argc, argv);
+/*	    status = dotalk( ctx, argc, argv); */
 	} else if (ctx->player.hp < -10) {
 	    /* player is dead */
 /*	    dr1Dead_cmd( ctx, argc, argv); */
@@ -299,10 +309,10 @@ int dr1Controller_handleCommand( dr1Context *ctx, int argc, char **argv) {
 		status = domove( ctx, argc, argv);
 	    } else if (ctx->state == TOWN) {
 		/* player in town map */
-		dr1Town_cmd( ctx, argc, argv);
+/*		dr1Town_cmd( ctx, argc, argv); */
 	    } else if (ctx->state == DUNGEON) {
 	        /* player in dungeon map */
-		dr1Dungeon_cmd( ctx, argc, argv);
+/*		dr1Dungeon_cmd( ctx, argc, argv); */
 	    } else {
 		/* not a valid state */
 		dr1Stream_printf( &ctx->ios, DR1MSG_540);

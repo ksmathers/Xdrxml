@@ -127,7 +127,7 @@ int dr1Stream_fwrite( dr1Stream *str, char *buf, int len) {
         str->error = ENOMEM;
         return -1;
     }
-    return dr1Stream_drain( str);
+    return dr1Stream_flush( str);
 }
 
 int dr1Stream_printf( dr1Stream *str, char *fmt, ...) {

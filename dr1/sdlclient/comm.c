@@ -59,7 +59,9 @@ enum {
     M_LOGIN,
     M_READY,
     M_MAPDATA,
-    M_PLAYERDATA
+    M_PLAYERDATA,
+    M_CHARACTERCREATEDIALOG,
+    M_INVENTORYDIALOG
 };
 
 int handleMessage(char *buf) {
@@ -83,6 +85,9 @@ int handleMessage(char *buf) {
 	    if (!strncmp( buf, DR1MSG_100, 3)) {
 /*		closeDialog( DLG_LOGIN); */
 		mode = M_READY;
+	    } else if (!strncmp( buf, DR1MSG_105, 3)) {
+/*		openDialog( DLG_CHARACTERCREATE); */
+	        mode = M_CHARACTERCREATEDIALOG;
 	    } else if (!strncmp( buf, DR1MSG_500, 3)) {
 		printf("Name/password error\n");
 #if 0
@@ -104,10 +109,15 @@ int handleMessage(char *buf) {
 	case M_READY:	/* ready for next message */
 	    if (!strncmp( buf, DR1MSG_120, 3)) {
 		mode = M_MAPDATA;
-	    }
-	    if (!strncmp( buf, DR1MSG_170, 3)) {
+	    } else if (!strncmp( buf, DR1MSG_170, 3)) {
 		mode = M_PLAYERDATA;
+	    } 
+#if 0
+	    else if (!strncmp( bud, DR1MSG_195, 3)) {
+/*		openDialog( DLG_INVENTORYDIALOG); */
+	        mode = M_INVENTORYDIALOG;
 	    }
+#endif
 	    break;
 
 	case M_MAPDATA: 	/* reading map data */

@@ -510,6 +510,10 @@ xdr_dr1Map( XDR *xdrs, dr1Map *map) {
     if (!xdr_dr1MapMobile( xdrs, &map->moblayer)) return FALSE;
     xdr_pop_note( xdrs);
 
+    xdr_attr( xdrs, "town");
+    if (!xdr_int( xdrs, &map->town)) {
+        town = TRUE;
+    }
     return TRUE;
 }
 

@@ -18,6 +18,16 @@ dr1StringBuffer_create( dr1StringBuffer* _sb) {
     return sb;
 }
 
+void
+dr1StringBuffer_finit( dr1StringBuffer* sb) {
+    if (sb) {
+        free( sb->buf);
+	sb->buf = 0;
+	sb->bufsize = 0;
+	sb->cpos = 0;
+    }
+}
+
 int
 dr1StringBuffer_grow( dr1StringBuffer *sb, int len) {
     sb->bufsize += len;

@@ -26,12 +26,14 @@
 #include "lib/protocol.h"
 
 /* merchants */
+#include "merchant.h"
 #include "apothecary.h"
 #include "smithy.h"
 #include "tanner.h"
 #include "wright.h"
 
 /* dialogs */
+#include "controller.h"
 #include "playerv.h"
 #include "class.h"
 #include "combatv.h"
@@ -87,7 +89,7 @@ int pc_runcmd( int cs, enum runstate_t state) {
     }
 
     /* handle it */
-    return dr1Protocol_handleCommand( c, nargs, cmds);
+    return dr1Controller_handleCommand( c, nargs, cmds);
 }
 
 int pc_finit( cs) {
@@ -101,7 +103,7 @@ int pc_finit( cs) {
 /* main */
 int main( int argc, char **argv) {
     int ss, cs, maxsock;
-    int xsocks;
+    int xsocks = 0;
     struct sockaddr_in sin;
     struct sockaddr csin;
     fd_set r_set, w_set, e_set, x_set;
@@ -128,7 +130,7 @@ int main( int argc, char **argv) {
     sin.sin_family = AF_INET;
     sin.sin_port = htons( PORT);
     sin.sin_addr.s_addr = INADDR_ANY;
-    if (bind( ss, &sin, sizeof(sin))) { perror("bind"); abort(); }
+    if (bind( ss, (struct sockaddr *)&sin, sizeof(sin))) { perror("bind"); abort(); }
     if (listen( ss, 10)) { perror("listen"); abort(); }
 
     /* setup for select */
@@ -158,7 +160,10 @@ int main( int argc, char **argv) {
 	}
         
         err = select( maxsock + 1, &tr_set, &tw_set, &te_set, &ttv);
-	if (err == EINTR) continue;
+	if (err == EINTR) {
+	    /* caught a signal */
+	    continue;
+	}
 	if (err < 0) { perror("select"); abort(); }
 	printf("select returned %d\n", err);
 
@@ -184,21 +189,24 @@ int main( int argc, char **argv) {
 		} else {
 		    /* player socket */
 		    readerr = pc_runcmd( i, READABLE);
+		    if ( dr1Stream_oqlen( &ctx[i]->ios)) {
+		        /* data is waiting on the output buffer */
+			FD_SET( i, &w_set);
+		    }
 		}
 	    } /* if */
 
 	    if (FD_ISSET( i, &tw_set)) {
-		/* writable */
-		/*
-		 * FIXME: right now dr1Stream_printf is synchronous, so
-		 * this doesn't do anything yet.  Eventually
-		 * this should flush queues as write space becomes
-		 * available on the socket
-		 */
+		/* writable player socket */
+	        int res = dr1Stream_flush( &ctx[i]->ios);
+		if (res == 0) { 
+		    /* all data has been written from the output buffer */
+		    FD_CLR( i, &w_set); 
+		}
 	    } /* if */
 
 	    if (FD_ISSET( i, &te_set) || readerr) {
-		/* errors */
+		/* errors on a socket */
 		printf("%d: Error on socket.\n", i);
 		perror("select");
 		pc_finit(i);
@@ -208,6 +216,11 @@ int main( int argc, char **argv) {
 		FD_CLR( i, &e_set);
 		FD_CLR( i, &x_set);
 	    } /* if */
+	    
+	    if (FD_ISSET( i, &x_set)) {
+	        /* on time slice */
+		pc_runcmd( i, EXECUTE);
+	    }
 	} /* for */
     }
 }

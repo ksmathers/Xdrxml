@@ -96,6 +96,7 @@ struct dr1Map {
     int starty;
     dr1MapMobile moblayer;
     int select;
+    int town;			/* true or false */
 };
 
 /*-------------------------------------------------------------------

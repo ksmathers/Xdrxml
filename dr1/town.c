@@ -12,8 +12,8 @@
 #include "barter.h"
 #include "dice.h"
 #include "itemset.h"
-#include "qio.h"
 #include "lib/protocol.h"
+#include "lib/stream.h"
 
 int dobuy( dr1Context *ctx, int c, char **v) {
     /* purchase an item */

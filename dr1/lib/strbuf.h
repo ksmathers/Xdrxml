@@ -45,6 +45,25 @@ dr1StringBuffer*
 dr1StringBuffer_create( dr1StringBuffer *sb);
 
 /*-------------------------------------------------------------------
+ * dr1StringBuffer_finit
+ *
+ *    De-Initialize a stringbuffer.  
+ *
+ *  PARAMETERS:
+ *    sb   If non-null sb points to a string buffer to be finalized
+ *
+ *  RETURNS:
+ *    void
+ *
+ *  SIDE EFFECTS:
+ *    Frees the string buffer's malloc'd data, and zeroes the string
+ *    buffer structure.  The caller is responsible for freeing the
+ *    structure itself (if it was allocated space to start with.)
+ */
+void
+dr1StringBuffer_finit( dr1StringBuffer *sb);
+
+/*-------------------------------------------------------------------
  * sbclear
  *
  *    Clear all data from the buffer, returning it to its just 
