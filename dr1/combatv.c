@@ -46,7 +46,8 @@ int attack( dr1Player *p, dr1Monster *m, int c, char **v) {
 	if (roll >= tohit) {
 	    int dam;
 
-	    dam = dr1Dice_roll( p->weapon->damage);
+	    dam = dr1Dice_roll( p->weapon->damage) + 
+	    	dr1Attr_damage( &p->base_attr, p->weapon->ranged);
 	    printf("Hit! %d Damage.\n", dam);
 	    m->hp -= dam;
 	} else {
@@ -124,6 +125,7 @@ void dr1Combatv_showPage( dr1Player *p, dr1Monster *m) {
 
         if (!strcasecmp( cmds[0], "attack")) attack( p, m, i, cmds);
         else if (!strcasecmp( cmds[0], "run")) attack( p, m, i, cmds);
+        else if (!strcasecmp( cmds[0], "equip")) equip( p, i, cmds);
 	else {
 	    printf("Unknown command %s.\n", cmds[0]);
 	}

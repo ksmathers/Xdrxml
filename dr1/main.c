@@ -150,6 +150,14 @@ int hunt( dr1Player *p, int c, char **v) {
     return 0;
 }
 
+int rest( dr1Player *p, int c, char **v) {
+    dr1Money roomcost = { 0, 2, 0, 0, 0 };
+    printf("You've rested for 1 day at 2sp per day for room and board.\n");
+    p->hp ++;
+    if (p->hp > p->full_hp) p->hp = p->full_hp;
+    dr1Money_deduct( &p->purse, &roomcost);
+}
+
 int main( int argc, char** argv) {
     FILE *fp;
     XDR xdrs;
@@ -185,7 +193,7 @@ int main( int argc, char** argv) {
 	printf("---------------------------------------------------------\n");
 	if (player.name) printf("Name: %s\n", player.name);
 
-	printf("(buy, equip, sell, hunt, quit)\n");
+	printf("(buy, equip, sell, rest, hunt, quit)\n");
 	printf("Command: ");
 	fgets( cmd, sizeof(cmd), stdin);
 
@@ -196,6 +204,7 @@ int main( int argc, char** argv) {
 	if ( !strcmp(cmds[0], "buy")) r=buy( p, i, cmds);
 	else if ( !strcmp(cmds[0], "equip")) r=equip( p, i, cmds);
 	else if ( !strcmp(cmds[0], "hunt")) r=hunt( p, i, cmds);
+	else if ( !strcmp(cmds[0], "rest")) r=rest( p, i, cmds);
 	else if ( !strcmp(cmds[0], "quit")) break;
 	else printf("Unknown command: '%s'\n", cmds[0]);
 	if (r) printf("Command returned code %d\n", r);

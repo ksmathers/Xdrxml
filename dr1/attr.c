@@ -4,6 +4,83 @@
 #include "xdrasc.h"
 
 /*-------------------------------------------------------------------
+ * Strength modifiers
+ *
+ *   dr1Attr_str_damage   Damage adjustment
+ *   dr1Attr_str_weight   Weight adjustment
+ */
+
+static int str_damage[] = 
+    /* 3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25*/
+    { -4,-3,-2,-1, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12};
+
+static int str_weight[] = 
+    /*   3    4    5    6    7   8   9  10  11  12  13  14  15  16  17  18 */
+    { -600,-400,-300,-200,-100,  0,  0,  0,  0,  0,100,200,300,400,500,600 };
+
+/*-------------------------------------------------------------------
+ * Constitution modifiers
+ *
+ *   dr1Attr_str_damage   Damage adjustment
+ *   dr1Attr_str_weight   Weight adjustment
+ */
+
+static int con_hp[] = 
+    /* 3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25*/
+    { -4,-3,-2,-1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5};
+
+/*-------------------------------------------------------------------
+ * dr1Attr_damage
+ *
+ *    Returns the attributes adjustment for damage
+ *
+ * Parameters:
+ *    a       Attributes of the player being checked
+ *    ranged  Flag that is TRUE if a ranged weapon is being used
+ *
+ * Returns:
+ *    Attribute value
+ */
+
+int dr1Attr_damage( dr1Attr *a, int ranged) {
+    int str;
+    if (ranged) return 0;
+    str = a->_str;
+
+    if (str > 25) str=25;
+    if (str < 3) str=3;
+    return str_damage[ str - 3];
+}
+
+/*-------------------------------------------------------------------
+ * dr1Attr_hp
+ *
+ *    Returns the attributes adjustment for hit points
+ *
+ * Parameters:
+ *    a       Attributes of the player being checked
+ *    fighter Flag that is TRUE if the player is a Fighter class
+ *
+ * Returns:
+ *    Attribute value
+ */
+
+int dr1Attr_hp( dr1Attr *a, int fighter) {
+    int con, hpadj;
+    con = a->_con;
+
+    if (con > 25) con=25;
+    if (con < 3) con=3;
+
+    hpadj = con_hp[ con-3]; 
+    if (hpadj > 2 && !fighter) {
+    	hpadj -= 2;
+	if (hpadj == 1) hpadj++;
+    }
+    return hpadj;
+}
+
+/*-------------------------------------------------------------------
  * dr1Attr_gen_mode4
  *
  *    Generates a new Attribute value by the fourth method; roll

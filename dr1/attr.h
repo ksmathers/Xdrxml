@@ -27,6 +27,36 @@ typedef struct {
 } dr1AttrAdjust;
 
 /*-------------------------------------------------------------------
+ * dr1Attr_damage
+ *
+ *    Returns the attributes adjustment for damage
+ *
+ * Parameters:
+ *    a       Attributes of the player being checked
+ *    ranged  Flag that is TRUE if a ranged weapon is being used
+ *
+ * Returns:
+ *    Attribute value
+ */
+
+int dr1Attr_damage( dr1Attr *a, int ranged);
+
+/*-------------------------------------------------------------------
+ * dr1Attr_hp
+ *
+ *    Returns the attributes adjustment for hit points
+ *
+ * Parameters:
+ *    a       Attributes of the player being checked
+ *    fighter Flag that is TRUE if the player is a Fighter class
+ *
+ * Returns:
+ *    Attribute value
+ */
+
+int dr1Attr_hp( dr1Attr *a, int fighter);
+
+/*-------------------------------------------------------------------
  * dr1Attr_create_mode1
  *
  *    Generates a new Attribute value by the first method; roll

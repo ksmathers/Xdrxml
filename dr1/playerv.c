@@ -113,25 +113,39 @@ int dr1Playerv_race( dr1Player *p, int c, char **v) {
 int dr1Playerv_class( dr1Player *p, int c, char **v) {
     dr1ClassType *cl;
     int ccode;
+    static dr1Money m[4];
+    static int hits[4] = { 0, 0, 0, 0 };
+    int idx;
 
     if (c != 2) return -1;
     if (!strcasecmp( v[1], "mu")) {
 	ccode = DR1C_MU;
+	idx = 0;
     } else if (!strcasecmp( v[1], "fighter")) {
 	ccode = DR1C_FIGHTER;
+	idx = 1;
     } else if (!strcasecmp( v[1], "cleric")) {
 	ccode = DR1C_CLERIC;
+	idx = 2;
     } else if (!strcasecmp( v[1], "thief")) {
 	ccode = DR1C_THIEF;
+	idx = 3;
     } else return -1;
     
     cl = dr1Registry_lookup( &dr1class, ccode);
     if (!cl) return -1;
 
     p->class = ccode;
-    p->hp = dr1Dice_roll( cl->hitdice);
+    if ( !hits[ idx]) {
+	p->hp = dr1Dice_roll( cl->hitdice);
+	p->purse.gp = dr1Dice_roll( cl->startingMoney);
+	m[ idx] = p->purse;
+	hits[ idx] = p->hp;
+    } else {
+        p->hp = hits[ idx];
+	p->purse = m[ idx];
+    }
     p->full_hp = p->hp;
-    p->purse.gp = dr1Dice_roll( cl->startingMoney);
     return 0;
 }
 
@@ -190,6 +204,7 @@ int dr1Playerv_showDialog( dr1Player *p) {
 	if (class) printf("Class: %s\n", class->class);
 	printf("Sex: %s\n", p->sex=='FEMA'?"Female":"Male");
 	printf("Purse: %s\n", buf);
+	printf("Hits: %d\n", p->full_hp + dr1Attr_hp( &p->base_attr, p->class == DR1C_FIGHTER));
 	printf("Str: %2d\n", p->base_attr._str);
 	printf("Int: %2d\n", p->base_attr._int);
 	printf("Wis: %2d\n", p->base_attr._wis);
@@ -211,9 +226,10 @@ int dr1Playerv_showDialog( dr1Player *p) {
 	else if ( !strcasecmp(cmds[0], "name")) dr1Playerv_name( p, i, cmds);
 	else if ( !strcasecmp(cmds[0], "class")) dr1Playerv_class( p, i, cmds);
 	else if ( !strcasecmp(cmds[0], "sex")) dr1Playerv_sex( p, i, cmds);
-	else if ( !strcasecmp(cmds[0], "done")) return 0;
+	else if ( !strcasecmp(cmds[0], "done")) break;
 	else printf("Unknown command: '%s'\n", cmds[0]);
     }
-    printf("class=%08x\n", p->class);
+    p->full_hp += dr1Attr_hp( &p->base_attr, p->class == DR1C_FIGHTER);
+    return 0;
 }
 

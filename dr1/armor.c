@@ -33,14 +33,12 @@ dr1ItemType dr1Armor_type = {
 
 static dr1ArmorType leather = {
     /* code    */ DR1A_LEATHER,
-    /* name    */ "Leather",
     /* damage  */ "3d10+20",
-    /* base_ac */ 9
+    /* base_ac */ 8
 };
 
 static dr1ArmorType chainmail = {
     /* code    */ DR1A_CHAINMAIL,
-    /* name    */ "Chainmail",
     /* damage  */ "5d20+20",
     /* base_ac */ 5
 };
@@ -66,9 +64,9 @@ dr1Registry dr1armortype = {
 
 dr1Armor dr1Armor_leather = {
     /* super */ {
-    	/* value       */ GP(30),
+    	/* value       */ GP(10),
 	/* name        */ "Leather",
-	/* encumbrance */ 100,
+	/* encumbrance */ 150,
 	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ FALSE,
@@ -82,9 +80,9 @@ dr1Armor dr1Armor_leather = {
 
 dr1Armor dr1Armor_chainmail = {
     /* super */ {
-    	/* value       */ GP(170),
+    	/* value       */ GP(150),
 	/* name        */ "Chainmail",
-	/* encumbrance */ 100,
+	/* encumbrance */ 400,
 	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
 	/* weapon      */ FALSE,

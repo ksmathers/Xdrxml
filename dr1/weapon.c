@@ -22,7 +22,7 @@ dr1ItemType dr1Weapon_type = {
 
 dr1Weapon dr1Weapon_halfspear = {
     /* super */ {
-    	/* value       */ GP(4),
+    	/* value       */ GP(1),
 	/* name        */ "Halfspear",
 	/* encumbrance */ 20,
 	/* unique      */ FALSE,
@@ -39,7 +39,7 @@ dr1Weapon dr1Weapon_halfspear = {
 
 dr1Weapon dr1Weapon_longsword = {
     /* super */ {
-    	/* value       */ GP(4),
+    	/* value       */ GP(15),
 	/* name        */ "Longsword",
 	/* encumbrance */ 150,
 	/* unique      */ FALSE,

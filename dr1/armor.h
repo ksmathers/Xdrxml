@@ -40,7 +40,6 @@ extern dr1ItemType dr1Armor_type;
 
 typedef struct {
     int code;
-    char *name;
     dr1Dice damage;
     int base_ac;
 } dr1ArmorType;
