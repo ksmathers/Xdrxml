@@ -298,7 +298,7 @@ void dr1Combatv_showPage( dr1Player *p, int nmon, dr1Monster *m) {
 	    }
 	}
 
-	if (p->wounds >= p->hp) {
+	if (HITPOINTS(p) <= 0) {
 	    printf("Thou'rt slain.  Donai nais requiem.  Resquiat in pace.\n");
 	    break;
 	}
