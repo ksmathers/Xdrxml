@@ -22,6 +22,7 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
     int dist;
     int nattacks;
     int tohit_penalty = 0;
+    int damage_bonus = 0;
     dr1Monster *target;
 
     /* choose target */
@@ -74,6 +75,8 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
 	} 
         nattacks = dr1Player_nattacks( p);
     }
+    tohit_penalty -= p->weapon->plusToHit;
+    damage_bonus = p->weapon->plusToDamage;
 
     /* Player swings */
     *surprise = 0;
@@ -123,6 +126,7 @@ int attack( dr1Player *p, int nmon, dr1Monster *m, int *surprise, int c, char **
 		dam = dr1Dice_roll( "d3") + 
 		    dr1Attr_damage( &p->base_attr, FALSE);
 	    }
+	    dam += damage_bonus;
 	    dam *= mul;
 	    if (p->weapon->range) {
 		printf("Thunk! %d Damage.\n", dam);

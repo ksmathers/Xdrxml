@@ -115,9 +115,10 @@ int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop) {
 
 bool_t xdrxml_getstring( XDR *xdrs, int prealloc_len, char **s) {
     /* get some bytes from " */
-    xmlNodePtr cur = XDRXML_DATA(xdrs)->cur;
-    xmlDocPtr doc = XDRXML_DATA(xdrs)->doc;
-    char *attr = XDRXML_DATA(xdrs)->attr;
+    struct xdrxml_st *xdrd = XDRXML_DATA(xdrs);
+    xmlNodePtr cur = xdrd->cur;
+    xmlDocPtr doc = xdrd->doc;
+    char *attr = xdrd->attr;
     char *value, *cpos, *err;
     int c;
     int i;
@@ -126,7 +127,12 @@ bool_t xdrxml_getstring( XDR *xdrs, int prealloc_len, char **s) {
     if (!attr) attr="string";
 
     cur = bfs1( cur, attr);
-    if (!cur) return FALSE;
+    if (!cur) {
+	printf("No node %s/%s: Using empty string\n", xdrd->path, attr);
+	*s = malloc(1);
+	(*s)[0]=0;
+	return TRUE;
+    }
     mark(cur);
     value = xmlNodeListGetString(doc, cur->children, 1);
     if (!value) return FALSE;
@@ -306,7 +312,11 @@ bool_t xdrxml_getlong( XDR *__xdrs, long *__lp)
     if (!attr) attr="long";
 
     cur = bfs1( xdrd->cur, attr);
-    if (!cur) return FALSE;
+    if (!cur) {
+	printf("No node %s/%s: Using value 0\n", xdrd->path, attr);
+	*__lp = 0;
+	return TRUE;
+    }
 
     value = xmlGetProp(cur, "value");
     if (!value) return FALSE;

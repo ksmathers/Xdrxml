@@ -42,13 +42,11 @@ typedef struct {
     int rof;		/* rate of fire for ranged weapons */
     int speed;
     enum DR1DamageType dtype;
-#if 0
     int plusToHit;
     int plusToDamage;
     int stackable;
-    enum DR1ProjectileType ptype;  /* type of projectile */
+    enum DR1ProjectileType projectile;  /* type of projectile */
     int min_str;	/* minimum strength required to use */
-#endif
 } dr1Weapon;
 
 extern dr1Weapon dr1Weapon_halfspear;

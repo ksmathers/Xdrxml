@@ -3,6 +3,7 @@
 #include <time.h>
 #include <stdio.h>
 #include "dice.h"
+#include "xdrxml.h"
 
 double drand48();
 void dr1Dice_seed() {
@@ -90,6 +91,7 @@ int dr1Dice_roll( char *ds) {
  * xdr_dr1Dice( xdrs, dr1Dice*)
  */
 bool_t xdr_dr1Dice( XDR *xdrs, dr1Dice* d) {
-    return xdr_wrapstring( xdrs, d);
+    xdr_attr(xdrs, "dice");
+    return xdrxml_wrapstring( xdrs, d);
 }
 

@@ -58,14 +58,12 @@ dr1Weapon dr1Weapon_halfspear = {
     /* range    */ 0,
     /* rof      */ 0,
     /* speed    */ 4,
-    /* dtype    */ DR1PIERCING
-#if 0
+    /* dtype    */ DR1PIERCING,
     /* plusToHit    */ 0,
     /* plusToDamage */ 0,
     /* stackable    */ FALSE,
     /* projectile   */ DR1W_NONE,
     /* min_str      */ 8
-#endif
 };
 
 dr1Weapon dr1Weapon_longsword = {
@@ -84,14 +82,12 @@ dr1Weapon dr1Weapon_longsword = {
     /* range    */ 0,
     /* rof      */ 0,
     /* speed    */ 6,
-    /* dtype    */ DR1SLASHING
-#if 0
+    /* dtype    */ DR1SLASHING,
     /* plusToHit    */ 0,
     /* plusToDamage */ 0,
     /* stackable    */ FALSE,
     /* projectile   */ DR1W_NONE,
     /* min_str      */ 12
-#endif
 };
 
 dr1Weapon dr1Weapon_longbow = {
@@ -110,14 +106,12 @@ dr1Weapon dr1Weapon_longbow = {
     /* range    */ 120,
     /* rof      */ 2,
     /* speed    */ 6,
-    /* dtype    */ DR1PIERCING
-#if 0
+    /* dtype    */ DR1PIERCING,
     /* plusToHit    */ 0,
     /* plusToDamage */ 0,
     /* stackable    */ FALSE,
     /* projectile   */ DR1W_ARROW,
     /* min_str      */ 16
-#endif
 };
 
 dr1Weapon dr1Weapon_arrow = {
@@ -136,14 +130,12 @@ dr1Weapon dr1Weapon_arrow = {
     /* range    */ 120,
     /* rof      */ 2,
     /* speed    */ 6,
-    /* dtype    */ DR1PIERCING
-#if 0
+    /* dtype    */ DR1PIERCING,
     /* plusToHit    */ 0,
     /* plusToDamage */ 0,
     /* stackable    */ TRUE,
     /* projectile   */ DR1W_ARROW,
     /* min_str      */ 0
-#endif
 };
 /*-------------------------------------------------------------------
  * dr1
@@ -158,7 +150,7 @@ dr1Weapon dr1Weapon_arrow = {
  */
 static bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i) {
     bool_t res;
-    int dt;
+    int tmp;
     dr1Weapon *w = (dr1Weapon*)i;
     xdr_push_note( xdrs, "damage");
     res = xdr_dr1Dice( xdrs, &w->damage);
@@ -178,10 +170,29 @@ static bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i) {
     if (!res) return FALSE;
 
     xdr_attr( xdrs, "dtype");
-    dt = w->dtype;
-    res = xdr_int( xdrs, &dt);
-    w->dtype = dt;
+    tmp = w->dtype;
+    res = xdr_int( xdrs, &tmp);
+    w->dtype = tmp;
     if (!res) return FALSE;
+
+    xdr_attr( xdrs, "plusToHit");
+    if (!xdr_int( xdrs, &w->plusToHit)) return FALSE;
+    
+    xdr_attr( xdrs, "plusToDamage");
+    if (!xdr_int( xdrs, &w->plusToDamage)) return FALSE;
+    
+    xdr_attr( xdrs, "stackable");
+    if (!xdr_int( xdrs, &w->stackable)) return FALSE;
+    
+    xdr_attr( xdrs, "projectile");
+    tmp = w->projectile;
+    res = xdr_int( xdrs, &tmp);
+    w->projectile = tmp;
+    if (!res) return FALSE;
+    
+    xdr_attr( xdrs, "min_str");
+    if (!xdr_int( xdrs, &w->min_str)) return FALSE;
+
     return TRUE;
 }
 

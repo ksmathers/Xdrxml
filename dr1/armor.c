@@ -34,42 +34,77 @@ dr1ItemType dr1Armor_type = {
 static dr1ArmorType leather = {
     /* code    */ DR1A_LEATHER,
     /* damage  */ "3d10+20",
-    /* base_ac */ 8
+    /* base_ac */ 8,
+    /* ac_adj  */ {
+	/* piercing */ 0,
+	/* crushing */ 0, 
+	/* slashing */ 0, 
+	/* overbear */ 0 
+    }
 };
 
 static dr1ArmorType studdedleather = {
     /* code    */ DR1A_STUDDEDLEATHER,
     /* damage  */ "3d12+20",
-    /* base_ac */ 7
+    /* base_ac */ 7,
+    /* ac_adj  */ {
+	/* piercing */ 1,
+	/* crushing */ 0, 
+	/* slashing */ 0, 
+	/* overbear */ 0 
+    }
 };
 
 static dr1ArmorType scalemail = {
     /* code    */ DR1A_SCALEMAIL,
     /* damage  */ "5d12+20",
-    /* base_ac */ 6
+    /* base_ac */ 6,
+    /* ac_adj  */ {
+	/* piercing */ 0,
+	/* crushing */ 0, 
+	/* slashing */ 0, 
+	/* overbear */ 0 
+    }
 };
 
 static dr1ArmorType chainmail = {
     /* code    */ DR1A_CHAINMAIL,
     /* damage  */ "5d20+20",
-    /* base_ac */ 5
+    /* base_ac */ 5,
+    /* ac_adj  */ {
+	/* piercing */ 1,
+	/* crushing */ 2, 
+	/* slashing */ 0, 
+	/* overbear */ 0 
+    }
 };
 
 static dr1ArmorType splintmail = {
     /* code    */ DR1A_SPLINTMAIL,
     /* damage  */ "5d12+20",
-    /* base_ac */ 4
+    /* base_ac */ 4,
+    /* ac_adj  */ {
+	/* piercing */ 1,
+	/* crushing */ 1, 
+	/* slashing */ 0, 
+	/* overbear */ 0 
+    }
 };
 
 static dr1ArmorType platemail = {
     /* code    */ DR1A_PLATEMAIL,
     /* damage  */ "5d10+20",
-    /* base_ac */ 3
+    /* base_ac */ 3,
+    /* ac_adj  */ {
+	/* piercing */ 0,
+	/* crushing */ 0, 
+	/* slashing */ 0, 
+	/* overbear */ 2 
+    }
 };
 static dr1RegistryEntry entries[] = {
     { DR1A_LEATHER, &leather },
     { DR1A_STUDDEDLEATHER, &studdedleather },
-
     { DR1A_SCALEMAIL, &scalemail },
     { DR1A_CHAINMAIL, &chainmail },
     { DR1A_SPLINTMAIL, &splintmail },

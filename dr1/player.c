@@ -159,9 +159,12 @@ int dr1Player_ac( dr1Player *p, int surprise, int ranged, enum DR1DamageType dty
 {
     int ac = 10;
     if (p->armor) {
-	ac = p->armor->type->base_ac;
+	assert(dtype >= 0);
+	assert(dtype < DR1DTYPE_LAST);
+	ac = p->armor->type->base_ac + p->armor->type->ac_adjust[ dtype];
     }
     ac -= dr1Attr_ac(&p->curr_attr, surprise);
+    
     return ac;
 }
 

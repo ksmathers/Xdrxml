@@ -32,14 +32,9 @@
     <pack>
         <len value="0x1"/>
         <item>
-            <tcode value="0x1"/>
             <code value="0x1"/>
             <value value="0xbb8"/>
-            <name>
-                <long value="0x9"/>
-                <bytes>Longsword</bytes>
-                <bytes>=00=00=00</bytes>
-            </name>
+            <name>Longsword</name>
             <encumbrance value="0x96"/>
             <unique value="0x0"/>
             <inuse value="0x0"/>
@@ -47,25 +42,23 @@
             <identified value="0x1"/>
             <uses value="0x0"/>
             <damage>
-                <long value="0x2"/>
-                <bytes>d8</bytes>
-                <bytes>=00=00</bytes>
+                <dice>d8</dice>
             </damage>
             <range value="0x0"/>
             <rof value="0x0"/>
             <speed value="0x6"/>
             <dtype value="0x2"/>
+            <plusToHit value="0x0"/>
+            <plusToDamage value="0x0"/>
+            <stackable value="0x0"/>
+            <projectile value="0x0"/>
+            <min_str value="0x0"/>
         </item>
     </pack>
     <weapon>
-        <tcode value="0x1"/>
         <code value="0x1"/>
         <value value="0x2ee0"/>
-        <name>
-            <long value="0x7"/>
-            <bytes>Longbow</bytes>
-            <bytes>=00</bytes>
-        </name>
+        <name>Longbow</name>
         <encumbrance value="0x64"/>
         <unique value="0x0"/>
         <inuse value="0x0"/>
@@ -73,27 +66,25 @@
         <identified value="0x1"/>
         <uses value="0x0"/>
         <damage>
-            <long value="0x2"/>
-            <bytes>d6</bytes>
-            <bytes>=00=00</bytes>
+            <dice>d6</dice>
         </damage>
         <range value="0x78"/>
         <rof value="0x2"/>
         <speed value="0x6"/>
         <dtype value="0x0"/>
+        <plusToHit value="0x0"/>
+        <plusToDamage value="0x0"/>
+        <stackable value="0x0"/>
+        <projectile value="0x0"/>
+        <min_str value="0x0"/>
     </weapon>
     <gauche>
-        <tcode value="0x0"/>
+        <code value="0x0"/>
     </gauche>
     <armor>
-        <tcode value="0x2001"/>
         <code value="0x2001"/>
         <value value="0x3e80"/>
-        <name>
-            <long value="0xa"/>
-            <bytes>Splintmail</bytes>
-            <bytes>=00=00</bytes>
-        </name>
+        <name>Splintmail</name>
         <encumbrance value="0x190"/>
         <unique value="0x0"/>
         <inuse value="0x0"/>

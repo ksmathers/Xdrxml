@@ -233,31 +233,7 @@ dice.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/float.h
 dice.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
 dice.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
 dice.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
-dice.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
-fooread.o: /usr/include/alloca.h /usr/include/assert.h
-fooread.o: /usr/include/bits/endian.h /usr/include/bits/pthreadtypes.h
-fooread.o: /usr/include/bits/sched.h /usr/include/bits/select.h
-fooread.o: /usr/include/bits/sigset.h /usr/include/bits/stdio_lim.h
-fooread.o: /usr/include/bits/types.h /usr/include/bits/waitflags.h
-fooread.o: /usr/include/bits/waitstatus.h /usr/include/endian.h
-fooread.o: /usr/include/features.h /usr/include/_G_config.h
-fooread.o: /usr/include/gconv.h /usr/include/gnu/stubs.h /usr/include/iconv.h
-fooread.o: /usr/include/libio.h /usr/include/stdio.h /usr/include/stdlib.h
-fooread.o: /usr/include/string.h /usr/include/sys/cdefs.h
-fooread.o: /usr/include/sys/select.h /usr/include/sys/sysmacros.h
-fooread.o: /usr/include/sys/types.h /usr/include/time.h /usr/include/wchar.h
-fooread.o: /usr/include/xlocale.h
-fooread.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
-fooread.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
-fooread.o: /usr/local/include/libxml/encoding.h
-fooread.o: /usr/local/include/libxml/entities.h
-fooread.o: /usr/local/include/libxml/hash.h /usr/local/include/libxml/list.h
-fooread.o: /usr/local/include/libxml/parser.h /usr/local/include/libxml/tree.h
-fooread.o: /usr/local/include/libxml/valid.h /usr/local/include/libxml/xmlIO.h
-fooread.o: /usr/local/include/libxml/xmlmemory.h
-fooread.o: /usr/local/include/libxml/xmlversion.h
-fooread.o: /usr/local/include/libxml/xpath.h
-fooread.o: /usr/local/include/libxml/xpointer.h
+dice.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h xdrxml.h
 item.o: armor.h dice.h globals.h item.h itemreg.h money.h registry.h
 item.o: /usr/include/alloca.h /usr/include/asm/param.h
 item.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
@@ -314,19 +290,19 @@ itemreg.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
 itemreg.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
 itemreg.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
 itemreg.o: weapon.h
-itemset.o: item.h itemset.h /usr/include/alloca.h /usr/include/asm/param.h
-itemset.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
-itemset.o: /usr/include/assert.h /usr/include/bits/byteswap.h
-itemset.o: /usr/include/bits/endian.h /usr/include/bits/in.h
-itemset.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
-itemset.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
-itemset.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
-itemset.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
-itemset.o: /usr/include/bits/types.h /usr/include/bits/waitflags.h
-itemset.o: /usr/include/bits/waitstatus.h /usr/include/bits/wordsize.h
-itemset.o: /usr/include/endian.h /usr/include/features.h
-itemset.o: /usr/include/_G_config.h /usr/include/gconv.h
-itemset.o: /usr/include/gnu/stubs.h /usr/include/libio.h
+itemset.o: globals.h item.h itemset.h /usr/include/alloca.h
+itemset.o: /usr/include/asm/param.h /usr/include/asm/socket.h
+itemset.o: /usr/include/asm/sockios.h /usr/include/assert.h
+itemset.o: /usr/include/bits/byteswap.h /usr/include/bits/endian.h
+itemset.o: /usr/include/bits/in.h /usr/include/bits/pthreadtypes.h
+itemset.o: /usr/include/bits/sched.h /usr/include/bits/select.h
+itemset.o: /usr/include/bits/sigset.h /usr/include/bits/sockaddr.h
+itemset.o: /usr/include/bits/socket.h /usr/include/bits/stdio_lim.h
+itemset.o: /usr/include/bits/time.h /usr/include/bits/types.h
+itemset.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
+itemset.o: /usr/include/bits/wordsize.h /usr/include/endian.h
+itemset.o: /usr/include/features.h /usr/include/_G_config.h
+itemset.o: /usr/include/gconv.h /usr/include/gnu/stubs.h /usr/include/libio.h
 itemset.o: /usr/include/linux/limits.h /usr/include/linux/param.h
 itemset.o: /usr/include/netinet/in.h /usr/include/rpc/types.h
 itemset.o: /usr/include/rpc/xdr.h /usr/include/stdint.h /usr/include/stdio.h
@@ -581,6 +557,49 @@ race.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
 race.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
 race.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
 registry.o: registry.h
+server.o: apothecary.h armor.h attr.h barter.h combatv.h dice.h globals.h
+server.o: item.h itemset.h location.h merchant.h money.h monster.h player.h
+server.o: playerv.h registry.h smithy.h tanner.h /usr/include/alloca.h
+server.o: /usr/include/asm/param.h /usr/include/asm/socket.h
+server.o: /usr/include/asm/sockios.h /usr/include/assert.h
+server.o: /usr/include/bits/byteswap.h /usr/include/bits/confname.h
+server.o: /usr/include/bits/endian.h /usr/include/bits/environments.h
+server.o: /usr/include/bits/huge_val.h /usr/include/bits/in.h
+server.o: /usr/include/bits/mathcalls.h /usr/include/bits/mathdef.h
+server.o: /usr/include/bits/nan.h /usr/include/bits/posix_opt.h
+server.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
+server.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+server.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
+server.o: /usr/include/bits/stat.h /usr/include/bits/stdio_lim.h
+server.o: /usr/include/bits/time.h /usr/include/bits/types.h
+server.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
+server.o: /usr/include/bits/wordsize.h /usr/include/endian.h
+server.o: /usr/include/features.h /usr/include/_G_config.h
+server.o: /usr/include/gconv.h /usr/include/getopt.h /usr/include/gnu/stubs.h
+server.o: /usr/include/iconv.h /usr/include/libio.h
+server.o: /usr/include/linux/limits.h /usr/include/linux/param.h
+server.o: /usr/include/math.h /usr/include/netinet/in.h
+server.o: /usr/include/rpc/types.h /usr/include/rpc/xdr.h
+server.o: /usr/include/stdint.h /usr/include/stdio.h /usr/include/stdlib.h
+server.o: /usr/include/string.h /usr/include/sys/cdefs.h
+server.o: /usr/include/sys/param.h /usr/include/sys/select.h
+server.o: /usr/include/sys/stat.h /usr/include/sys/sysmacros.h
+server.o: /usr/include/sys/time.h /usr/include/sys/types.h /usr/include/time.h
+server.o: /usr/include/unistd.h /usr/include/wchar.h /usr/include/xlocale.h
+server.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/float.h
+server.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+server.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+server.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+server.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+server.o: /usr/local/include/libxml/encoding.h
+server.o: /usr/local/include/libxml/entities.h
+server.o: /usr/local/include/libxml/hash.h /usr/local/include/libxml/list.h
+server.o: /usr/local/include/libxml/parser.h /usr/local/include/libxml/tree.h
+server.o: /usr/local/include/libxml/valid.h /usr/local/include/libxml/xmlIO.h
+server.o: /usr/local/include/libxml/xmlmemory.h
+server.o: /usr/local/include/libxml/xmlversion.h
+server.o: /usr/local/include/libxml/xpath.h
+server.o: /usr/local/include/libxml/xpointer.h weapon.h wright.h xdrxml.h
 smithy.o: armor.h barter.h dice.h globals.h item.h itemset.h merchant.h
 smithy.o: money.h smithy.h /usr/include/alloca.h /usr/include/asm/param.h
 smithy.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
@@ -794,36 +813,3 @@ xdrxml.o: /usr/local/include/libxml/xmlmemory.h
 xdrxml.o: /usr/local/include/libxml/xmlversion.h
 xdrxml.o: /usr/local/include/libxml/xpath.h
 xdrxml.o: /usr/local/include/libxml/xpointer.h xdrxml.h
-xtest.o: /usr/include/alloca.h /usr/include/asm/param.h
-xtest.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
-xtest.o: /usr/include/bits/byteswap.h /usr/include/bits/endian.h
-xtest.o: /usr/include/bits/in.h /usr/include/bits/pthreadtypes.h
-xtest.o: /usr/include/bits/sched.h /usr/include/bits/select.h
-xtest.o: /usr/include/bits/sigset.h /usr/include/bits/sockaddr.h
-xtest.o: /usr/include/bits/socket.h /usr/include/bits/stdio_lim.h
-xtest.o: /usr/include/bits/time.h /usr/include/bits/types.h
-xtest.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
-xtest.o: /usr/include/bits/wordsize.h /usr/include/endian.h
-xtest.o: /usr/include/features.h /usr/include/_G_config.h /usr/include/gconv.h
-xtest.o: /usr/include/gnu/stubs.h /usr/include/iconv.h /usr/include/libio.h
-xtest.o: /usr/include/linux/limits.h /usr/include/linux/param.h
-xtest.o: /usr/include/netinet/in.h /usr/include/rpc/types.h
-xtest.o: /usr/include/rpc/xdr.h /usr/include/stdint.h /usr/include/stdio.h
-xtest.o: /usr/include/stdlib.h /usr/include/sys/cdefs.h
-xtest.o: /usr/include/sys/param.h /usr/include/sys/select.h
-xtest.o: /usr/include/sys/sysmacros.h /usr/include/sys/time.h
-xtest.o: /usr/include/sys/types.h /usr/include/time.h /usr/include/wchar.h
-xtest.o: /usr/include/xlocale.h
-xtest.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
-xtest.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
-xtest.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
-xtest.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
-xtest.o: /usr/local/include/libxml/encoding.h
-xtest.o: /usr/local/include/libxml/entities.h /usr/local/include/libxml/hash.h
-xtest.o: /usr/local/include/libxml/list.h /usr/local/include/libxml/parser.h
-xtest.o: /usr/local/include/libxml/tree.h /usr/local/include/libxml/valid.h
-xtest.o: /usr/local/include/libxml/xmlIO.h
-xtest.o: /usr/local/include/libxml/xmlmemory.h
-xtest.o: /usr/local/include/libxml/xmlversion.h
-xtest.o: /usr/local/include/libxml/xpath.h
-xtest.o: /usr/local/include/libxml/xpointer.h xdrxml.h

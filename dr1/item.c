@@ -131,9 +131,8 @@ static bool_t xdr_dr1Item( XDR *xdrs, dr1Item* i) {
     xdr_attr( xdrs, "value");
     if (!xdr_long( xdrs, &i->value)) return FALSE;
    
-    xdr_push_note( xdrs, "name");
-    if (!xdr_wrapstring( xdrs, &i->name)) return FALSE;
-    xdr_pop_note( xdrs);
+    xdr_attr( xdrs, "name");
+    if (!xdrxml_wrapstring( xdrs, &i->name)) return FALSE;
    
     xdr_attr( xdrs, "encumbrance");
     if (!xdr_int( xdrs, &i->encumbrance)) return FALSE;
@@ -183,7 +182,7 @@ bool_t xdr_dr1ItemPtr( XDR *xdrs, dr1Item **itemp) {
     if (!xdr_int( xdrs, &tcode)) { return FALSE; }
 
     if (xdrs->x_op == XDR_DECODE) {
-	printf("got tcode %lx\n", tcode); /**/
+/*	printf("got tcode %lx\n", tcode); /**/
 	if (tcode == DR1ILLEGAL) {
 	    ityp = NULL;
 	} else {

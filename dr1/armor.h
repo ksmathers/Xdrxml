@@ -46,6 +46,7 @@ typedef struct {
     int code;
     dr1Dice damage;
     int base_ac;
+    int ac_adjust[ DR1DTYPE_LAST];
 } dr1ArmorType;
 
 typedef struct {
