@@ -3,6 +3,14 @@
 
 #	gcc -c -g -Wall -Wno-comment -Wno-multichar -I. $< -o $@
 
+all: subdirs dr1server
+
+subdirs:
+	cd gfx/24x35 ; make
+	cd lib ; make
+	cd mapedit ; make
+	cd sdlclient ; make
+
 dr1server: server.o money.o merchant.o apothecary.o dice.o player.o \
 	    barter.o itemset.o item.o attr.o registry.o \
 	    itemreg.o playerv.o race.o class.o \

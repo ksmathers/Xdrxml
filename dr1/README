@@ -21,18 +21,25 @@ Prerequisites:
    1.2.0 of the library.  The code isn't backward compatible with 1.1 so
    you will have to get 1.2 from the network.
 
-   sdl_ttf
+   SDL_ttf
    =======
 
-   Truetype font library for SDL.  You can find this library on the
-   'library' page at www.libsdl.org.  Build and install.
+   Truetype font library for SDL.  To use this with the latest version
+   of freetype you will need to get at least version 2.0.2.
+   
+   You can find this library at:
+       http://www.libsdl.org/cvs/ 
 
    freetype
    ========
 
-   SDL_ttf currently only supports the version 1.x series of Freetype.  You
-   can download freetype 1.3.1 from www.freetype.org, or just install the
-   devel package from the second binary disk if you are using Redhat 7.
+   SDL_ttf 2.0.2 and later support Freetype 2, which has the benefit of
+   being maintained, and having fewer bugs, but most importantly can be
+   compiled without the hinting interpreter in case Apple gets bent over
+   their truetype patents.  Autohinting sometimes even looks better than
+   the code hinting.
+
+   Get the sources from www.freetype.org.
 
 To Build:
 
@@ -69,10 +76,29 @@ To Run:
 
     The custom client test code is in the sdlclient subdirectory.
     Feel free to try it out, but it isn't yet connected to the 
-    server. 
+    server.  The commands are currently like 'vi':
+        h - left
+	j - down
+	k - up
+	l - right
+	o - open doors
+        s - get a screenshot
 
     $ cd gfx/24x35
     $ make
     $ cd -
     $ cd sdlclient
     $ make
+
+    mapedit
+    =======
+
+    The map editor is almost the same code as the sdlclient right 
+    now.  In addition to the sdlclient commands mapedit supports:
+        r - replace tile (followed by the two character code for the
+	     new tile)
+	w - write map out to disk
+   
+    The map editor also lets you walk through walls, off the edge of
+    the map, etc.  (Don't try to replace tiles off the edge of the 
+    map though; the editor will core dump.)
