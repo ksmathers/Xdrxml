@@ -21,6 +21,7 @@ extern dr1ItemType dr1pHeal_type;
  */
 typedef struct {
     dr1Item super;
+    dr1Dice effect;
 } dr1pHeal;
 
 
@@ -30,14 +31,23 @@ typedef struct {
  *    Use the potion
  *
  *  PARAMETERS:
- *    Player drinking the potion
+ *    p   Player drinking the potion
+ *    i   The potion being consumed
+ *    fn  The mode being used
+ *         0 = drink
+ *         1 = taste
  *
  *  RETURNS:
  *
  *  SIDE EFFECTS:
  *    Increases the player hit points if damaged
  */
-void dr1pHeal_quaff( dr1Player *p);
+void dr1pHeal_quaff( dr1Player *p, dr1Item *i, int fn);
 
+
+/*-------------------------------------------------------------------
+ * xdr_dr1pHeal( xdrs, dr1pHeal*)
+ */
+bool_t xdr_dr1pHeal( XDR *xdrs, dr1pHeal*);
 
 #endif /* __DR1PHEAL__H */

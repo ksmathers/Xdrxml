@@ -85,7 +85,7 @@ char* dr1Barter_offer( dr1Barter *b, dr1Money o) {
 	/*
 	 * Client declines to purchase, let them bow out.
 	 */
-	return "Very well. Perhaps later."
+	return "Very well. Perhaps later.";
     }
 
     if ( offer <= lastoffer) {

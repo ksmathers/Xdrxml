@@ -24,7 +24,7 @@
  *    of a Player character.
  */
 
-typedef struct {
+typedef struct dr1Player {
     char *name;			/* Character name */
     long xp;			/* Experience points */
 

@@ -60,14 +60,14 @@ int main( int argc, char** argv) {
 	offr = dr1Barter_offer( b, val);
 	sell = dr1Money_value( &b->start, b->merchant->ep);
     } while ( buy < sell && buy != 0);
-    if ( dr1Money_deduct( &player.purse, &b->start)) {
+    if ( buy==0) {
+	printf("%s\n", (char *) offr);
+    } else if ( dr1Money_deduct( &player.purse, &b->start)) {
 	printf("Sorry, you haven't that much in your purse.\n");
     } else {
 	printf("%s\n", (char *) offr);
-	if ( buy != 0) {
-	    dr1Merchant_completeSale( &dr1apothecary, b);
-	    dr1ItemSet_add( &player.pack, b->item);
-	} 
+	dr1Merchant_completeSale( &dr1apothecary, b);
+	dr1ItemSet_add( &player.pack, b->item);
     }
     free(b);
   

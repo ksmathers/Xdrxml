@@ -1,15 +1,13 @@
 
 add character gen routines to player
-add barter
 equipment class
 add XDR routines
-add d20Money_compound()
 
 money	-- 
 player	--
 attr --
-magic	--
-  potions --
+potions --
+   heal -- 
 
 timeq --
 set --

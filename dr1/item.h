@@ -11,6 +11,7 @@
  * Inventory item
  */
 
+struct dr1Player;
 struct dr1ItemType;
 typedef struct {
     long value;			/* in copper */
@@ -21,9 +22,9 @@ typedef struct {
     struct dr1ItemType *type;
 } dr1Item;
 
-typedef void (* dr1Item_use_fnp) ( dr1Item *i, int function);
-typedef void (* dr1Item_drop_fnp) ( dr1Item *i, int function);
-typedef void (* dr1Item_take_fnp) ( dr1Item *i, int function);
+typedef void (* dr1Item_use_fnp) ( struct dr1Player *p, dr1Item *i, int function);
+typedef int (* dr1Item_drop_fnp) ( struct dr1Player *p, dr1Item *i);
+typedef void (* dr1Item_take_fnp) ( struct dr1Player *p, dr1Item *i);
 typedef bool_t (* dr1Item_xdr_fnp) ( XDR *xdrs, dr1Item *i);
 typedef struct dr1ItemType {
     long size;

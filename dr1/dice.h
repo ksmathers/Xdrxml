@@ -1,6 +1,26 @@
 #ifndef __DR1DICE__H
 #define __DR1DICE__H
 
+#include <string.h>
+#ifndef _RPC_XDR_H
+#   include <rpc/xdr.h>
+#endif
+
+/*-------------------------------------------------------------------
+ * dr1Dice 
+ *
+ *    This structure represents a set of dice.
+ */
+typedef char* dr1Dice;
+
+/*-------------------------------------------------------------------
+ * dr1Dice_create
+ *
+ *    Returns a dr1Dice created from the string 's'.  The caller
+ *    is responsible for freeing the dice when done.
+ */
+#define dr1Dice_create(s) strdup(s);
+
 /*-------------------------------------------------------------------
  * dr1Dice_roll
  *
@@ -31,4 +51,10 @@ int dr1Dice_roll( char *ds);
 
 void dr1Dice_seed();
 
+/*-------------------------------------------------------------------
+ * xdr_dr1Dice( xdrs, dr1Dice*)
+ */
+bool_t xdr_dr1Dice( XDR *xdrs, dr1Dice*);
+
 #endif /* _DR1DICE__H */
+

@@ -48,3 +48,10 @@ int dr1Dice_roll( char *ds) {
     return val;
 }
 
+/*-------------------------------------------------------------------
+ * xdr_dr1Dice( xdrs, dr1Dice*)
+ */
+bool_t xdr_dr1Dice( XDR *xdrs, dr1Dice* d) {
+    return xdr_wrapstring( xdrs, d);
+}
+

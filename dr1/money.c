@@ -1,5 +1,6 @@
 #include <math.h>
 #include <string.h>
+#include <ctype.h>
 #include "money.h"
 
 /*-------------------------------------------------------------------
@@ -240,14 +241,25 @@ int dr1Money_deductx( dr1Money *purse, dr1Money *price, int ep) {
  *    Initializes the purse from the parsed value of the string
  */
 void dr1Money_parse( dr1Money *purse, char *str) {
-    bzero( purse, sizeof(*purse));
-    sscanf( str, "%dpp %dgp %dep %dsp %dcp", 
-	    &purse->pp,
-	    &purse->gp,
-	    &purse->ep,
-	    &purse->sp,
-	    &purse->cp
-	);
+    char *pos;
+    char *s[5] = { "pp", "gp", "ep", "sp", "cp" };
+    int v[5];
+    int i;
+
+    bzero( v, sizeof(v));
+    for (i=0; i<5; i++) {
+	pos = strstr( str, s[i]);
+	if (!pos) continue;
+	pos--;
+	while ( isdigit(*pos)) pos--;
+	pos++;
+	v[i] = atoi(pos);
+    }
+    purse->pp = v[0];
+    purse->gp = v[1];
+    purse->ep = v[2];
+    purse->sp = v[3];
+    purse->cp = v[4];
 }
 
 /*-------------------------------------------------------------------
@@ -261,13 +273,28 @@ void dr1Money_parse( dr1Money *purse, char *str) {
  *    Format the money object into a string in the buf buffer.
  */
 void dr1Money_format( dr1Money *purse, char *buf) {
-    sprintf(buf, "%dpp %dgp %dep %dsp %dcp",
-	    purse->pp,
-	    purse->gp,
-	    purse->ep,
-	    purse->sp,
-	    purse->cp
-	);
+    char tbuf[80];
+    buf[0] = 0;
+    if (purse->pp) {
+	sprintf(tbuf, "%dpp ", purse->pp);
+	strcat( buf, tbuf);
+    }
+    if (purse->gp) {
+	sprintf(tbuf, "%dgp ", purse->gp);
+	strcat( buf, tbuf);
+    }
+    if (purse->ep) {
+	sprintf(tbuf, "%dep ", purse->ep);
+	strcat( buf, tbuf);
+    }
+    if (purse->sp) {
+	sprintf(tbuf, "%dsp ", purse->sp);
+	strcat( buf, tbuf);
+    }
+    if (purse->cp) {
+	sprintf(tbuf, "%dcp ", purse->cp);
+	strcat( buf, tbuf);
+    }
 }
 
 /*-------------------------------------------------------------------
