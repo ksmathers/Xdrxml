@@ -3,7 +3,22 @@
 
 #	gcc -c -g -Wall -Wno-comment -Wno-multichar -I. $< -o $@
 
-dr1: main.o money.o merchant.o apothecary.o dice.o player.o \
+dr1server: server.o money.o merchant.o apothecary.o dice.o player.o \
+	    barter.o itemset.o item.o attr.o registry.o \
+	    itemreg.o xdrxml.o playerv.o race.o class.o \
+	    smithy.o weapon.o monster.o combatv.o armor.o \
+	    ttype.o tanner.o wright.o location.o qio.o \
+	    potions/heal.o context.o town.o
+	gcc -g -Wl,-warn-common -odr1server server.o money.o merchant.o \
+	apothecary.o dice.o \
+	player.o barter.o itemset.o item.o attr.o registry.o \
+	itemreg.o xdrxml.o playerv.o race.o class.o \
+	smithy.o weapon.o monster.o combatv.o armor.o \
+	ttype.o tanner.o wright.o location.o qio.o \
+	context.o town.o \
+	potions/heal.o -lxml2 -lm
+
+main: main.o money.o merchant.o apothecary.o dice.o player.o \
 	    barter.o itemset.o item.o attr.o registry.o \
 	    itemreg.o xdrxml.o playerv.o race.o class.o \
 	    smithy.o weapon.o monster.o combatv.o armor.o \
@@ -15,9 +30,6 @@ dr1: main.o money.o merchant.o apothecary.o dice.o player.o \
 	smithy.o weapon.o monster.o combatv.o armor.o \
 	ttype.o tanner.o wright.o location.o \
 	potions/heal.o -lxml2 -lm
-
-server: server.o
-	gcc -g -Wl,-warn-common -oserver server.o
 
 #xtest: xtest.o xdrxml.o
 #	gcc -g -oxtest xtest.o xdrxml.o -lxml2

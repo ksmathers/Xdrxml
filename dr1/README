@@ -15,11 +15,32 @@ Prerequisites:
 
 To Build:
 
-    dr1
-    ===
+    dr1server
+    =========
 
     $ make depend && make
 
-    The result is the program 'dr1' which is a test driver for the game
-    libraries.
+    The result is the program 'dr1server' which is the server side of 
+    Dragon's Reach
 
+To Run:
+
+    Run the dr1server from the shell prompt.  For a client you can 
+    connect to localhost port 2300:
+
+    server
+    ======
+
+    $ dr1server
+    3: Server ready...
+
+    client
+    ======
+
+    $ telnet localhost 2300
+    Login:
+
+    The server saves player data to files with names like 
+    'login-password.xml' in the current directory.
+
+    

@@ -6,7 +6,6 @@
  *    These enumerations set the boundaries for item codes of various
  *    item subtypes.
  */
-
 enum {
     DR1ILLEGAL,
     DR1WEAPONS,

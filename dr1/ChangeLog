@@ -1,3 +1,34 @@
+4/29 Major rewrite to client server.  
+
+The server opens a server socket then calls out to another function
+depending on the socket that was active.  Each function is expected
+to return whenever it would block on input or output.  Currently
+the output is synchronous, so it will just wait for the client to
+receive all of its data.
+
+Reading is asynchronous however, so multiple clients can connect to
+the server simultaneously.  Client context is kept in the dr1Context
+structures.
+
+I'm not entirely happy with the current structure; it feels too much
+like programming in Fortran; every function is broken up into smallish
+bits so that the context can be restored correctly the next time that
+socket is active, and I've done the restoration using switch statements.
+The result though is that each change of state from one region of
+code to the next must completely close any program scope, so loops,
+branches, and similar all look far too much like a series of gotos.
+
+The other two alternatives are to use threads (I'm trying to avoid this),
+or to use goto's and labels to restore state.
+
+There are still a couple of malloc bugs that crash the server from
+time to time, that I need to track down.   I'll probably be reading
+up on Electric Fence later this week.
+
+--
+
+Older stuff:
+
 Added ac adjustment by armor type
 Added new weapon stats including plusToHit
 

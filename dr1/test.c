@@ -1,67 +1,64 @@
 #include <stdio.h>
-#include "money.h"
-#include "dice.h"
 
-void dump( char *s, dr1Money p) {
-    printf("[%s] %dcp, %dsp, %dep, %dgp, %dpp\n", s, p.cp, p.sp, p.ep, p.gp, p.pp);
+struct {
+    int i;
+    char *s;
+    char buf[80];
+    int st;
+    int g;
+} _a, _b;
+
+int a() {
+    char *s;
+    enum { INIT, LOOP, DONE, BEGN };
+    
+    switch( _a.st) {
+	case INIT: goto INIT;
+	case LOOP: goto LOOP;
+	case DONE: goto DONE;
+    }
+
+    INIT:
+    printf("init\n");
+    _a.s = _a.buf;
+
+    for (_a.i = 0; _a.i < 10; _a.i++) {
+        printf("a-what? ");
+	LOOP: _a.st=LOOP;
+	if (_a.g++ % 4 != 0) return 0;
+	gets( _a.s);
+    }
+    DONE: _a.st=DONE;
+    printf("done");
+    return -1;
+}
+
+
+int b() {
+    char *s;
+    enum { INIT, LOOP, DONE, BEGN };
+    
+    switch( _b.st) {
+	case INIT: goto INIT;
+	case LOOP: goto LOOP;
+	case DONE: goto DONE;
+    }
+
+    INIT:
+    printf("init\n");
+    _b.s = _b.buf;
+
+    for (_b.i = 0; _b.i < 10; _b.i++) {
+        printf("b-what? ");
+	LOOP: _b.st=LOOP;
+	if (_b.g++ % 3 != 0) return 0;
+	gets( _b.s);
+    }
+    DONE: _b.st=DONE;
+    printf("done");
+    return -1;
 }
 
 int main(int argc, char **argv) {
-    int i,j;
-    char *dice[] = { "d8", "d10", "d100", "dr1", "d4", "3d6", 
-        "2d4+1", "dr1-4" };
-
-    dr1Money p = { 
-	    200 /* cp */, 
-	    50 /* sp */, 
-	    60 /* ep */, 
-	    20 /* gp */,
-	    10 /* pp */ 
-	};
-
-    dr1Money chg, tp;
-    XDR xdrs;
-    FILE *fp;
-    dr1Dice_seed();
-
-    dump( "original", p);
-    tp=p;
-    
-    chg = dr1Money_normalizex( &p, 0.1, 1);
-
-    dump( "normalize", p);
-    dump( "charge", chg);
-
-    dr1Money_add( &p, &chg);
-    dump( "combined", p);
-    dr1Money_normalizex( &tp, 0.0, 1);
-    dump( "equivalent", tp);
-
-    dr1Money_deductx( &tp, &chg, 1);
-    dump( "chg deduct", tp);
-
-    fp = fopen("money.dat", "w");
-    xdrstdio_create( &xdrs, fp, XDR_ENCODE);
-    xdr_dr1Money( &xdrs, &p);
-    xdr_destroy( &xdrs);
-    fclose( fp);
-    
-    fp = fopen("money.dat", "r");
-    xdrstdio_create( &xdrs, fp, XDR_DECODE);
-    xdr_dr1Money( &xdrs, &p);
-    xdr_destroy( &xdrs);
-    fclose( fp);
-    dump( "combined (reload)", p);
-    
-    for (j=0; j<sizeof(dice)/sizeof(*dice); j++) {
-	printf("%s\t", dice[j]);
-    }
-    printf("\n");
-    for (i=0; i<10; i++) {
-        for (j=0; j<sizeof(dice)/sizeof(*dice); j++) {
-	    printf("%d\t", dr1Dice_roll(dice[j]));
-	}
-	printf("\n");
-    }
-    return 0;
+    while (!a() && !b());
 }

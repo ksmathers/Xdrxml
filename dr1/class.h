@@ -15,7 +15,14 @@ enum {
     DR1C_MU,
     DR1C_CLERIC,
     DR1C_FIGHTER,
-    DR1C_THIEF
+    DR1C_THIEF,
+    /* not implemented below here */
+    DR1C_ILLUSIONIST,
+    DR1C_DRUID,
+    DR1C_ASASSIN,
+    DR1C_PALADIN,
+    DR1C_RANGER,
+    DR1C_MONK
 };
     
 /*-------------------------------------------------------------------

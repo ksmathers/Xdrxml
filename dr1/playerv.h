@@ -4,6 +4,9 @@
 #ifndef __DR1PLAYER__H
 #   include "player.h"
 #endif
+#ifndef __DR1CONTEXT__H
+#   include "context.h"
+#endif
 
 
 /*-------------------------------------------------------------------
@@ -23,6 +26,6 @@
  *    Initializes p from the player's selections
  */
 
-int dr1Playerv_showDialog( dr1Player *p);
+int dr1Playerv_showDialog( dr1Context* ctx);
 
 #endif /* __DR1PLAYERV__H */
