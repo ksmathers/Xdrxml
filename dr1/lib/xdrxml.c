@@ -83,6 +83,7 @@ int xdr_xml_create( XDR* xdrs, char *fname, enum xdr_op xop) {
     struct xdrxml_st *xdrd;
 
     xdrd = calloc( 1, sizeof(struct xdrxml_st));
+    xdrd->ext = &xdrxml_extops;
     if (xop == XDR_DECODE) {
 	/*
 	 * build an XML tree from a the file;

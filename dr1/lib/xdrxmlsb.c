@@ -69,6 +69,7 @@ int xdr_xml_sb_create( XDR* xdrs, dr1StringBuffer *sb, enum xdr_op xop) {
     struct xdrxml_st *xdrd;
 
     xdrd = calloc( 1, sizeof(struct xdrxml_st));
+    xdrd->ext = &xdrxmlsb_extops;
     if (xop == XDR_DECODE) {
 	/*
 	 * build an XML tree from a the file;
