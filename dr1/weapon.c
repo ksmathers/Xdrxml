@@ -1,7 +1,5 @@
-#ifndef __DR1WEAPON__H
-#define __DR1WEAPON__H
-
 #include "weapon.h"
+#include "money.h"
 
 /*-------------------------------------------------------------------
  * dr1
@@ -25,9 +23,10 @@ dr1Weapon half_spear = {
 	/* encumbrance */ 20,
 	/* unique      */ FALSE,
 	/* inuse       */ FALSE,
+	/* weapon      */ TRUE,
 	/* identified  */ TRUE,
-	/* uses        */ "d8*100",
-	/* type        */ &dr1weapon_type
+	/* uses        */ 0,
+	/* type        */ &dr1Weapon_type
     },
     /* damage   */ "d6-1",
     /* ranged   */ FALSE,
@@ -48,7 +47,7 @@ dr1Weapon half_spear = {
 bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i) {
     bool_t res;
     dr1Weapon *w = (dr1Weapon*)i;
-    res = xdr_dr1Dice( xdrs, w->damage);
+    res = xdr_dr1Dice( xdrs, &w->damage);
     if (!res) return FALSE;
 
     res = xdr_int( xdrs, &w->ranged);
@@ -56,5 +55,6 @@ bool_t xdr_dr1Weapon( XDR *xdrs, dr1Item *i) {
 
     res = xdr_int( xdrs, &w->speed);
     if (!res) return FALSE;
+    return TRUE;
 }
 

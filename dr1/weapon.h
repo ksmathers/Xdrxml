@@ -4,6 +4,12 @@
 #ifndef _RPC_XDR_H
 #   include <rpc/xdr.h>
 #endif
+#ifndef __DR1ITEM__H
+#   include "item.h"
+#endif
+#ifndef __DR1DICE__H
+#   include "dice.h"
+#endif
 
 /*-------------------------------------------------------------------
  * dr1
